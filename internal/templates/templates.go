@@ -521,6 +521,101 @@ var builtInTemplates = map[string]Template{
 			{Path: ".gitignore", Content: gitignoreGoTmpl},
 		},
 	},
+	// Additional Project Templates
+	"go-auth": {
+		Name:        "go-auth",
+		Description: "JWT authentication with middleware",
+		Directories: []string{
+			"cmd/server",
+			"internal/auth",
+			"internal/handler",
+			"internal/model",
+		},
+		Files: []FileTemplate{
+			{Path: "cmd/server/main.go", Content: authMainTmpl},
+			{Path: "internal/auth/jwt.go", Content: authJWTTmpl},
+			{Path: "internal/auth/middleware.go", Content: authMiddlewareTmpl},
+			{Path: "internal/handler/auth.go", Content: authHandlerTmpl},
+			{Path: "internal/model/user.go", Content: authUserModelTmpl},
+			{Path: "README.md", Content: readmeTmpl},
+			{Path: ".gitignore", Content: gitignoreGoTmpl},
+		},
+	},
+	"go-kafka": {
+		Name:        "go-kafka",
+		Description: "Kafka consumer & producer",
+		Directories: []string{
+			"cmd/producer",
+			"cmd/consumer",
+			"internal/kafka",
+		},
+		Files: []FileTemplate{
+			{Path: "cmd/producer/main.go", Content: kafkaProducerMainTmpl},
+			{Path: "cmd/consumer/main.go", Content: kafkaConsumerMainTmpl},
+			{Path: "internal/kafka/producer.go", Content: kafkaProducerTmpl},
+			{Path: "internal/kafka/consumer.go", Content: kafkaConsumerTmpl},
+			{Path: "docker-compose.yml", Content: kafkaDockerComposeTmpl},
+			{Path: "README.md", Content: readmeTmpl},
+			{Path: ".gitignore", Content: gitignoreGoTmpl},
+		},
+	},
+	"go-redis": {
+		Name:        "go-redis",
+		Description: "Redis caching & pub/sub patterns",
+		Directories: []string{
+			"cmd/server",
+			"internal/cache",
+			"internal/pubsub",
+		},
+		Files: []FileTemplate{
+			{Path: "cmd/server/main.go", Content: redisMainTmpl},
+			{Path: "internal/cache/redis.go", Content: redisCacheTmpl},
+			{Path: "internal/pubsub/pubsub.go", Content: redisPubSubTmpl},
+			{Path: "docker-compose.yml", Content: redisDockerComposeTmpl},
+			{Path: "README.md", Content: readmeTmpl},
+			{Path: ".gitignore", Content: gitignoreGoTmpl},
+		},
+	},
+	"go-clean-arch": {
+		Name:        "go-clean-arch",
+		Description: "Clean Architecture pattern",
+		Directories: []string{
+			"cmd/api",
+			"internal/entity",
+			"internal/usecase",
+			"internal/repository",
+			"internal/delivery/http",
+			"pkg/errors",
+		},
+		Files: []FileTemplate{
+			{Path: "cmd/api/main.go", Content: cleanArchMainTmpl},
+			{Path: "internal/entity/user.go", Content: cleanArchEntityTmpl},
+			{Path: "internal/usecase/user.go", Content: cleanArchUsecaseTmpl},
+			{Path: "internal/repository/user.go", Content: cleanArchRepoTmpl},
+			{Path: "internal/delivery/http/handler.go", Content: cleanArchHandlerTmpl},
+			{Path: "pkg/errors/errors.go", Content: cleanArchErrorsTmpl},
+			{Path: "README.md", Content: readmeTmpl},
+			{Path: ".gitignore", Content: gitignoreGoTmpl},
+		},
+	},
+	"go-monorepo": {
+		Name:        "go-monorepo",
+		Description: "Multi-service monorepo with shared packages",
+		Directories: []string{
+			"services/api",
+			"services/worker",
+			"pkg/shared",
+		},
+		Files: []FileTemplate{
+			{Path: "services/api/main.go", Content: monorepoAPITmpl},
+			{Path: "services/worker/main.go", Content: monorepoWorkerTmpl},
+			{Path: "pkg/shared/config.go", Content: monorepoConfigTmpl},
+			{Path: "pkg/shared/logger.go", Content: monorepoLoggerTmpl},
+			{Path: "Makefile", Content: monorepoMakefileTmpl},
+			{Path: "README.md", Content: readmeTmpl},
+			{Path: ".gitignore", Content: gitignoreGoTmpl},
+		},
+	},
 }
 
 // GetTemplate returns a template by name
@@ -5714,4 +5809,638 @@ func (s *Scheduler) Schedule(spec string, job func()) {
 
 func (s *Scheduler) Start() { s.cron.Start() }
 func (s *Scheduler) Stop()  { s.cron.Stop() }
+`
+
+// ============== Go Auth Templates ==============
+
+var authMainTmpl = `package main
+
+import (
+	"log"
+	"net/http"
+
+	"{{.ProjectName}}/internal/auth"
+	"{{.ProjectName}}/internal/handler"
+)
+
+func main() {
+	mux := http.NewServeMux()
+	
+	// Public routes
+	mux.HandleFunc("/api/login", handler.Login)
+	mux.HandleFunc("/api/register", handler.Register)
+	
+	// Protected routes
+	mux.Handle("/api/profile", auth.Middleware(http.HandlerFunc(handler.Profile)))
+	
+	log.Println("Server starting on :8080")
+	log.Fatal(http.ListenAndServe(":8080", mux))
+}
+`
+
+var authJWTTmpl = `package auth
+
+import (
+	"errors"
+	"time"
+
+	"github.com/golang-jwt/jwt/v5"
+)
+
+var jwtSecret = []byte("your-secret-key-change-in-production")
+
+type Claims struct {
+	UserID   int64  ` + "`json:\"user_id\"`" + `
+	Username string ` + "`json:\"username\"`" + `
+	jwt.RegisteredClaims
+}
+
+func GenerateToken(userID int64, username string) (string, error) {
+	claims := Claims{
+		UserID:   userID,
+		Username: username,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+		},
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString(jwtSecret)
+}
+
+func ValidateToken(tokenString string) (*Claims, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(t *jwt.Token) (interface{}, error) {
+		return jwtSecret, nil
+	})
+	if err != nil { return nil, err }
+	if claims, ok := token.Claims.(*Claims); ok && token.Valid {
+		return claims, nil
+	}
+	return nil, errors.New("invalid token")
+}
+`
+
+var authMiddlewareTmpl = `package auth
+
+import (
+	"context"
+	"net/http"
+	"strings"
+)
+
+type contextKey string
+const UserKey contextKey = "user"
+
+func Middleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		authHeader := r.Header.Get("Authorization")
+		if authHeader == "" {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+		
+		parts := strings.Split(authHeader, " ")
+		if len(parts) != 2 || parts[0] != "Bearer" {
+			http.Error(w, "Invalid auth header", http.StatusUnauthorized)
+			return
+		}
+		
+		claims, err := ValidateToken(parts[1])
+		if err != nil {
+			http.Error(w, "Invalid token", http.StatusUnauthorized)
+			return
+		}
+		
+		ctx := context.WithValue(r.Context(), UserKey, claims)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+`
+
+var authHandlerTmpl = `package handler
+
+import (
+	"encoding/json"
+	"net/http"
+
+	"{{.ProjectName}}/internal/auth"
+)
+
+type LoginRequest struct {
+	Username string ` + "`json:\"username\"`" + `
+	Password string ` + "`json:\"password\"`" + `
+}
+
+func Login(w http.ResponseWriter, r *http.Request) {
+	var req LoginRequest
+	json.NewDecoder(r.Body).Decode(&req)
+	
+	// TODO: Validate against database
+	if req.Username == "" || req.Password == "" {
+		http.Error(w, "Invalid credentials", http.StatusBadRequest)
+		return
+	}
+	
+	token, _ := auth.GenerateToken(1, req.Username)
+	json.NewEncoder(w).Encode(map[string]string{"token": token})
+}
+
+func Register(w http.ResponseWriter, r *http.Request) {
+	// TODO: Implement registration
+	json.NewEncoder(w).Encode(map[string]string{"message": "User registered"})
+}
+
+func Profile(w http.ResponseWriter, r *http.Request) {
+	claims := r.Context().Value(auth.UserKey).(*auth.Claims)
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"user_id":  claims.UserID,
+		"username": claims.Username,
+	})
+}
+`
+
+var authUserModelTmpl = `package model
+
+type User struct {
+	ID       int64  ` + "`json:\"id\"`" + `
+	Username string ` + "`json:\"username\"`" + `
+	Email    string ` + "`json:\"email\"`" + `
+	Password string ` + "`json:\"-\"`" + `
+}
+`
+
+// ============== Go Kafka Templates ==============
+
+var kafkaProducerMainTmpl = `package main
+
+import (
+	"log"
+	"{{.ProjectName}}/internal/kafka"
+)
+
+func main() {
+	producer, err := kafka.NewProducer([]string{"localhost:9092"})
+	if err != nil { log.Fatal(err) }
+	defer producer.Close()
+	
+	err = producer.Send("my-topic", "Hello Kafka!")
+	if err != nil { log.Fatal(err) }
+	log.Println("Message sent!")
+}
+`
+
+var kafkaConsumerMainTmpl = `package main
+
+import (
+	"log"
+	"os"
+	"os/signal"
+	"syscall"
+
+	"{{.ProjectName}}/internal/kafka"
+)
+
+func main() {
+	consumer, err := kafka.NewConsumer([]string{"localhost:9092"}, "my-group")
+	if err != nil { log.Fatal(err) }
+	
+	go consumer.Consume("my-topic", func(msg string) {
+		log.Printf("Received: %s\n", msg)
+	})
+	
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+	consumer.Close()
+}
+`
+
+var kafkaProducerTmpl = `package kafka
+
+import (
+	"github.com/IBM/sarama"
+)
+
+type Producer struct {
+	producer sarama.SyncProducer
+}
+
+func NewProducer(brokers []string) (*Producer, error) {
+	config := sarama.NewConfig()
+	config.Producer.Return.Successes = true
+	
+	producer, err := sarama.NewSyncProducer(brokers, config)
+	if err != nil { return nil, err }
+	
+	return &Producer{producer: producer}, nil
+}
+
+func (p *Producer) Send(topic, message string) error {
+	_, _, err := p.producer.SendMessage(&sarama.ProducerMessage{
+		Topic: topic,
+		Value: sarama.StringEncoder(message),
+	})
+	return err
+}
+
+func (p *Producer) Close() { p.producer.Close() }
+`
+
+var kafkaConsumerTmpl = `package kafka
+
+import (
+	"github.com/IBM/sarama"
+)
+
+type Consumer struct {
+	consumer sarama.Consumer
+}
+
+func NewConsumer(brokers []string, group string) (*Consumer, error) {
+	config := sarama.NewConfig()
+	consumer, err := sarama.NewConsumer(brokers, config)
+	if err != nil { return nil, err }
+	return &Consumer{consumer: consumer}, nil
+}
+
+func (c *Consumer) Consume(topic string, handler func(string)) error {
+	partitions, _ := c.consumer.Partitions(topic)
+	for _, partition := range partitions {
+		pc, _ := c.consumer.ConsumePartition(topic, partition, sarama.OffsetNewest)
+		go func(pc sarama.PartitionConsumer) {
+			for msg := range pc.Messages() {
+				handler(string(msg.Value))
+			}
+		}(pc)
+	}
+	return nil
+}
+
+func (c *Consumer) Close() { c.consumer.Close() }
+`
+
+var kafkaDockerComposeTmpl = `version: '3.8'
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+    ports:
+      - "2181:2181"
+
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+`
+
+// ============== Go Redis Templates ==============
+
+var redisMainTmpl = `package main
+
+import (
+	"log"
+	"{{.ProjectName}}/internal/cache"
+)
+
+func main() {
+	client := cache.NewRedisClient("localhost:6379")
+	defer client.Close()
+	
+	client.Set("key", "value", 0)
+	val, _ := client.Get("key")
+	log.Printf("Got: %s\n", val)
+}
+`
+
+var redisCacheTmpl = `package cache
+
+import (
+	"context"
+	"time"
+
+	"github.com/redis/go-redis/v9"
+)
+
+type RedisClient struct {
+	client *redis.Client
+	ctx    context.Context
+}
+
+func NewRedisClient(addr string) *RedisClient {
+	return &RedisClient{
+		client: redis.NewClient(&redis.Options{Addr: addr}),
+		ctx:    context.Background(),
+	}
+}
+
+func (r *RedisClient) Set(key, value string, expiration time.Duration) error {
+	return r.client.Set(r.ctx, key, value, expiration).Err()
+}
+
+func (r *RedisClient) Get(key string) (string, error) {
+	return r.client.Get(r.ctx, key).Result()
+}
+
+func (r *RedisClient) Delete(key string) error {
+	return r.client.Del(r.ctx, key).Err()
+}
+
+func (r *RedisClient) Close() { r.client.Close() }
+`
+
+var redisPubSubTmpl = `package pubsub
+
+import (
+	"context"
+	"github.com/redis/go-redis/v9"
+)
+
+type PubSub struct {
+	client *redis.Client
+	ctx    context.Context
+}
+
+func NewPubSub(addr string) *PubSub {
+	return &PubSub{
+		client: redis.NewClient(&redis.Options{Addr: addr}),
+		ctx:    context.Background(),
+	}
+}
+
+func (p *PubSub) Publish(channel, message string) error {
+	return p.client.Publish(p.ctx, channel, message).Err()
+}
+
+func (p *PubSub) Subscribe(channel string, handler func(string)) {
+	sub := p.client.Subscribe(p.ctx, channel)
+	ch := sub.Channel()
+	for msg := range ch {
+		handler(msg.Payload)
+	}
+}
+`
+
+var redisDockerComposeTmpl = `version: '3.8'
+services:
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+`
+
+// ============== Go Clean Architecture Templates ==============
+
+var cleanArchMainTmpl = `package main
+
+import (
+	"log"
+	"net/http"
+
+	"{{.ProjectName}}/internal/delivery/http"
+	"{{.ProjectName}}/internal/repository"
+	"{{.ProjectName}}/internal/usecase"
+)
+
+func main() {
+	repo := repository.NewUserRepository()
+	uc := usecase.NewUserUsecase(repo)
+	handler := http.NewHandler(uc)
+	
+	mux := http.NewServeMux()
+	mux.HandleFunc("/users", handler.GetUsers)
+	
+	log.Println("Server on :8080")
+	log.Fatal(http.ListenAndServe(":8080", mux))
+}
+`
+
+var cleanArchEntityTmpl = `package entity
+
+type User struct {
+	ID    int64  ` + "`json:\"id\"`" + `
+	Name  string ` + "`json:\"name\"`" + `
+	Email string ` + "`json:\"email\"`" + `
+}
+`
+
+var cleanArchUsecaseTmpl = `package usecase
+
+import "{{.ProjectName}}/internal/entity"
+
+type UserRepository interface {
+	FindAll() ([]entity.User, error)
+	FindByID(id int64) (*entity.User, error)
+}
+
+type UserUsecase struct {
+	repo UserRepository
+}
+
+func NewUserUsecase(repo UserRepository) *UserUsecase {
+	return &UserUsecase{repo: repo}
+}
+
+func (u *UserUsecase) GetUsers() ([]entity.User, error) {
+	return u.repo.FindAll()
+}
+
+func (u *UserUsecase) GetUser(id int64) (*entity.User, error) {
+	return u.repo.FindByID(id)
+}
+`
+
+var cleanArchRepoTmpl = `package repository
+
+import "{{.ProjectName}}/internal/entity"
+
+type UserRepository struct {
+	users []entity.User
+}
+
+func NewUserRepository() *UserRepository {
+	return &UserRepository{
+		users: []entity.User{
+			{ID: 1, Name: "Alice", Email: "alice@example.com"},
+			{ID: 2, Name: "Bob", Email: "bob@example.com"},
+		},
+	}
+}
+
+func (r *UserRepository) FindAll() ([]entity.User, error) {
+	return r.users, nil
+}
+
+func (r *UserRepository) FindByID(id int64) (*entity.User, error) {
+	for _, u := range r.users {
+		if u.ID == id { return &u, nil }
+	}
+	return nil, nil
+}
+`
+
+var cleanArchHandlerTmpl = `package http
+
+import (
+	"encoding/json"
+	"net/http"
+
+	"{{.ProjectName}}/internal/usecase"
+)
+
+type Handler struct {
+	uc *usecase.UserUsecase
+}
+
+func NewHandler(uc *usecase.UserUsecase) *Handler {
+	return &Handler{uc: uc}
+}
+
+func (h *Handler) GetUsers(w http.ResponseWriter, r *http.Request) {
+	users, err := h.uc.GetUsers()
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+	json.NewEncoder(w).Encode(users)
+}
+`
+
+var cleanArchErrorsTmpl = `package errors
+
+import "errors"
+
+var (
+	ErrNotFound = errors.New("not found")
+	ErrInvalid  = errors.New("invalid input")
+)
+
+type AppError struct {
+	Code    int
+	Message string
+}
+
+func (e *AppError) Error() string { return e.Message }
+`
+
+// ============== Go Monorepo Templates ==============
+
+var monorepoAPITmpl = `package main
+
+import (
+	"log"
+	"net/http"
+
+	"{{.ProjectName}}/pkg/shared"
+)
+
+func main() {
+	cfg := shared.LoadConfig()
+	logger := shared.NewLogger("api")
+	
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		logger.Info("Request received")
+		w.Write([]byte("API Service"))
+	})
+	
+	logger.Info("API starting on " + cfg.APIPort)
+	log.Fatal(http.ListenAndServe(cfg.APIPort, nil))
+}
+`
+
+var monorepoWorkerTmpl = `package main
+
+import (
+	"log"
+	"time"
+
+	"{{.ProjectName}}/pkg/shared"
+)
+
+func main() {
+	cfg := shared.LoadConfig()
+	logger := shared.NewLogger("worker")
+	
+	logger.Info("Worker starting...")
+	
+	for {
+		logger.Info("Processing job...")
+		time.Sleep(time.Duration(cfg.WorkerInterval) * time.Second)
+	}
+}
+`
+
+var monorepoConfigTmpl = `package shared
+
+import "os"
+
+type Config struct {
+	APIPort        string
+	WorkerInterval int
+	Environment    string
+}
+
+func LoadConfig() *Config {
+	return &Config{
+		APIPort:        getEnv("API_PORT", ":8080"),
+		WorkerInterval: 5,
+		Environment:    getEnv("ENV", "development"),
+	}
+}
+
+func getEnv(key, def string) string {
+	if val := os.Getenv(key); val != "" { return val }
+	return def
+}
+`
+
+var monorepoLoggerTmpl = `package shared
+
+import (
+	"log"
+	"os"
+)
+
+type Logger struct {
+	service string
+	logger  *log.Logger
+}
+
+func NewLogger(service string) *Logger {
+	return &Logger{
+		service: service,
+		logger:  log.New(os.Stdout, "", log.LstdFlags),
+	}
+}
+
+func (l *Logger) Info(msg string) {
+	l.logger.Printf("[%s] INFO: %s", l.service, msg)
+}
+
+func (l *Logger) Error(msg string) {
+	l.logger.Printf("[%s] ERROR: %s", l.service, msg)
+}
+`
+
+var monorepoMakefileTmpl = `.PHONY: api worker build-all
+
+api:
+	go run ./services/api
+
+worker:
+	go run ./services/worker
+
+build-all:
+	go build -o bin/api ./services/api
+	go build -o bin/worker ./services/worker
+
+test:
+	go test -v ./...
 `

@@ -288,6 +288,19 @@ func printNextSteps(config tui.ProjectConfig) {
 	case "go-cron":
 		fmt.Println("   go get github.com/robfig/cron/v3")
 		fmt.Println("   go run ./cmd/scheduler")
+	case "go-auth":
+		fmt.Println("   go get github.com/golang-jwt/jwt/v5")
+		fmt.Println("   go run ./cmd/server")
+	case "go-kafka":
+		fmt.Println("   docker-compose up -d")
+		fmt.Println("   go get github.com/IBM/sarama")
+	case "go-redis":
+		fmt.Println("   docker-compose up -d")
+		fmt.Println("   go get github.com/redis/go-redis/v9")
+	case "go-clean-arch":
+		fmt.Println("   go run ./cmd/api")
+	case "go-monorepo":
+		fmt.Println("   make api  # atau make worker")
 	default:
 		fmt.Println("   go mod tidy")
 		fmt.Println("   go test ./...")
