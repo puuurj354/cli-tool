@@ -49,13 +49,16 @@ Examples:
   scaffold init                        # Interactive mode with prompts
   scaffold init go-api                 # Quick start with template
   scaffold init fullstack --dry-run    # Preview without creating
-  scaffold list                        # See all 14 templates
+  scaffold list                        # See all 25 templates
   scaffold info learn-dsa              # Check what files will be created
 
-Templates (14):
-  Project:    go-api, go-cli, go-lib, go-grpc, go-worker, go-tui
+Templates (25):
+  Project:    go-api, go-cli, go-lib, go-grpc, go-worker, go-tui,
+              go-microservice, go-websocket, go-graphql, go-lambda, go-cron
   Fullstack:  fullstack (Go + React/Vite/Bun/Tailwind)
-  Learning:   learn-concurrency, learn-testing, learn-dsa
+  Learning:   learn-concurrency, learn-testing, learn-dsa, learn-generics,
+              learn-context, learn-http, learn-error-handling,
+              learn-interfaces, learn-design-patterns
   Skill:      challenge-30days, mini-project, refactoring-exercise, code-review-exercise
 
 Config: ~/.scaffold/config.json`,

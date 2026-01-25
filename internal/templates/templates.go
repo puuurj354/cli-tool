@@ -317,6 +317,210 @@ var builtInTemplates = map[string]Template{
 			{Path: ".gitignore", Content: gitignoreGoTmpl},
 		},
 	},
+	// Learning Specific Skills Templates
+	"learn-generics": {
+		Name:        "learn-generics",
+		Description: "Learn Go generics (type parameters & constraints)",
+		Directories: []string{
+			"basics",
+			"constraints",
+			"practical",
+		},
+		Files: []FileTemplate{
+			{Path: "README.md", Content: learnGenericsReadmeTmpl},
+			{Path: "basics/main.go", Content: learnGenericsBasicsTmpl},
+			{Path: "basics/main_test.go", Content: learnGenericsBasicsTestTmpl},
+			{Path: "constraints/main.go", Content: learnGenericsConstraintsTmpl},
+			{Path: "constraints/main_test.go", Content: learnGenericsConstraintsTestTmpl},
+			{Path: "practical/main.go", Content: learnGenericsPracticalTmpl},
+			{Path: "practical/main_test.go", Content: learnGenericsPracticalTestTmpl},
+			{Path: ".gitignore", Content: gitignoreGoTmpl},
+		},
+	},
+	"learn-context": {
+		Name:        "learn-context",
+		Description: "Learn context.Context (cancellation & timeout)",
+		Directories: []string{
+			"cancellation",
+			"timeout",
+			"values",
+		},
+		Files: []FileTemplate{
+			{Path: "README.md", Content: learnContextReadmeTmpl},
+			{Path: "cancellation/main.go", Content: learnContextCancellationTmpl},
+			{Path: "cancellation/main_test.go", Content: learnContextCancellationTestTmpl},
+			{Path: "timeout/main.go", Content: learnContextTimeoutTmpl},
+			{Path: "timeout/main_test.go", Content: learnContextTimeoutTestTmpl},
+			{Path: "values/main.go", Content: learnContextValuesTmpl},
+			{Path: "values/main_test.go", Content: learnContextValuesTestTmpl},
+			{Path: ".gitignore", Content: gitignoreGoTmpl},
+		},
+	},
+	"learn-http": {
+		Name:        "learn-http",
+		Description: "Learn HTTP client, server & middleware",
+		Directories: []string{
+			"client",
+			"server",
+			"middleware",
+		},
+		Files: []FileTemplate{
+			{Path: "README.md", Content: learnHTTPReadmeTmpl},
+			{Path: "client/main.go", Content: learnHTTPClientTmpl},
+			{Path: "client/main_test.go", Content: learnHTTPClientTestTmpl},
+			{Path: "server/main.go", Content: learnHTTPServerTmpl},
+			{Path: "server/main_test.go", Content: learnHTTPServerTestTmpl},
+			{Path: "middleware/main.go", Content: learnHTTPMiddlewareTmpl},
+			{Path: "middleware/main_test.go", Content: learnHTTPMiddlewareTestTmpl},
+			{Path: ".gitignore", Content: gitignoreGoTmpl},
+		},
+	},
+	"learn-error-handling": {
+		Name:        "learn-error-handling",
+		Description: "Learn error handling patterns in Go",
+		Directories: []string{
+			"basics",
+			"wrapping",
+			"custom",
+		},
+		Files: []FileTemplate{
+			{Path: "README.md", Content: learnErrorReadmeTmpl},
+			{Path: "basics/main.go", Content: learnErrorBasicsTmpl},
+			{Path: "basics/main_test.go", Content: learnErrorBasicsTestTmpl},
+			{Path: "wrapping/main.go", Content: learnErrorWrappingTmpl},
+			{Path: "wrapping/main_test.go", Content: learnErrorWrappingTestTmpl},
+			{Path: "custom/main.go", Content: learnErrorCustomTmpl},
+			{Path: "custom/main_test.go", Content: learnErrorCustomTestTmpl},
+			{Path: ".gitignore", Content: gitignoreGoTmpl},
+		},
+	},
+	"learn-interfaces": {
+		Name:        "learn-interfaces",
+		Description: "Learn interfaces & polymorphism in Go",
+		Directories: []string{
+			"basics",
+			"composition",
+			"patterns",
+		},
+		Files: []FileTemplate{
+			{Path: "README.md", Content: learnInterfacesReadmeTmpl},
+			{Path: "basics/main.go", Content: learnInterfacesBasicsTmpl},
+			{Path: "basics/main_test.go", Content: learnInterfacesBasicsTestTmpl},
+			{Path: "composition/main.go", Content: learnInterfacesCompositionTmpl},
+			{Path: "composition/main_test.go", Content: learnInterfacesCompositionTestTmpl},
+			{Path: "patterns/main.go", Content: learnInterfacesPatternsTmpl},
+			{Path: "patterns/main_test.go", Content: learnInterfacesPatternsTestTmpl},
+			{Path: ".gitignore", Content: gitignoreGoTmpl},
+		},
+	},
+	"learn-design-patterns": {
+		Name:        "learn-design-patterns",
+		Description: "Learn common design patterns in Go",
+		Directories: []string{
+			"creational",
+			"behavioral",
+			"structural",
+		},
+		Files: []FileTemplate{
+			{Path: "README.md", Content: learnPatternsReadmeTmpl},
+			{Path: "creational/factory.go", Content: learnPatternsFactoryTmpl},
+			{Path: "creational/factory_test.go", Content: learnPatternsFactoryTestTmpl},
+			{Path: "creational/singleton.go", Content: learnPatternsSingletonTmpl},
+			{Path: "creational/singleton_test.go", Content: learnPatternsSingletonTestTmpl},
+			{Path: "behavioral/observer.go", Content: learnPatternsObserverTmpl},
+			{Path: "behavioral/observer_test.go", Content: learnPatternsObserverTestTmpl},
+			{Path: "behavioral/strategy.go", Content: learnPatternsStrategyTmpl},
+			{Path: "behavioral/strategy_test.go", Content: learnPatternsStrategyTestTmpl},
+			{Path: ".gitignore", Content: gitignoreGoTmpl},
+		},
+	},
+	// New Project Templates
+	"go-microservice": {
+		Name:        "go-microservice",
+		Description: "Microservice with health check, metrics & graceful shutdown",
+		Directories: []string{
+			"cmd/server",
+			"internal/handler",
+			"internal/middleware",
+			"internal/health",
+		},
+		Files: []FileTemplate{
+			{Path: "cmd/server/main.go", Content: microserviceMainTmpl},
+			{Path: "internal/handler/handler.go", Content: microserviceHandlerTmpl},
+			{Path: "internal/middleware/logging.go", Content: microserviceLoggingTmpl},
+			{Path: "internal/health/health.go", Content: microserviceHealthTmpl},
+			{Path: "Dockerfile", Content: microserviceDockerfileTmpl},
+			{Path: "Makefile", Content: microserviceMakefileTmpl},
+			{Path: "README.md", Content: readmeTmpl},
+			{Path: ".gitignore", Content: gitignoreGoTmpl},
+		},
+	},
+	"go-websocket": {
+		Name:        "go-websocket",
+		Description: "Real-time WebSocket application",
+		Directories: []string{
+			"cmd/server",
+			"internal/hub",
+			"internal/client",
+			"web",
+		},
+		Files: []FileTemplate{
+			{Path: "cmd/server/main.go", Content: websocketMainTmpl},
+			{Path: "internal/hub/hub.go", Content: websocketHubTmpl},
+			{Path: "internal/client/client.go", Content: websocketClientTmpl},
+			{Path: "web/index.html", Content: websocketHTMLTmpl},
+			{Path: "README.md", Content: readmeTmpl},
+			{Path: ".gitignore", Content: gitignoreGoTmpl},
+		},
+	},
+	"go-graphql": {
+		Name:        "go-graphql",
+		Description: "GraphQL API with gqlgen",
+		Directories: []string{
+			"cmd/server",
+			"graph",
+		},
+		Files: []FileTemplate{
+			{Path: "cmd/server/main.go", Content: graphqlMainTmpl},
+			{Path: "graph/schema.graphqls", Content: graphqlSchemaTmpl},
+			{Path: "graph/resolver.go", Content: graphqlResolverTmpl},
+			{Path: "gqlgen.yml", Content: graphqlConfigTmpl},
+			{Path: "README.md", Content: readmeTmpl},
+			{Path: ".gitignore", Content: gitignoreGoTmpl},
+		},
+	},
+	"go-lambda": {
+		Name:        "go-lambda",
+		Description: "AWS Lambda function with SAM",
+		Directories: []string{
+			"cmd/lambda",
+			"internal/handler",
+		},
+		Files: []FileTemplate{
+			{Path: "cmd/lambda/main.go", Content: lambdaMainTmpl},
+			{Path: "internal/handler/handler.go", Content: lambdaHandlerTmpl},
+			{Path: "template.yaml", Content: lambdaSAMTmpl},
+			{Path: "Makefile", Content: lambdaMakefileTmpl},
+			{Path: "README.md", Content: readmeTmpl},
+			{Path: ".gitignore", Content: gitignoreGoTmpl},
+		},
+	},
+	"go-cron": {
+		Name:        "go-cron",
+		Description: "Scheduled jobs with cron",
+		Directories: []string{
+			"cmd/scheduler",
+			"internal/jobs",
+			"internal/scheduler",
+		},
+		Files: []FileTemplate{
+			{Path: "cmd/scheduler/main.go", Content: cronMainTmpl},
+			{Path: "internal/jobs/jobs.go", Content: cronJobsTmpl},
+			{Path: "internal/scheduler/scheduler.go", Content: cronSchedulerTmpl},
+			{Path: "README.md", Content: readmeTmpl},
+			{Path: ".gitignore", Content: gitignoreGoTmpl},
+		},
+	},
 }
 
 // GetTemplate returns a template by name
@@ -4084,4 +4288,1430 @@ func TestLoggerConcurrent(t *testing.T) {
 		t.Errorf("Logger has %d logs, want 1000", len(l.GetLogs()))
 	}
 }
+`
+
+// ============== Learn Generics Templates ==============
+
+var learnGenericsReadmeTmpl = `# Learn Go Generics
+
+Master Go generics with hands-on exercises!
+
+## Sections
+
+1. **basics/** - Generic functions and type parameters
+2. **constraints/** - Type constraints and interfaces
+3. **practical/** - Real-world generic patterns
+
+## How to Use
+
+` + "```bash" + `
+cd basics && go test -v
+` + "```" + `
+`
+
+var learnGenericsBasicsTmpl = `package main
+
+// TODO: Implement a generic Min function
+// Returns the smaller of two values
+func Min[T any](a, b T) T {
+	// YOUR CODE HERE (hint: need comparable/ordered constraint)
+	return a
+}
+
+// TODO: Implement a generic Map function
+// Applies fn to each element and returns new slice
+func Map[T, U any](slice []T, fn func(T) U) []U {
+	// YOUR CODE HERE
+	return nil
+}
+
+// TODO: Implement a generic Filter function
+func Filter[T any](slice []T, fn func(T) bool) []T {
+	// YOUR CODE HERE
+	return nil
+}
+`
+
+var learnGenericsBasicsTestTmpl = `package main
+
+import "testing"
+
+func TestMin(t *testing.T) {
+	if Min(3, 5) != 3 { t.Error("Min(3,5) should be 3") }
+	if Min(5.5, 2.2) != 2.2 { t.Error("Min(5.5,2.2) should be 2.2") }
+}
+
+func TestMap(t *testing.T) {
+	doubled := Map([]int{1, 2, 3}, func(x int) int { return x * 2 })
+	if len(doubled) != 3 || doubled[0] != 2 { t.Error("Map failed") }
+}
+
+func TestFilter(t *testing.T) {
+	evens := Filter([]int{1, 2, 3, 4}, func(x int) bool { return x%2 == 0 })
+	if len(evens) != 2 { t.Error("Filter failed") }
+}
+`
+
+var learnGenericsConstraintsTmpl = `package main
+
+import "golang.org/x/exp/constraints"
+
+// Number constraint for numeric types
+type Number interface {
+	constraints.Integer | constraints.Float
+}
+
+// TODO: Implement Sum using Number constraint
+func Sum[T Number](nums []T) T {
+	// YOUR CODE HERE
+	var zero T
+	return zero
+}
+
+// TODO: Implement a generic Stack with any type
+type Stack[T any] struct {
+	items []T
+}
+
+func (s *Stack[T]) Push(item T) {
+	// YOUR CODE HERE
+}
+
+func (s *Stack[T]) Pop() (T, bool) {
+	// YOUR CODE HERE
+	var zero T
+	return zero, false
+}
+`
+
+var learnGenericsConstraintsTestTmpl = `package main
+
+import "testing"
+
+func TestSum(t *testing.T) {
+	if Sum([]int{1, 2, 3}) != 6 { t.Error("Sum ints failed") }
+	if Sum([]float64{1.5, 2.5}) != 4.0 { t.Error("Sum floats failed") }
+}
+
+func TestStack(t *testing.T) {
+	s := &Stack[string]{}
+	s.Push("hello")
+	s.Push("world")
+	if v, ok := s.Pop(); !ok || v != "world" { t.Error("Pop failed") }
+}
+`
+
+var learnGenericsPracticalTmpl = `package main
+
+// TODO: Implement a generic Result type for error handling
+type Result[T any] struct {
+	Value T
+	Err   error
+}
+
+func Ok[T any](value T) Result[T] {
+	return Result[T]{Value: value}
+}
+
+func Err[T any](err error) Result[T] {
+	return Result[T]{Err: err}
+}
+
+// TODO: Implement generic cache
+type Cache[K comparable, V any] struct {
+	data map[K]V
+}
+
+func NewCache[K comparable, V any]() *Cache[K, V] {
+	return &Cache[K, V]{data: make(map[K]V)}
+}
+
+func (c *Cache[K, V]) Set(key K, value V) {
+	// YOUR CODE HERE
+}
+
+func (c *Cache[K, V]) Get(key K) (V, bool) {
+	// YOUR CODE HERE
+	var zero V
+	return zero, false
+}
+`
+
+var learnGenericsPracticalTestTmpl = `package main
+
+import (
+	"errors"
+	"testing"
+)
+
+func TestResult(t *testing.T) {
+	ok := Ok(42)
+	if ok.Err != nil || ok.Value != 42 { t.Error("Ok failed") }
+	
+	err := Err[int](errors.New("fail"))
+	if err.Err == nil { t.Error("Err failed") }
+}
+
+func TestCache(t *testing.T) {
+	c := NewCache[string, int]()
+	c.Set("age", 30)
+	if v, ok := c.Get("age"); !ok || v != 30 { t.Error("Cache failed") }
+}
+`
+
+// ============== Learn Context Templates ==============
+
+var learnContextReadmeTmpl = `# Learn context.Context
+
+Master Go's context package for cancellation, timeouts, and value passing.
+
+## Sections
+1. **cancellation/** - Cancel long-running operations
+2. **timeout/** - Set deadlines for operations
+3. **values/** - Pass request-scoped values
+`
+
+var learnContextCancellationTmpl = `package main
+
+import (
+	"context"
+	"fmt"
+	"time"
+)
+
+// TODO: Implement a function that respects context cancellation
+func DoWork(ctx context.Context) error {
+	for i := 0; i < 10; i++ {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+			fmt.Printf("Working... %d\n", i)
+			time.Sleep(100 * time.Millisecond)
+		}
+	}
+	return nil
+}
+
+func main() {
+	ctx, cancel := context.WithCancel(context.Background())
+	go func() {
+		time.Sleep(300 * time.Millisecond)
+		cancel()
+	}()
+	DoWork(ctx)
+}
+`
+
+var learnContextCancellationTestTmpl = `package main
+
+import (
+	"context"
+	"testing"
+	"time"
+)
+
+func TestDoWork_Cancellation(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	go func() {
+		time.Sleep(50 * time.Millisecond)
+		cancel()
+	}()
+	err := DoWork(ctx)
+	if err != context.Canceled { t.Error("Should return context.Canceled") }
+}
+`
+
+var learnContextTimeoutTmpl = `package main
+
+import (
+	"context"
+	"time"
+)
+
+// TODO: Implement function with timeout
+func FetchWithTimeout(ctx context.Context, duration time.Duration) (string, error) {
+	ctx, cancel := context.WithTimeout(ctx, duration)
+	defer cancel()
+	
+	select {
+	case <-time.After(500 * time.Millisecond):
+		return "data", nil
+	case <-ctx.Done():
+		return "", ctx.Err()
+	}
+}
+`
+
+var learnContextTimeoutTestTmpl = `package main
+
+import (
+	"context"
+	"testing"
+	"time"
+)
+
+func TestFetchWithTimeout(t *testing.T) {
+	_, err := FetchWithTimeout(context.Background(), 100*time.Millisecond)
+	if err != context.DeadlineExceeded { t.Error("Should timeout") }
+	
+	data, err := FetchWithTimeout(context.Background(), 1*time.Second)
+	if err != nil || data != "data" { t.Error("Should succeed") }
+}
+`
+
+var learnContextValuesTmpl = `package main
+
+import "context"
+
+type contextKey string
+
+const userIDKey contextKey = "userID"
+
+// TODO: Implement context value functions
+func WithUserID(ctx context.Context, userID string) context.Context {
+	return context.WithValue(ctx, userIDKey, userID)
+}
+
+func GetUserID(ctx context.Context) (string, bool) {
+	userID, ok := ctx.Value(userIDKey).(string)
+	return userID, ok
+}
+`
+
+var learnContextValuesTestTmpl = `package main
+
+import (
+	"context"
+	"testing"
+)
+
+func TestContextValues(t *testing.T) {
+	ctx := WithUserID(context.Background(), "user123")
+	if id, ok := GetUserID(ctx); !ok || id != "user123" { t.Error("Value failed") }
+	
+	if _, ok := GetUserID(context.Background()); ok { t.Error("Should not find value") }
+}
+`
+
+// ============== Learn HTTP Templates ==============
+
+var learnHTTPReadmeTmpl = `# Learn HTTP in Go
+
+Learn HTTP client, server, and middleware patterns.
+
+## Sections
+1. **client/** - Making HTTP requests
+2. **server/** - Building HTTP servers
+3. **middleware/** - Request/response middleware
+`
+
+var learnHTTPClientTmpl = `package main
+
+import (
+	"encoding/json"
+	"io"
+	"net/http"
+)
+
+// TODO: Implement GET request
+func GetJSON(url string, target interface{}) error {
+	resp, err := http.Get(url)
+	if err != nil { return err }
+	defer resp.Body.Close()
+	return json.NewDecoder(resp.Body).Decode(target)
+}
+
+// TODO: Implement POST request with JSON body
+func PostJSON(url string, body interface{}, target interface{}) error {
+	// YOUR CODE HERE
+	return nil
+}
+
+// Helper
+var _ = io.ReadAll
+`
+
+var learnHTTPClientTestTmpl = `package main
+
+import (
+	"net/http"
+	"net/http/httptest"
+	"testing"
+)
+
+func TestGetJSON(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte(` + "`" + `{"name":"test"}` + "`" + `))
+	}))
+	defer server.Close()
+	
+	var result struct{ Name string }
+	if err := GetJSON(server.URL, &result); err != nil || result.Name != "test" {
+		t.Error("GetJSON failed")
+	}
+}
+`
+
+var learnHTTPServerTmpl = `package main
+
+import (
+	"encoding/json"
+	"net/http"
+)
+
+// TODO: Implement JSON response helper
+func respondJSON(w http.ResponseWriter, status int, data interface{}) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	json.NewEncoder(w).Encode(data)
+}
+
+// TODO: Implement a handler that returns user by ID
+func UserHandler(w http.ResponseWriter, r *http.Request) {
+	// YOUR CODE HERE
+	respondJSON(w, 200, map[string]string{"id": "1", "name": "John"})
+}
+`
+
+var learnHTTPServerTestTmpl = `package main
+
+import (
+	"net/http"
+	"net/http/httptest"
+	"testing"
+)
+
+func TestUserHandler(t *testing.T) {
+	req := httptest.NewRequest("GET", "/user/1", nil)
+	w := httptest.NewRecorder()
+	UserHandler(w, req)
+	if w.Code != 200 { t.Errorf("got %d, want 200", w.Code) }
+}
+`
+
+var learnHTTPMiddlewareTmpl = `package main
+
+import (
+	"log"
+	"net/http"
+	"time"
+)
+
+// TODO: Implement logging middleware
+func LoggingMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+		next.ServeHTTP(w, r)
+		log.Printf("%s %s %v", r.Method, r.URL.Path, time.Since(start))
+	})
+}
+
+// TODO: Implement auth middleware
+func AuthMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// YOUR CODE HERE - check Authorization header
+		next.ServeHTTP(w, r)
+	})
+}
+`
+
+var learnHTTPMiddlewareTestTmpl = `package main
+
+import (
+	"net/http"
+	"net/http/httptest"
+	"testing"
+)
+
+func TestLoggingMiddleware(t *testing.T) {
+	handler := LoggingMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(200)
+	}))
+	req := httptest.NewRequest("GET", "/test", nil)
+	w := httptest.NewRecorder()
+	handler.ServeHTTP(w, req)
+	if w.Code != 200 { t.Error("Middleware failed") }
+}
+`
+
+// ============== Learn Error Handling Templates ==============
+
+var learnErrorReadmeTmpl = `# Learn Error Handling in Go
+
+Master Go error handling patterns.
+
+## Sections
+1. **basics/** - Error basics and checking
+2. **wrapping/** - Error wrapping with context
+3. **custom/** - Custom error types
+`
+
+var learnErrorBasicsTmpl = `package main
+
+import (
+	"errors"
+	"fmt"
+)
+
+var ErrNotFound = errors.New("not found")
+var ErrInvalid = errors.New("invalid input")
+
+// TODO: Implement a function that returns appropriate errors
+func FindUser(id int) (string, error) {
+	if id < 0 { return "", ErrInvalid }
+	if id == 0 { return "", ErrNotFound }
+	return fmt.Sprintf("User%d", id), nil
+}
+
+// TODO: Check specific error types
+func HandleError(err error) string {
+	if errors.Is(err, ErrNotFound) { return "user not found" }
+	if errors.Is(err, ErrInvalid) { return "invalid id" }
+	return "unknown error"
+}
+`
+
+var learnErrorBasicsTestTmpl = `package main
+
+import (
+	"errors"
+	"testing"
+)
+
+func TestFindUser(t *testing.T) {
+	_, err := FindUser(-1)
+	if !errors.Is(err, ErrInvalid) { t.Error("Should be ErrInvalid") }
+	
+	_, err = FindUser(0)
+	if !errors.Is(err, ErrNotFound) { t.Error("Should be ErrNotFound") }
+	
+	name, err := FindUser(1)
+	if err != nil || name != "User1" { t.Error("Should succeed") }
+}
+`
+
+var learnErrorWrappingTmpl = `package main
+
+import (
+	"errors"
+	"fmt"
+)
+
+// TODO: Wrap errors with context
+func LoadConfig(path string) error {
+	err := readFile(path)
+	if err != nil {
+		return fmt.Errorf("loading config %s: %w", path, err)
+	}
+	return nil
+}
+
+func readFile(path string) error {
+	return errors.New("file not found")
+}
+
+// TODO: Unwrap and check original error
+func IsFileError(err error) bool {
+	return errors.Is(err, errors.New("file not found"))
+}
+`
+
+var learnErrorWrappingTestTmpl = `package main
+
+import (
+	"strings"
+	"testing"
+)
+
+func TestLoadConfig(t *testing.T) {
+	err := LoadConfig("/etc/app.conf")
+	if err == nil { t.Error("Should error") }
+	if !strings.Contains(err.Error(), "loading config") { t.Error("Should wrap") }
+}
+`
+
+var learnErrorCustomTmpl = `package main
+
+import "fmt"
+
+// TODO: Implement custom error type
+type ValidationError struct {
+	Field   string
+	Message string
+}
+
+func (e *ValidationError) Error() string {
+	return fmt.Sprintf("%s: %s", e.Field, e.Message)
+}
+
+// TODO: Create error with type assertion
+func ValidateAge(age int) error {
+	if age < 0 {
+		return &ValidationError{Field: "age", Message: "must be positive"}
+	}
+	if age > 150 {
+		return &ValidationError{Field: "age", Message: "too large"}
+	}
+	return nil
+}
+`
+
+var learnErrorCustomTestTmpl = `package main
+
+import "testing"
+
+func TestValidateAge(t *testing.T) {
+	err := ValidateAge(-1)
+	if ve, ok := err.(*ValidationError); !ok || ve.Field != "age" {
+		t.Error("Should be ValidationError")
+	}
+	
+	if err := ValidateAge(25); err != nil { t.Error("Should pass") }
+}
+`
+
+// ============== Learn Interfaces Templates ==============
+
+var learnInterfacesReadmeTmpl = `# Learn Interfaces in Go
+
+Master Go interfaces and polymorphism.
+
+## Sections
+1. **basics/** - Interface basics
+2. **composition/** - Interface embedding
+3. **patterns/** - Common interface patterns
+`
+
+var learnInterfacesBasicsTmpl = `package main
+
+import "fmt"
+
+// TODO: Define a simple interface
+type Speaker interface {
+	Speak() string
+}
+
+type Dog struct{ Name string }
+type Cat struct{ Name string }
+
+func (d Dog) Speak() string { return fmt.Sprintf("%s says Woof!", d.Name) }
+func (c Cat) Speak() string { return fmt.Sprintf("%s says Meow!", c.Name) }
+
+// TODO: Implement a function that accepts interface
+func MakeSpeak(s Speaker) string {
+	return s.Speak()
+}
+`
+
+var learnInterfacesBasicsTestTmpl = `package main
+
+import "testing"
+
+func TestSpeaker(t *testing.T) {
+	dog := Dog{Name: "Rex"}
+	cat := Cat{Name: "Whiskers"}
+	
+	if MakeSpeak(dog) != "Rex says Woof!" { t.Error("Dog failed") }
+	if MakeSpeak(cat) != "Whiskers says Meow!" { t.Error("Cat failed") }
+}
+`
+
+var learnInterfacesCompositionTmpl = `package main
+
+// TODO: Compose interfaces
+type Reader interface {
+	Read(p []byte) (n int, err error)
+}
+
+type Writer interface {
+	Write(p []byte) (n int, err error)
+}
+
+type ReadWriter interface {
+	Reader
+	Writer
+}
+
+// Buffer implements ReadWriter
+type Buffer struct {
+	data []byte
+}
+
+func (b *Buffer) Read(p []byte) (int, error) {
+	n := copy(p, b.data)
+	return n, nil
+}
+
+func (b *Buffer) Write(p []byte) (int, error) {
+	b.data = append(b.data, p...)
+	return len(p), nil
+}
+`
+
+var learnInterfacesCompositionTestTmpl = `package main
+
+import "testing"
+
+func TestBuffer(t *testing.T) {
+	var rw ReadWriter = &Buffer{}
+	rw.Write([]byte("hello"))
+	
+	p := make([]byte, 5)
+	n, _ := rw.Read(p)
+	if n != 5 || string(p) != "hello" { t.Error("Buffer failed") }
+}
+`
+
+var learnInterfacesPatternsTmpl = `package main
+
+// TODO: Implement Stringer pattern
+type Person struct {
+	Name string
+	Age  int
+}
+
+func (p Person) String() string {
+	return p.Name
+}
+
+// TODO: Implement sort.Interface
+type ByAge []Person
+
+func (a ByAge) Len() int           { return len(a) }
+func (a ByAge) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a ByAge) Less(i, j int) bool { return a[i].Age < a[j].Age }
+`
+
+var learnInterfacesPatternsTestTmpl = `package main
+
+import (
+	"sort"
+	"testing"
+)
+
+func TestStringer(t *testing.T) {
+	p := Person{Name: "Alice", Age: 30}
+	if p.String() != "Alice" { t.Error("Stringer failed") }
+}
+
+func TestSort(t *testing.T) {
+	people := ByAge{{Name: "B", Age: 30}, {Name: "A", Age: 20}}
+	sort.Sort(people)
+	if people[0].Name != "A" { t.Error("Sort failed") }
+}
+`
+
+// ============== Learn Design Patterns Templates ==============
+
+var learnPatternsReadmeTmpl = `# Learn Design Patterns in Go
+
+Learn common design patterns idiomatically in Go.
+
+## Sections
+1. **creational/** - Factory, Singleton patterns
+2. **behavioral/** - Observer, Strategy patterns
+3. **structural/** - (future: Decorator, Adapter)
+`
+
+var learnPatternsFactoryTmpl = `package creational
+
+// Factory Pattern - create objects without exposing creation logic
+
+type Animal interface {
+	Speak() string
+}
+
+type Dog struct{}
+func (d Dog) Speak() string { return "Woof!" }
+
+type Cat struct{}
+func (c Cat) Speak() string { return "Meow!" }
+
+// TODO: Implement factory function
+func NewAnimal(animalType string) Animal {
+	switch animalType {
+	case "dog": return Dog{}
+	case "cat": return Cat{}
+	default: return nil
+	}
+}
+`
+
+var learnPatternsFactoryTestTmpl = `package creational
+
+import "testing"
+
+func TestFactory(t *testing.T) {
+	dog := NewAnimal("dog")
+	if dog.Speak() != "Woof!" { t.Error("Dog factory failed") }
+	
+	cat := NewAnimal("cat")
+	if cat.Speak() != "Meow!" { t.Error("Cat factory failed") }
+}
+`
+
+var learnPatternsSingletonTmpl = `package creational
+
+import "sync"
+
+// Singleton Pattern - ensure only one instance exists
+
+type Database struct {
+	connection string
+}
+
+var (
+	instance *Database
+	once     sync.Once
+)
+
+// TODO: Implement thread-safe singleton
+func GetDatabase() *Database {
+	once.Do(func() {
+		instance = &Database{connection: "connected"}
+	})
+	return instance
+}
+`
+
+var learnPatternsSingletonTestTmpl = `package creational
+
+import "testing"
+
+func TestSingleton(t *testing.T) {
+	db1 := GetDatabase()
+	db2 := GetDatabase()
+	if db1 != db2 { t.Error("Should be same instance") }
+}
+`
+
+var learnPatternsObserverTmpl = `package behavioral
+
+// Observer Pattern - notify subscribers of changes
+
+type Observer interface {
+	Update(message string)
+}
+
+type Subject struct {
+	observers []Observer
+}
+
+func (s *Subject) Register(o Observer) {
+	s.observers = append(s.observers, o)
+}
+
+func (s *Subject) Notify(message string) {
+	for _, o := range s.observers {
+		o.Update(message)
+	}
+}
+
+type EmailSubscriber struct {
+	Messages []string
+}
+
+func (e *EmailSubscriber) Update(message string) {
+	e.Messages = append(e.Messages, message)
+}
+`
+
+var learnPatternsObserverTestTmpl = `package behavioral
+
+import "testing"
+
+func TestObserver(t *testing.T) {
+	subject := &Subject{}
+	sub := &EmailSubscriber{}
+	subject.Register(sub)
+	subject.Notify("Hello!")
+	if len(sub.Messages) != 1 { t.Error("Observer failed") }
+}
+`
+
+var learnPatternsStrategyTmpl = `package behavioral
+
+// Strategy Pattern - swap algorithms at runtime
+
+type PaymentStrategy interface {
+	Pay(amount float64) string
+}
+
+type CreditCard struct{}
+func (c CreditCard) Pay(amount float64) string { return "Paid with credit card" }
+
+type PayPal struct{}
+func (p PayPal) Pay(amount float64) string { return "Paid with PayPal" }
+
+type Checkout struct {
+	strategy PaymentStrategy
+}
+
+func (c *Checkout) SetStrategy(s PaymentStrategy) {
+	c.strategy = s
+}
+
+func (c *Checkout) Process(amount float64) string {
+	return c.strategy.Pay(amount)
+}
+`
+
+var learnPatternsStrategyTestTmpl = `package behavioral
+
+import "testing"
+
+func TestStrategy(t *testing.T) {
+	checkout := &Checkout{}
+	
+	checkout.SetStrategy(CreditCard{})
+	if checkout.Process(100) != "Paid with credit card" { t.Error("CC failed") }
+	
+	checkout.SetStrategy(PayPal{})
+	if checkout.Process(100) != "Paid with PayPal" { t.Error("PayPal failed") }
+}
+`
+
+// ============== Go Microservice Templates ==============
+
+var microserviceMainTmpl = `package main
+
+import (
+	"context"
+	"log"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+
+	"{{.ProjectName}}/internal/handler"
+	"{{.ProjectName}}/internal/health"
+	"{{.ProjectName}}/internal/middleware"
+)
+
+func main() {
+	mux := http.NewServeMux()
+	
+	// Health endpoints
+	mux.HandleFunc("/health", health.HealthHandler)
+	mux.HandleFunc("/ready", health.ReadyHandler)
+	
+	// API endpoints
+	mux.HandleFunc("/api/", handler.APIHandler)
+	
+	// Apply middleware
+	h := middleware.Logging(mux)
+	
+	srv := &http.Server{
+		Addr:         ":8080",
+		Handler:      h,
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
+	}
+	
+	// Graceful shutdown
+	go func() {
+		log.Println("Server starting on :8080")
+		if err := srv.ListenAndServe(); err != http.ErrServerClosed {
+			log.Fatalf("Server error: %v", err)
+		}
+	}()
+	
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+	
+	log.Println("Shutting down...")
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Fatalf("Shutdown error: %v", err)
+	}
+	log.Println("Server stopped")
+}
+`
+
+var microserviceHandlerTmpl = `package handler
+
+import (
+	"encoding/json"
+	"net/http"
+)
+
+func APIHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{
+		"status":  "ok",
+		"message": "Hello from microservice!",
+	})
+}
+`
+
+var microserviceLoggingTmpl = `package middleware
+
+import (
+	"log"
+	"net/http"
+	"time"
+)
+
+func Logging(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+		next.ServeHTTP(w, r)
+		log.Printf("%s %s %v", r.Method, r.URL.Path, time.Since(start))
+	})
+}
+`
+
+var microserviceHealthTmpl = `package health
+
+import (
+	"encoding/json"
+	"net/http"
+)
+
+func HealthHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{"status": "healthy"})
+}
+
+func ReadyHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{"status": "ready"})
+}
+`
+
+var microserviceDockerfileTmpl = `FROM golang:1.21-alpine AS builder
+WORKDIR /app
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+RUN CGO_ENABLED=0 go build -o /server ./cmd/server
+
+FROM alpine:latest
+RUN apk --no-cache add ca-certificates
+COPY --from=builder /server /server
+EXPOSE 8080
+CMD ["/server"]
+`
+
+var microserviceMakefileTmpl = `.PHONY: run build docker test
+
+run:
+	go run ./cmd/server
+
+build:
+	go build -o bin/server ./cmd/server
+
+docker:
+	docker build -t {{.ProjectName}} .
+
+test:
+	go test -v ./...
+`
+
+// ============== Go WebSocket Templates ==============
+
+var websocketMainTmpl = `package main
+
+import (
+	"log"
+	"net/http"
+
+	"{{.ProjectName}}/internal/hub"
+)
+
+func main() {
+	h := hub.NewHub()
+	go h.Run()
+
+	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+		hub.ServeWs(h, w, r)
+	})
+	http.Handle("/", http.FileServer(http.Dir("./web")))
+
+	log.Println("Server starting on :8080")
+	log.Fatal(http.ListenAndServe(":8080", nil))
+}
+`
+
+var websocketHubTmpl = `package hub
+
+import (
+	"log"
+	"net/http"
+
+	"github.com/gorilla/websocket"
+)
+
+var upgrader = websocket.Upgrader{
+	CheckOrigin: func(r *http.Request) bool { return true },
+}
+
+type Hub struct {
+	clients    map[*Client]bool
+	broadcast  chan []byte
+	register   chan *Client
+	unregister chan *Client
+}
+
+func NewHub() *Hub {
+	return &Hub{
+		clients:    make(map[*Client]bool),
+		broadcast:  make(chan []byte),
+		register:   make(chan *Client),
+		unregister: make(chan *Client),
+	}
+}
+
+func (h *Hub) Run() {
+	for {
+		select {
+		case client := <-h.register:
+			h.clients[client] = true
+		case client := <-h.unregister:
+			if _, ok := h.clients[client]; ok {
+				delete(h.clients, client)
+				close(client.send)
+			}
+		case message := <-h.broadcast:
+			for client := range h.clients {
+				select {
+				case client.send <- message:
+				default:
+					close(client.send)
+					delete(h.clients, client)
+				}
+			}
+		}
+	}
+}
+
+func ServeWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256)}
+	hub.register <- client
+	go client.writePump()
+	go client.readPump()
+}
+
+func (h *Hub) Broadcast(msg []byte) {
+	h.broadcast <- msg
+}
+`
+
+var websocketClientTmpl = `package hub
+
+import (
+	"github.com/gorilla/websocket"
+)
+
+type Client struct {
+	hub  *Hub
+	conn *websocket.Conn
+	send chan []byte
+}
+
+func (c *Client) readPump() {
+	defer func() {
+		c.hub.unregister <- c
+		c.conn.Close()
+	}()
+	for {
+		_, message, err := c.conn.ReadMessage()
+		if err != nil { break }
+		c.hub.broadcast <- message
+	}
+}
+
+func (c *Client) writePump() {
+	defer c.conn.Close()
+	for message := range c.send {
+		if err := c.conn.WriteMessage(websocket.TextMessage, message); err != nil {
+			return
+		}
+	}
+}
+`
+
+var websocketHTMLTmpl = `<!DOCTYPE html>
+<html>
+<head>
+    <title>WebSocket Chat</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; }
+        #messages { border: 1px solid #ccc; height: 300px; overflow-y: scroll; padding: 10px; }
+        #input { width: 80%; padding: 10px; }
+        button { padding: 10px 20px; }
+    </style>
+</head>
+<body>
+    <h1>WebSocket Chat</h1>
+    <div id="messages"></div>
+    <input id="input" type="text" placeholder="Type a message...">
+    <button onclick="send()">Send</button>
+    <script>
+        const ws = new WebSocket('ws://' + location.host + '/ws');
+        ws.onmessage = (e) => {
+            const div = document.createElement('div');
+            div.textContent = e.data;
+            document.getElementById('messages').appendChild(div);
+        };
+        function send() {
+            const input = document.getElementById('input');
+            ws.send(input.value);
+            input.value = '';
+        }
+        document.getElementById('input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') send();
+        });
+    </script>
+</body>
+</html>
+`
+
+// ============== Go GraphQL Templates ==============
+
+var graphqlMainTmpl = `package main
+
+import (
+	"log"
+	"net/http"
+
+	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/playground"
+	"{{.ProjectName}}/graph"
+)
+
+func main() {
+	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{
+		Resolvers: &graph.Resolver{},
+	}))
+
+	http.Handle("/", playground.Handler("GraphQL", "/query"))
+	http.Handle("/query", srv)
+
+	log.Println("GraphQL server on http://localhost:8080/")
+	log.Fatal(http.ListenAndServe(":8080", nil))
+}
+`
+
+var graphqlSchemaTmpl = `type Query {
+  todos: [Todo!]!
+  todo(id: ID!): Todo
+}
+
+type Mutation {
+  createTodo(input: NewTodo!): Todo!
+}
+
+type Todo {
+  id: ID!
+  text: String!
+  done: Boolean!
+}
+
+input NewTodo {
+  text: String!
+}
+`
+
+var graphqlResolverTmpl = `package graph
+
+type Resolver struct {
+	todos []Todo
+}
+
+type Todo struct {
+	ID   string
+	Text string
+	Done bool
+}
+
+func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
+func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
+
+type queryResolver struct{ *Resolver }
+type mutationResolver struct{ *Resolver }
+
+func (r *queryResolver) Todos() ([]Todo, error) { return r.todos, nil }
+func (r *queryResolver) Todo(id string) (*Todo, error) {
+	for _, t := range r.todos {
+		if t.ID == id { return &t, nil }
+	}
+	return nil, nil
+}
+
+func (r *mutationResolver) CreateTodo(input NewTodo) (Todo, error) {
+	todo := Todo{ID: fmt.Sprintf("%d", len(r.todos)+1), Text: input.Text}
+	r.todos = append(r.todos, todo)
+	return todo, nil
+}
+
+type NewTodo struct { Text string }
+`
+
+var graphqlConfigTmpl = `schema:
+  - graph/schema.graphqls
+
+exec:
+  filename: graph/generated.go
+  package: graph
+
+model:
+  filename: graph/models_gen.go
+  package: graph
+
+resolver:
+  filename: graph/resolver.go
+  type: Resolver
+`
+
+// ============== Go Lambda Templates ==============
+
+var lambdaMainTmpl = `package main
+
+import (
+	"github.com/aws/aws-lambda-go/lambda"
+	"{{.ProjectName}}/internal/handler"
+)
+
+func main() {
+	lambda.Start(handler.HandleRequest)
+}
+`
+
+var lambdaHandlerTmpl = `package handler
+
+import (
+	"context"
+	"fmt"
+)
+
+type Request struct {
+	Name string ` + "`json:\"name\"`" + `
+}
+
+type Response struct {
+	Message string ` + "`json:\"message\"`" + `
+}
+
+func HandleRequest(ctx context.Context, req Request) (Response, error) {
+	if req.Name == "" {
+		req.Name = "World"
+	}
+	return Response{Message: fmt.Sprintf("Hello, %s!", req.Name)}, nil
+}
+`
+
+var lambdaSAMTmpl = `AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: {{.ProjectName}} Lambda function
+
+Globals:
+  Function:
+    Timeout: 30
+
+Resources:
+  Function:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: bootstrap
+      Runtime: provided.al2
+      CodeUri: .
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /hello
+            Method: get
+`
+
+var lambdaMakefileTmpl = `.PHONY: build deploy test
+
+build:
+	GOOS=linux GOARCH=amd64 go build -o bootstrap ./cmd/lambda
+
+deploy: build
+	sam deploy --guided
+
+test:
+	go test -v ./...
+
+local:
+	sam local start-api
+`
+
+// ============== Go Cron Templates ==============
+
+var cronMainTmpl = `package main
+
+import (
+	"log"
+	"os"
+	"os/signal"
+	"syscall"
+
+	"{{.ProjectName}}/internal/jobs"
+	"{{.ProjectName}}/internal/scheduler"
+)
+
+func main() {
+	s := scheduler.New()
+	
+	s.Schedule("*/5 * * * *", jobs.CleanupJob)
+	s.Schedule("0 * * * *", jobs.ReportJob)
+	
+	s.Start()
+	log.Println("Scheduler started")
+	
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+	
+	s.Stop()
+	log.Println("Scheduler stopped")
+}
+`
+
+var cronJobsTmpl = `package jobs
+
+import "log"
+
+func CleanupJob() {
+	log.Println("Running cleanup job...")
+}
+
+func ReportJob() {
+	log.Println("Running report job...")
+}
+`
+
+var cronSchedulerTmpl = `package scheduler
+
+import (
+	"github.com/robfig/cron/v3"
+)
+
+type Scheduler struct {
+	cron *cron.Cron
+}
+
+func New() *Scheduler {
+	return &Scheduler{cron: cron.New()}
+}
+
+func (s *Scheduler) Schedule(spec string, job func()) {
+	s.cron.AddFunc(spec, job)
+}
+
+func (s *Scheduler) Start() { s.cron.Start() }
+func (s *Scheduler) Stop()  { s.cron.Stop() }
 `

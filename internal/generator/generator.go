@@ -255,6 +255,39 @@ func printNextSteps(config tui.ProjectConfig) {
 		fmt.Println("   cd bugs/01_off_by_one")
 		fmt.Println("   go test -v          # See the failing tests")
 		fmt.Println("   # Find and fix the bugs in buggy.go!")
+	case "learn-generics":
+		fmt.Println("   cd basics && go test -v")
+		fmt.Println("   # Implement generic functions!")
+	case "learn-context":
+		fmt.Println("   cd cancellation && go test -v")
+		fmt.Println("   # Learn context cancellation patterns")
+	case "learn-http":
+		fmt.Println("   cd server && go test -v")
+		fmt.Println("   # Build HTTP handlers")
+	case "learn-error-handling":
+		fmt.Println("   cd basics && go test -v")
+		fmt.Println("   # Master error patterns")
+	case "learn-interfaces":
+		fmt.Println("   cd basics && go test -v")
+		fmt.Println("   # Learn interface design")
+	case "learn-design-patterns":
+		fmt.Println("   cd creational && go test -v")
+		fmt.Println("   # Learn design patterns")
+	case "go-microservice":
+		fmt.Println("   go mod tidy && go run ./cmd/server")
+		fmt.Println("   # curl http://localhost:8080/health")
+	case "go-websocket":
+		fmt.Println("   go get github.com/gorilla/websocket")
+		fmt.Println("   go run ./cmd/server")
+	case "go-graphql":
+		fmt.Println("   go run github.com/99designs/gqlgen generate")
+		fmt.Println("   go run ./cmd/server")
+	case "go-lambda":
+		fmt.Println("   make build")
+		fmt.Println("   sam local start-api")
+	case "go-cron":
+		fmt.Println("   go get github.com/robfig/cron/v3")
+		fmt.Println("   go run ./cmd/scheduler")
 	default:
 		fmt.Println("   go mod tidy")
 		fmt.Println("   go test ./...")
