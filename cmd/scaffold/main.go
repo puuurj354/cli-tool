@@ -146,8 +146,17 @@ func runInit(cmd *cobra.Command, args []string) error {
 		if err != nil {
 			return fmt.Errorf("template '%s' not found. Use 'scaffold list' to see available templates", templateName)
 		}
+
+		// Prompt for project name
+		var projectName string
+		fmt.Print("Project name: ")
+		fmt.Scanln(&projectName)
+		if projectName == "" {
+			projectName = "my-project"
+		}
+
 		cfg = tui.ProjectConfig{
-			ProjectName:   getProjectNameFromCwd(),
+			ProjectName:   projectName,
 			TemplateName:  tmpl.Name,
 			License:       "MIT",
 			IncludeDocker: false,
