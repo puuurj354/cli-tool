@@ -239,6 +239,22 @@ func printNextSteps(config tui.ProjectConfig) {
 	case "learn-dsa":
 		fmt.Println("   go test -v ./...   # See which tests fail")
 		fmt.Println("   # Then implement the functions!")
+	case "challenge-30days":
+		fmt.Println("   cd week1/day01_hello")
+		fmt.Println("   go test -v          # See failing tests")
+		fmt.Println("   # Implement the functions, then move to next day!")
+	case "mini-project":
+		fmt.Println("   cd todo-cli         # or url-shortener")
+		fmt.Println("   go test -v          # See what to implement")
+		fmt.Println("   # Read README.md for requirements")
+	case "refactoring-exercise":
+		fmt.Println("   cd exercises/01_long_function")
+		fmt.Println("   # Look at before.go, read hints.md")
+		fmt.Println("   # Create after.go with your refactored code")
+	case "code-review-exercise":
+		fmt.Println("   cd bugs/01_off_by_one")
+		fmt.Println("   go test -v          # See the failing tests")
+		fmt.Println("   # Find and fix the bugs in buggy.go!")
 	default:
 		fmt.Println("   go mod tidy")
 		fmt.Println("   go test ./...")

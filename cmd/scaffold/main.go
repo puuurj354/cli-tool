@@ -37,7 +37,7 @@ func main() {
 		Long: `Scaffold - A CLI tool to generate project folder structures automatically.
 
 Create new projects quickly with predefined templates for Go APIs, CLIs,
-libraries, gRPC services, fullstack apps, and learning projects.
+libraries, gRPC services, fullstack apps, learning projects, and skill exercises.
 
 Commands:
   init [template]    Initialize a new project (interactive or with template)
@@ -49,13 +49,14 @@ Examples:
   scaffold init                        # Interactive mode with prompts
   scaffold init go-api                 # Quick start with template
   scaffold init fullstack --dry-run    # Preview without creating
-  scaffold list                        # See all 10 templates
+  scaffold list                        # See all 14 templates
   scaffold info learn-dsa              # Check what files will be created
 
-Templates (10):
+Templates (14):
   Project:    go-api, go-cli, go-lib, go-grpc, go-worker, go-tui
   Fullstack:  fullstack (Go + React/Vite/Bun/Tailwind)
   Learning:   learn-concurrency, learn-testing, learn-dsa
+  Skill:      challenge-30days, mini-project, refactoring-exercise, code-review-exercise
 
 Config: ~/.scaffold/config.json`,
 		Version: version,
@@ -78,16 +79,20 @@ Flags:
   --force      Overwrite existing directory if it already exists
 
 Available Templates:
-  go-api             REST API with clean architecture
-  go-cli             CLI app with Cobra
-  go-lib             Go library/package
-  go-grpc            gRPC service with proto file
-  go-worker          Background worker with job queue
-  go-tui             Terminal UI with Bubbletea
-  fullstack          Go backend + React/Vite/Bun/Tailwind frontend
-  learn-concurrency  Practice Go concurrency patterns
-  learn-testing      Practice Go testing techniques
-  learn-dsa          Practice Data Structures & Algorithms
+  go-api                 REST API with clean architecture
+  go-cli                 CLI app with Cobra
+  go-lib                 Go library/package
+  go-grpc                gRPC service with proto file
+  go-worker              Background worker with job queue
+  go-tui                 Terminal UI with Bubbletea
+  fullstack              Go backend + React/Vite/Bun/Tailwind frontend
+  learn-concurrency      Practice Go concurrency patterns
+  learn-testing          Practice Go testing techniques
+  learn-dsa              Practice Data Structures & Algorithms
+  challenge-30days       30-day Go coding challenge
+  mini-project           Mini projects to build (todo-cli, url-shortener)
+  refactoring-exercise   Practice refactoring bad code
+  code-review-exercise   Find bugs in code (code review practice)
 
 Examples:
   scaffold init                        # Interactive mode
@@ -170,6 +175,7 @@ func runList(cmd *cobra.Command, args []string) error {
 		"Project":   {},
 		"Learning":  {},
 		"Fullstack": {},
+		"Skill":     {},
 	}
 
 	for _, t := range tmpls {
@@ -178,6 +184,11 @@ func runList(cmd *cobra.Command, args []string) error {
 			categories["Learning"] = append(categories["Learning"], t)
 		case t.Name == "fullstack":
 			categories["Fullstack"] = append(categories["Fullstack"], t)
+		case strings.HasPrefix(t.Name, "challenge-") ||
+			strings.HasPrefix(t.Name, "mini-") ||
+			strings.HasPrefix(t.Name, "refactoring-") ||
+			strings.HasPrefix(t.Name, "code-review-"):
+			categories["Skill"] = append(categories["Skill"], t)
 		default:
 			categories["Project"] = append(categories["Project"], t)
 		}
@@ -187,7 +198,7 @@ func runList(cmd *cobra.Command, args []string) error {
 	fmt.Println()
 
 	// Print in order
-	order := []string{"Project", "Fullstack", "Learning"}
+	order := []string{"Project", "Fullstack", "Learning", "Skill"}
 	for _, cat := range order {
 		list := categories[cat]
 		if len(list) == 0 {

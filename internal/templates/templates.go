@@ -231,6 +231,92 @@ var builtInTemplates = map[string]Template{
 			{Path: ".gitignore", Content: fullstackGitignoreTmpl},
 		},
 	},
+	// Skill Coding Templates
+	"challenge-30days": {
+		Name:        "challenge-30days",
+		Description: "30-day Go coding challenge",
+		Directories: []string{
+			"week1/day01_hello",
+			"week1/day02_variables",
+			"week1/day03_conditionals",
+			"week2/day08_recursion",
+			"week2/day09_slices",
+			"week3/day15_http",
+			"week3/day16_json",
+			"week4/day22_concurrency",
+			"week4/day23_channels",
+		},
+		Files: []FileTemplate{
+			{Path: "README.md", Content: challenge30DaysReadmeTmpl},
+			{Path: "week1/day01_hello/main.go", Content: challengeDay01Tmpl},
+			{Path: "week1/day01_hello/main_test.go", Content: challengeDay01TestTmpl},
+			{Path: "week1/day02_variables/main.go", Content: challengeDay02Tmpl},
+			{Path: "week1/day02_variables/main_test.go", Content: challengeDay02TestTmpl},
+			{Path: "week2/day08_recursion/main.go", Content: challengeDay08Tmpl},
+			{Path: "week2/day08_recursion/main_test.go", Content: challengeDay08TestTmpl},
+			{Path: "week3/day15_http/main.go", Content: challengeDay15Tmpl},
+			{Path: "week3/day15_http/main_test.go", Content: challengeDay15TestTmpl},
+			{Path: "week4/day22_concurrency/main.go", Content: challengeDay22Tmpl},
+			{Path: "week4/day22_concurrency/main_test.go", Content: challengeDay22TestTmpl},
+			{Path: ".gitignore", Content: gitignoreGoTmpl},
+		},
+	},
+	"mini-project": {
+		Name:        "mini-project",
+		Description: "Mini projects to build (todo-cli, url-shortener)",
+		Directories: []string{
+			"todo-cli",
+			"url-shortener",
+		},
+		Files: []FileTemplate{
+			{Path: "README.md", Content: miniProjectReadmeTmpl},
+			{Path: "todo-cli/README.md", Content: todoCliReadmeTmpl},
+			{Path: "todo-cli/main.go", Content: todoCliMainTmpl},
+			{Path: "todo-cli/main_test.go", Content: todoCliTestTmpl},
+			{Path: "url-shortener/README.md", Content: urlShortenerReadmeTmpl},
+			{Path: "url-shortener/main.go", Content: urlShortenerMainTmpl},
+			{Path: "url-shortener/main_test.go", Content: urlShortenerTestTmpl},
+			{Path: ".gitignore", Content: gitignoreGoTmpl},
+		},
+	},
+	"refactoring-exercise": {
+		Name:        "refactoring-exercise",
+		Description: "Practice refactoring bad code",
+		Directories: []string{
+			"exercises/01_long_function",
+			"exercises/02_magic_numbers",
+			"exercises/03_poor_naming",
+		},
+		Files: []FileTemplate{
+			{Path: "README.md", Content: refactoringReadmeTmpl},
+			{Path: "exercises/01_long_function/before.go", Content: refactoring01BeforeTmpl},
+			{Path: "exercises/01_long_function/hints.md", Content: refactoring01HintsTmpl},
+			{Path: "exercises/02_magic_numbers/before.go", Content: refactoring02BeforeTmpl},
+			{Path: "exercises/02_magic_numbers/hints.md", Content: refactoring02HintsTmpl},
+			{Path: "exercises/03_poor_naming/before.go", Content: refactoring03BeforeTmpl},
+			{Path: "exercises/03_poor_naming/hints.md", Content: refactoring03HintsTmpl},
+			{Path: ".gitignore", Content: gitignoreGoTmpl},
+		},
+	},
+	"code-review-exercise": {
+		Name:        "code-review-exercise",
+		Description: "Find bugs in code (code review practice)",
+		Directories: []string{
+			"bugs/01_off_by_one",
+			"bugs/02_nil_pointer",
+			"bugs/03_race_condition",
+		},
+		Files: []FileTemplate{
+			{Path: "README.md", Content: codeReviewReadmeTmpl},
+			{Path: "bugs/01_off_by_one/buggy.go", Content: codeReview01BuggyTmpl},
+			{Path: "bugs/01_off_by_one/buggy_test.go", Content: codeReview01TestTmpl},
+			{Path: "bugs/02_nil_pointer/buggy.go", Content: codeReview02BuggyTmpl},
+			{Path: "bugs/02_nil_pointer/buggy_test.go", Content: codeReview02TestTmpl},
+			{Path: "bugs/03_race_condition/buggy.go", Content: codeReview03BuggyTmpl},
+			{Path: "bugs/03_race_condition/buggy_test.go", Content: codeReview03TestTmpl},
+			{Path: ".gitignore", Content: gitignoreGoTmpl},
+		},
+	},
 }
 
 // GetTemplate returns a template by name
@@ -2322,8 +2408,1680 @@ func TestReverseString(t *testing.T) {
 }
 
 func TestSumArray(t *testing.T) {
-	if got := SumArray([]int{1, 2, 3, 4, 5}); got != 15 {
-		t.Errorf("SumArray([1,2,3,4,5]) = %d; want 15", got)
+}
+`
+
+// ============== Skill Coding Templates ==============
+
+// Challenge 30 Days Templates
+var challenge30DaysReadmeTmpl = `# 30-Day Go Coding Challenge 🚀
+
+Welcome to the 30-day Go coding challenge! Each day has an exercise to help you master Go.
+
+## Structure
+
+### Week 1: Basics
+- Day 01: Hello World & Functions
+- Day 02: Variables & Types
+- Day 03: Conditionals
+
+### Week 2: Data Structures
+- Day 08: Recursion
+- Day 09: Slices & Arrays
+
+### Week 3: Web
+- Day 15: HTTP Basics
+- Day 16: JSON Handling
+
+### Week 4: Concurrency
+- Day 22: Goroutines
+- Day 23: Channels
+
+## How to Use
+
+1. Navigate to the day folder
+2. Read the main.go file for instructions
+3. Implement the TODO functions
+4. Run tests to verify: ` + "`go test -v`" + `
+
+## Rules
+
+- Complete one day at a time
+- Don't skip ahead!
+- Make all tests pass before moving on
+
+Good luck! 💪
+`
+
+var challengeDay01Tmpl = `package main
+
+import "fmt"
+
+// TODO: Implement Greet function
+// It should return "Hello, {name}!" where {name} is the input parameter
+func Greet(name string) string {
+	// YOUR CODE HERE
+	return ""
+}
+
+// TODO: Implement Add function
+// It should return the sum of two integers
+func Add(a, b int) int {
+	// YOUR CODE HERE
+	return 0
+}
+
+func main() {
+	fmt.Println(Greet("World"))
+	fmt.Println("2 + 3 =", Add(2, 3))
+}
+`
+
+var challengeDay01TestTmpl = `package main
+
+import "testing"
+
+func TestGreet(t *testing.T) {
+	tests := []struct {
+		name string
+		want string
+	}{
+		{"World", "Hello, World!"},
+		{"Go", "Hello, Go!"},
+		{"", "Hello, !"},
+	}
+	for _, tt := range tests {
+		if got := Greet(tt.name); got != tt.want {
+			t.Errorf("Greet(%q) = %q, want %q", tt.name, got, tt.want)
+		}
+	}
+}
+
+func TestAdd(t *testing.T) {
+	tests := []struct {
+		a, b, want int
+	}{
+		{2, 3, 5},
+		{0, 0, 0},
+		{-1, 1, 0},
+	}
+	for _, tt := range tests {
+		if got := Add(tt.a, tt.b); got != tt.want {
+			t.Errorf("Add(%d, %d) = %d, want %d", tt.a, tt.b, got, tt.want)
+		}
+	}
+}
+`
+
+var challengeDay02Tmpl = `package main
+
+import "fmt"
+
+// TODO: Implement Swap function
+// It should swap two integers and return them in reversed order
+func Swap(a, b int) (int, int) {
+	// YOUR CODE HERE
+	return 0, 0
+}
+
+// TODO: Implement IsEven function
+// It should return true if the number is even
+func IsEven(n int) bool {
+	// YOUR CODE HERE
+	return false
+}
+
+// TODO: Implement Max function
+// It should return the larger of two integers
+func Max(a, b int) int {
+	// YOUR CODE HERE
+	return 0
+}
+
+func main() {
+	a, b := Swap(1, 2)
+	fmt.Printf("Swap(1, 2) = %d, %d\n", a, b)
+	fmt.Printf("IsEven(4) = %v\n", IsEven(4))
+	fmt.Printf("Max(5, 3) = %d\n", Max(5, 3))
+}
+`
+
+var challengeDay02TestTmpl = `package main
+
+import "testing"
+
+func TestSwap(t *testing.T) {
+	a, b := Swap(1, 2)
+	if a != 2 || b != 1 {
+		t.Errorf("Swap(1, 2) = (%d, %d), want (2, 1)", a, b)
+	}
+}
+
+func TestIsEven(t *testing.T) {
+	tests := []struct {
+		n    int
+		want bool
+	}{
+		{0, true},
+		{1, false},
+		{2, true},
+		{-2, true},
+	}
+	for _, tt := range tests {
+		if got := IsEven(tt.n); got != tt.want {
+			t.Errorf("IsEven(%d) = %v, want %v", tt.n, got, tt.want)
+		}
+	}
+}
+
+func TestMax(t *testing.T) {
+	tests := []struct {
+		a, b, want int
+	}{
+		{5, 3, 5},
+		{1, 10, 10},
+		{7, 7, 7},
+	}
+	for _, tt := range tests {
+		if got := Max(tt.a, tt.b); got != tt.want {
+			t.Errorf("Max(%d, %d) = %d, want %d", tt.a, tt.b, got, tt.want)
+		}
+	}
+}
+`
+
+var challengeDay08Tmpl = `package main
+
+import "fmt"
+
+// TODO: Implement Factorial function using recursion
+// factorial(0) = 1, factorial(n) = n * factorial(n-1)
+func Factorial(n int) int {
+	// YOUR CODE HERE
+	return 0
+}
+
+// TODO: Implement Fibonacci function using recursion
+// fib(0) = 0, fib(1) = 1, fib(n) = fib(n-1) + fib(n-2)
+func Fibonacci(n int) int {
+	// YOUR CODE HERE
+	return 0
+}
+
+func main() {
+	fmt.Printf("Factorial(5) = %d\n", Factorial(5))
+	fmt.Printf("Fibonacci(10) = %d\n", Fibonacci(10))
+}
+`
+
+var challengeDay08TestTmpl = `package main
+
+import "testing"
+
+func TestFactorial(t *testing.T) {
+	tests := []struct {
+		n, want int
+	}{
+		{0, 1},
+		{1, 1},
+		{5, 120},
+		{10, 3628800},
+	}
+	for _, tt := range tests {
+		if got := Factorial(tt.n); got != tt.want {
+			t.Errorf("Factorial(%d) = %d, want %d", tt.n, got, tt.want)
+		}
+	}
+}
+
+func TestFibonacci(t *testing.T) {
+	tests := []struct {
+		n, want int
+	}{
+		{0, 0},
+		{1, 1},
+		{2, 1},
+		{10, 55},
+	}
+	for _, tt := range tests {
+		if got := Fibonacci(tt.n); got != tt.want {
+			t.Errorf("Fibonacci(%d) = %d, want %d", tt.n, got, tt.want)
+		}
+	}
+}
+`
+
+var challengeDay15Tmpl = `package main
+
+import (
+	"encoding/json"
+	"fmt"
+	"net/http"
+)
+
+// TODO: Implement HealthHandler
+// It should return JSON: {"status": "ok"}
+func HealthHandler(w http.ResponseWriter, r *http.Request) {
+	// YOUR CODE HERE
+}
+
+// TODO: Implement EchoHandler
+// It should return JSON with the "message" query parameter
+// e.g., /echo?message=hello returns {"echo": "hello"}
+func EchoHandler(w http.ResponseWriter, r *http.Request) {
+	// YOUR CODE HERE
+}
+
+func main() {
+	http.HandleFunc("/health", HealthHandler)
+	http.HandleFunc("/echo", EchoHandler)
+	fmt.Println("Server running on :8080")
+	http.ListenAndServe(":8080", nil)
+}
+
+// Helper for json encoding
+func respondJSON(w http.ResponseWriter, data interface{}) {
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(data)
+}
+`
+
+var challengeDay15TestTmpl = `package main
+
+import (
+	"encoding/json"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+)
+
+func TestHealthHandler(t *testing.T) {
+	req := httptest.NewRequest("GET", "/health", nil)
+	w := httptest.NewRecorder()
+	HealthHandler(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("got status %d, want %d", w.Code, http.StatusOK)
+	}
+
+	var resp map[string]string
+	json.NewDecoder(w.Body).Decode(&resp)
+	if resp["status"] != "ok" {
+		t.Errorf("got status %q, want %q", resp["status"], "ok")
+	}
+}
+
+func TestEchoHandler(t *testing.T) {
+	req := httptest.NewRequest("GET", "/echo?message=hello", nil)
+	w := httptest.NewRecorder()
+	EchoHandler(w, req)
+
+	var resp map[string]string
+	json.NewDecoder(w.Body).Decode(&resp)
+	if resp["echo"] != "hello" {
+		t.Errorf("got echo %q, want %q", resp["echo"], "hello")
+	}
+}
+`
+
+var challengeDay22Tmpl = `package main
+
+import (
+	"fmt"
+	"sync"
+	"time"
+)
+
+// TODO: Implement ConcurrentSum
+// It should calculate sum of array elements using goroutines
+// Divide the array into chunks and sum each chunk concurrently
+func ConcurrentSum(nums []int, workers int) int {
+	// YOUR CODE HERE
+	return 0
+}
+
+// TODO: Implement WorkerPool
+// Create 'n' workers that process jobs from the jobs channel
+// Each worker should square the number and send to results channel
+func WorkerPool(jobs <-chan int, results chan<- int, n int) {
+	// YOUR CODE HERE
+}
+
+func main() {
+	nums := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+	sum := ConcurrentSum(nums, 2)
+	fmt.Printf("ConcurrentSum = %d\n", sum)
+
+	// Worker pool example
+	jobs := make(chan int, 5)
+	results := make(chan int, 5)
+	
+	go WorkerPool(jobs, results, 3)
+	
+	for i := 1; i <= 5; i++ {
+		jobs <- i
+	}
+	close(jobs)
+	
+	time.Sleep(100 * time.Millisecond)
+	close(results)
+	
+	for r := range results {
+		fmt.Printf("Result: %d\n", r)
+	}
+}
+
+// Hint: You might need sync.WaitGroup
+var _ = sync.WaitGroup{}
+`
+
+var challengeDay22TestTmpl = `package main
+
+import (
+	"sort"
+	"testing"
+)
+
+func TestConcurrentSum(t *testing.T) {
+	tests := []struct {
+		nums    []int
+		workers int
+		want    int
+	}{
+		{[]int{1, 2, 3, 4, 5}, 2, 15},
+		{[]int{10, 20, 30}, 3, 60},
+		{[]int{}, 1, 0},
+	}
+	for _, tt := range tests {
+		got := ConcurrentSum(tt.nums, tt.workers)
+		if got != tt.want {
+			t.Errorf("ConcurrentSum(%v, %d) = %d, want %d", tt.nums, tt.workers, got, tt.want)
+		}
+	}
+}
+
+func TestWorkerPool(t *testing.T) {
+	jobs := make(chan int, 5)
+	results := make(chan int, 5)
+	
+	go WorkerPool(jobs, results, 3)
+	
+	for i := 1; i <= 5; i++ {
+		jobs <- i
+	}
+	close(jobs)
+	
+	var got []int
+	for i := 0; i < 5; i++ {
+		got = append(got, <-results)
+	}
+	
+	sort.Ints(got)
+	want := []int{1, 4, 9, 16, 25}
+	
+	for i, v := range got {
+		if v != want[i] {
+			t.Errorf("WorkerPool result mismatch at %d: got %d, want %d", i, v, want[i])
+		}
+	}
+}
+`
+
+// Mini-Project Templates
+var miniProjectReadmeTmpl = `# Mini Projects 🛠️
+
+Choose a mini project to build and learn by doing!
+
+## Available Projects
+
+### 1. Todo CLI (todo-cli/)
+A command-line todo list manager. Learn about:
+- File I/O
+- JSON handling
+- CLI argument parsing
+
+### 2. URL Shortener (url-shortener/)
+A simple URL shortening service. Learn about:
+- HTTP servers
+- In-memory storage
+- REST API design
+
+## How to Start
+
+1. Pick a project folder
+2. Read the README.md inside
+3. Look at main.go for the skeleton code
+4. Run tests as you implement: ` + "`go test -v`" + `
+
+Good luck! 🚀
+`
+
+var todoCliReadmeTmpl = `# Todo CLI
+
+Build a command-line todo list manager!
+
+## Features to Implement
+
+1. **Add todo**: ` + "`todo add \"Buy groceries\"`" + `
+2. **List todos**: ` + "`todo list`" + `
+3. **Complete todo**: ` + "`todo done 1`" + `
+4. **Delete todo**: ` + "`todo delete 1`" + `
+
+## Requirements
+
+- Store todos in a JSON file (todos.json)
+- Each todo has: id, text, completed, createdAt
+- Handle edge cases (invalid id, empty list, etc.)
+
+## Example Usage
+
+` + "```" + `
+$ todo add "Learn Go"
+Added: Learn Go (id: 1)
+
+$ todo add "Build CLI"
+Added: Build CLI (id: 2)
+
+$ todo list
+[ ] 1. Learn Go
+[ ] 2. Build CLI
+
+$ todo done 1
+Completed: Learn Go
+
+$ todo list
+[x] 1. Learn Go
+[ ] 2. Build CLI
+` + "```" + `
+
+## Testing
+
+Run ` + "`go test -v`" + ` to check your implementation.
+`
+
+var todoCliMainTmpl = `package main
+
+import (
+	"encoding/json"
+	"fmt"
+	"os"
+	"time"
+)
+
+const dataFile = "todos.json"
+
+type Todo struct {
+	ID        int       ` + "`json:\"id\"`" + `
+	Text      string    ` + "`json:\"text\"`" + `
+	Completed bool      ` + "`json:\"completed\"`" + `
+	CreatedAt time.Time ` + "`json:\"created_at\"`" + `
+}
+
+type TodoList struct {
+	Todos  []Todo ` + "`json:\"todos\"`" + `
+	NextID int    ` + "`json:\"next_id\"`" + `
+}
+
+// TODO: Implement Load function
+// Load todos from the JSON file. Return empty TodoList if file doesn't exist.
+func Load() (*TodoList, error) {
+	// YOUR CODE HERE
+	return &TodoList{NextID: 1}, nil
+}
+
+// TODO: Implement Save function
+// Save the TodoList to the JSON file
+func (tl *TodoList) Save() error {
+	// YOUR CODE HERE
+	return nil
+}
+
+// TODO: Implement Add function
+// Add a new todo item and return its ID
+func (tl *TodoList) Add(text string) int {
+	// YOUR CODE HERE
+	return 0
+}
+
+// TODO: Implement List function
+// Return all todos
+func (tl *TodoList) List() []Todo {
+	// YOUR CODE HERE
+	return nil
+}
+
+// TODO: Implement Complete function
+// Mark a todo as completed by ID. Return error if not found.
+func (tl *TodoList) Complete(id int) error {
+	// YOUR CODE HERE
+	return fmt.Errorf("todo not found: %d", id)
+}
+
+// TODO: Implement Delete function
+// Delete a todo by ID. Return error if not found.
+func (tl *TodoList) Delete(id int) error {
+	// YOUR CODE HERE
+	return fmt.Errorf("todo not found: %d", id)
+}
+
+func main() {
+	if len(os.Args) < 2 {
+		fmt.Println("Usage: todo <command> [args]")
+		fmt.Println("Commands: add, list, done, delete")
+		return
+	}
+
+	tl, err := Load()
+	if err != nil {
+		fmt.Println("Error loading todos:", err)
+		return
+	}
+
+	cmd := os.Args[1]
+	switch cmd {
+	case "add":
+		if len(os.Args) < 3 {
+			fmt.Println("Usage: todo add <text>")
+			return
+		}
+		id := tl.Add(os.Args[2])
+		tl.Save()
+		fmt.Printf("Added: %s (id: %d)\n", os.Args[2], id)
+	case "list":
+		todos := tl.List()
+		if len(todos) == 0 {
+			fmt.Println("No todos!")
+			return
+		}
+		for _, t := range todos {
+			status := "[ ]"
+			if t.Completed {
+				status = "[x]"
+			}
+			fmt.Printf("%s %d. %s\n", status, t.ID, t.Text)
+		}
+	case "done":
+		if len(os.Args) < 3 {
+			fmt.Println("Usage: todo done <id>")
+			return
+		}
+		var id int
+		fmt.Sscanf(os.Args[2], "%d", &id)
+		if err := tl.Complete(id); err != nil {
+			fmt.Println(err)
+			return
+		}
+		tl.Save()
+		fmt.Println("Marked as done!")
+	case "delete":
+		if len(os.Args) < 3 {
+			fmt.Println("Usage: todo delete <id>")
+			return
+		}
+		var id int
+		fmt.Sscanf(os.Args[2], "%d", &id)
+		if err := tl.Delete(id); err != nil {
+			fmt.Println(err)
+			return
+		}
+		tl.Save()
+		fmt.Println("Deleted!")
+	default:
+		fmt.Println("Unknown command:", cmd)
+	}
+}
+
+// Helper (you can use this)
+var _ = json.Marshal
+`
+
+var todoCliTestTmpl = `package main
+
+import (
+	"os"
+	"testing"
+)
+
+func TestTodoList(t *testing.T) {
+	// Clean up test file
+	os.Remove(dataFile)
+	defer os.Remove(dataFile)
+
+	tl := &TodoList{NextID: 1}
+
+	// Test Add
+	id1 := tl.Add("First todo")
+	if id1 != 1 {
+		t.Errorf("Add returned id %d, want 1", id1)
+	}
+
+	id2 := tl.Add("Second todo")
+	if id2 != 2 {
+		t.Errorf("Add returned id %d, want 2", id2)
+	}
+
+	// Test List
+	todos := tl.List()
+	if len(todos) != 2 {
+		t.Errorf("List returned %d todos, want 2", len(todos))
+	}
+
+	// Test Complete
+	err := tl.Complete(1)
+	if err != nil {
+		t.Errorf("Complete(1) returned error: %v", err)
+	}
+
+	todos = tl.List()
+	if !todos[0].Completed {
+		t.Error("Todo 1 should be completed")
+	}
+
+	// Test Complete non-existent
+	err = tl.Complete(999)
+	if err == nil {
+		t.Error("Complete(999) should return error")
+	}
+
+	// Test Delete
+	err = tl.Delete(1)
+	if err != nil {
+		t.Errorf("Delete(1) returned error: %v", err)
+	}
+
+	todos = tl.List()
+	if len(todos) != 1 {
+		t.Errorf("List returned %d todos after delete, want 1", len(todos))
+	}
+
+	// Test Save/Load
+	tl.Save()
+	loaded, err := Load()
+	if err != nil {
+		t.Errorf("Load returned error: %v", err)
+	}
+	if len(loaded.List()) != 1 {
+		t.Errorf("Loaded list has %d todos, want 1", len(loaded.List()))
+	}
+}
+`
+
+var urlShortenerReadmeTmpl = `# URL Shortener
+
+Build a simple URL shortening service!
+
+## Features to Implement
+
+1. **Shorten URL**: POST /shorten with {"url": "https://example.com"}
+2. **Redirect**: GET /{code} redirects to original URL
+3. **Stats**: GET /stats/{code} returns visit count
+
+## Requirements
+
+- Generate unique 6-character codes
+- Store URLs in memory (map)
+- Track visit counts
+- Validate URLs
+
+## Example Usage
+
+` + "```" + `
+# Shorten a URL
+curl -X POST localhost:8080/shorten -d '{"url":"https://google.com"}'
+{"code":"abc123","short_url":"http://localhost:8080/abc123"}
+
+# Access shortened URL (redirects)
+curl -L localhost:8080/abc123
+
+# Get stats
+curl localhost:8080/stats/abc123
+{"code":"abc123","url":"https://google.com","visits":1}
+` + "```" + `
+
+## Testing
+
+Run ` + "`go test -v`" + ` to check your implementation.
+`
+
+var urlShortenerMainTmpl = `package main
+
+import (
+	"crypto/rand"
+	"encoding/hex"
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"strings"
+	"sync"
+)
+
+type URLStore struct {
+	mu    sync.RWMutex
+	urls  map[string]string // code -> original URL
+	visits map[string]int   // code -> visit count
+}
+
+func NewURLStore() *URLStore {
+	return &URLStore{
+		urls:   make(map[string]string),
+		visits: make(map[string]int),
+	}
+}
+
+// TODO: Implement GenerateCode function
+// Generate a random 6-character hex code
+func GenerateCode() string {
+	// YOUR CODE HERE (hint: use crypto/rand)
+	return ""
+}
+
+// TODO: Implement Shorten method
+// Store the URL and return the generated code
+func (s *URLStore) Shorten(url string) (string, error) {
+	// YOUR CODE HERE
+	// 1. Validate URL (must start with http:// or https://)
+	// 2. Generate code
+	// 3. Store URL
+	// 4. Return code
+	return "", nil
+}
+
+// TODO: Implement Get method
+// Return the original URL for a code, increment visits
+func (s *URLStore) Get(code string) (string, bool) {
+	// YOUR CODE HERE
+	return "", false
+}
+
+// TODO: Implement Stats method
+// Return URL and visit count for a code
+func (s *URLStore) Stats(code string) (url string, visits int, found bool) {
+	// YOUR CODE HERE
+	return "", 0, false
+}
+
+var store = NewURLStore()
+
+func shortenHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var req struct {
+		URL string ` + "`json:\"url\"`" + `
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		return
+	}
+
+	code, err := store.Shorten(req.URL)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	resp := map[string]string{
+		"code":      code,
+		"short_url": fmt.Sprintf("http://localhost:8080/%s", code),
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(resp)
+}
+
+func redirectHandler(w http.ResponseWriter, r *http.Request) {
+	code := strings.TrimPrefix(r.URL.Path, "/")
+	if code == "" || code == "shorten" || strings.HasPrefix(code, "stats/") {
+		http.NotFound(w, r)
+		return
+	}
+
+	url, found := store.Get(code)
+	if !found {
+		http.NotFound(w, r)
+		return
+	}
+
+	http.Redirect(w, r, url, http.StatusFound)
+}
+
+func statsHandler(w http.ResponseWriter, r *http.Request) {
+	code := strings.TrimPrefix(r.URL.Path, "/stats/")
+	url, visits, found := store.Stats(code)
+	if !found {
+		http.NotFound(w, r)
+		return
+	}
+
+	resp := map[string]interface{}{
+		"code":   code,
+		"url":    url,
+		"visits": visits,
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(resp)
+}
+
+func main() {
+	http.HandleFunc("/shorten", shortenHandler)
+	http.HandleFunc("/stats/", statsHandler)
+	http.HandleFunc("/", redirectHandler)
+
+	fmt.Println("URL Shortener running on :8080")
+	http.ListenAndServe(":8080", nil)
+}
+
+// Helpers you can use
+var _ = rand.Read
+var _ = hex.EncodeToString
+`
+
+var urlShortenerTestTmpl = `package main
+
+import (
+	"testing"
+)
+
+func TestGenerateCode(t *testing.T) {
+	code := GenerateCode()
+	if len(code) != 6 {
+		t.Errorf("GenerateCode() returned %q (len=%d), want len=6", code, len(code))
+	}
+
+	code2 := GenerateCode()
+	if code == code2 {
+		t.Error("GenerateCode() returned same code twice")
+	}
+}
+
+func TestURLStore(t *testing.T) {
+	store := NewURLStore()
+
+	// Test Shorten with valid URL
+	code, err := store.Shorten("https://example.com")
+	if err != nil {
+		t.Errorf("Shorten returned error: %v", err)
+	}
+	if len(code) != 6 {
+		t.Errorf("Shorten returned code %q, want 6 chars", code)
+	}
+
+	// Test Shorten with invalid URL
+	_, err = store.Shorten("not-a-url")
+	if err == nil {
+		t.Error("Shorten should reject invalid URLs")
+	}
+
+	// Test Get
+	url, found := store.Get(code)
+	if !found {
+		t.Error("Get should find the shortened URL")
+	}
+	if url != "https://example.com" {
+		t.Errorf("Get returned %q, want %q", url, "https://example.com")
+	}
+
+	// Test Get increments visits
+	store.Get(code)
+	_, visits, _ := store.Stats(code)
+	if visits != 2 {
+		t.Errorf("Stats returned visits=%d, want 2", visits)
+	}
+
+	// Test Get with unknown code
+	_, found = store.Get("unknown")
+	if found {
+		t.Error("Get should not find unknown code")
+	}
+}
+`
+
+// Refactoring Exercise Templates
+var refactoringReadmeTmpl = `# Refactoring Exercises 🔧
+
+Practice improving code quality through refactoring!
+
+## How to Use
+
+1. Look at ` + "`before.go`" + ` in each exercise folder
+2. Identify the code smells
+3. Read ` + "`hints.md`" + ` for guidance
+4. Create ` + "`after.go`" + ` with your refactored version
+5. Make sure the functionality stays the same!
+
+## Exercises
+
+### 01 - Long Function
+A function that does too many things. Break it down!
+
+### 02 - Magic Numbers
+Numbers without context. Give them names!
+
+### 03 - Poor Naming
+Variables and functions with unclear names. Make them descriptive!
+
+## Tips
+
+- Make small, incremental changes
+- Run tests after each change
+- Focus on readability
+- Follow Go conventions
+
+Happy refactoring! 🧹
+`
+
+var refactoring01BeforeTmpl = `package main
+
+import "fmt"
+
+// This function does too many things - refactor it!
+func processOrder(items []string, quantities []int, prices []float64, customerName string, isVIP bool) {
+	// Calculate total
+	total := 0.0
+	for i := 0; i < len(items); i++ {
+		total += float64(quantities[i]) * prices[i]
+	}
+
+	// Apply discount
+	if isVIP {
+		total = total * 0.9
+	}
+	if total > 100 {
+		total = total * 0.95
+	}
+
+	// Calculate tax
+	tax := total * 0.1
+	finalTotal := total + tax
+
+	// Print receipt
+	fmt.Println("====== RECEIPT ======")
+	fmt.Printf("Customer: %s\n", customerName)
+	if isVIP {
+		fmt.Println("Status: VIP")
+	}
+	fmt.Println("---------------------")
+	for i := 0; i < len(items); i++ {
+		fmt.Printf("%s x%d @ $%.2f = $%.2f\n", items[i], quantities[i], prices[i], float64(quantities[i])*prices[i])
+	}
+	fmt.Println("---------------------")
+	fmt.Printf("Subtotal: $%.2f\n", total)
+	fmt.Printf("Tax (10%%): $%.2f\n", tax)
+	fmt.Printf("Total: $%.2f\n", finalTotal)
+	fmt.Println("=====================")
+
+	// Save to database (simulated)
+	fmt.Println("[DB] Saving order...")
+	fmt.Printf("[DB] Customer: %s, Total: $%.2f\n", customerName, finalTotal)
+
+	// Send email (simulated)
+	fmt.Println("[EMAIL] Sending confirmation...")
+	fmt.Printf("[EMAIL] To: %s, Subject: Order Confirmation\n", customerName)
+}
+
+func main() {
+	items := []string{"Apple", "Banana", "Orange"}
+	quantities := []int{3, 2, 5}
+	prices := []float64{1.00, 0.50, 0.75}
+	processOrder(items, quantities, prices, "John Doe", true)
+}
+`
+
+var refactoring01HintsTmpl = `# Hints for Exercise 01: Long Function
+
+## Code Smells
+1. ` + "`processOrder`" + ` does 5 different things
+2. Hard to test individual pieces
+3. Hard to reuse parts of the logic
+
+## Suggested Refactoring
+
+### Step 1: Extract Calculation Functions
+` + "```go" + `
+func calculateSubtotal(quantities []int, prices []float64) float64
+func applyDiscounts(total float64, isVIP bool) float64
+func calculateTax(amount float64) float64
+` + "```" + `
+
+### Step 2: Create an Order struct
+` + "```go" + `
+type Order struct {
+    Items      []OrderItem
+    Customer   string
+    IsVIP      bool
+}
+
+type OrderItem struct {
+    Name     string
+    Quantity int
+    Price    float64
+}
+` + "```" + `
+
+### Step 3: Extract Printing, DB, and Email
+` + "```go" + `
+func (o *Order) PrintReceipt()
+func (o *Order) SaveToDatabase()
+func (o *Order) SendConfirmation()
+` + "```" + `
+
+### Step 4: Create Clean Main Function
+` + "```go" + `
+func ProcessOrder(order Order) {
+    subtotal := order.CalculateSubtotal()
+    discounted := applyDiscounts(subtotal, order.IsVIP)
+    tax := calculateTax(discounted)
+    
+    order.PrintReceipt(discounted, tax)
+    order.SaveToDatabase()
+    order.SendConfirmation()
+}
+` + "```" + `
+
+## Benefits After Refactoring
+- Each function has a single responsibility
+- Easy to test individual functions
+- Easy to modify one part without affecting others
+- More readable and maintainable
+`
+
+var refactoring02BeforeTmpl = `package main
+
+import "fmt"
+
+// This code has magic numbers - give them names!
+func calculateShipping(weight float64, distance float64, priority int) float64 {
+	base := weight * 0.5
+
+	if distance > 100 {
+		base *= 1.5
+	} else if distance > 50 {
+		base *= 1.25
+	}
+
+	switch priority {
+	case 1:
+		base *= 3.0
+	case 2:
+		base *= 2.0
+	case 3:
+		base *= 1.5
+	}
+
+	if base < 5.0 {
+		base = 5.0
+	}
+	if base > 500.0 {
+		base = 500.0
+	}
+
+	return base
+}
+
+func calculatePassword(length int) bool {
+	if length < 8 {
+		return false
+	}
+	if length > 128 {
+		return false
+	}
+	return true
+}
+
+func applyDiscount(price float64, code string) float64 {
+	switch code {
+	case "SAVE10":
+		return price * 0.9
+	case "SAVE20":
+		return price * 0.8
+	case "HALF":
+		return price * 0.5
+	default:
+		return price
+	}
+}
+
+func main() {
+	fmt.Printf("Shipping: $%.2f\n", calculateShipping(10, 75, 2))
+	fmt.Printf("Password valid: %v\n", calculatePassword(12))
+	fmt.Printf("After discount: $%.2f\n", applyDiscount(100, "SAVE20"))
+}
+`
+
+var refactoring02HintsTmpl = `# Hints for Exercise 02: Magic Numbers
+
+## Code Smells
+1. Numbers like 0.5, 1.5, 100, 50, 8, 128 have no context
+2. Priority 1, 2, 3 are unclear
+3. Discount codes are hardcoded
+
+## Suggested Refactoring
+
+### Step 1: Define Constants for Shipping
+` + "```go" + `
+const (
+    BaseRatePerKg     = 0.5
+    LongDistanceThreshold  = 100.0
+    MediumDistanceThreshold = 50.0
+    LongDistanceMultiplier  = 1.5
+    MediumDistanceMultiplier = 1.25
+    MinShippingCost = 5.0
+    MaxShippingCost = 500.0
+)
+` + "```" + `
+
+### Step 2: Use Named Constants for Priority
+` + "```go" + `
+const (
+    PriorityExpress  = 1
+    PriorityFast     = 2
+    PriorityStandard = 3
+)
+
+var priorityMultipliers = map[int]float64{
+    PriorityExpress:  3.0,
+    PriorityFast:     2.0,
+    PriorityStandard: 1.5,
+}
+` + "```" + `
+
+### Step 3: Define Password Constraints
+` + "```go" + `
+const (
+    MinPasswordLength = 8
+    MaxPasswordLength = 128
+)
+` + "```" + `
+
+### Step 4: Use a Discounts Map
+` + "```go" + `
+var discounts = map[string]float64{
+    "SAVE10": 0.10,
+    "SAVE20": 0.20,
+    "HALF":   0.50,
+}
+` + "```" + `
+
+## Benefits
+- Self-documenting code
+- Easy to change values in one place
+- Prevents typos with repeated numbers
+- More readable conditions
+`
+
+var refactoring03BeforeTmpl = `package main
+
+import "fmt"
+
+// This code has poor naming - make it descriptive!
+func calc(a []int) int {
+	t := 0
+	for _, v := range a {
+		t += v
+	}
+	return t
+}
+
+func f(s string) string {
+	r := ""
+	for i := len(s) - 1; i >= 0; i-- {
+		r += string(s[i])
+	}
+	return r
+}
+
+func proc(d []map[string]interface{}) []string {
+	res := []string{}
+	for _, item := range d {
+		n, ok := item["n"].(string)
+		if !ok {
+			continue
+		}
+		a, ok := item["a"].(int)
+		if !ok || a < 18 {
+			continue
+		}
+		res = append(res, n)
+	}
+	return res
+}
+
+type U struct {
+	N string
+	E string
+	P string
+}
+
+func (u *U) V() bool {
+	if len(u.N) < 2 {
+		return false
+	}
+	if len(u.E) < 5 {
+		return false
+	}
+	if len(u.P) < 8 {
+		return false
+	}
+	return true
+}
+
+func main() {
+	nums := []int{1, 2, 3, 4, 5}
+	fmt.Println("Result:", calc(nums))
+	fmt.Println("Reversed:", f("hello"))
+
+	data := []map[string]interface{}{
+		{"n": "Alice", "a": 25},
+		{"n": "Bob", "a": 17},
+		{"n": "Charlie", "a": 30},
+	}
+	fmt.Println("Adults:", proc(data))
+
+	user := &U{N: "Al", E: "a@b.co", P: "password123"}
+	fmt.Println("Valid:", user.V())
+}
+`
+
+var refactoring03HintsTmpl = `# Hints for Exercise 03: Poor Naming
+
+## Code Smells
+1. Single-letter variable names (a, t, v, r, s, d, n, etc.)
+2. Abbreviated function names (calc, f, proc, V)
+3. Unclear struct name (U) and fields (N, E, P)
+
+## Suggested Refactoring
+
+### Step 1: Rename calc function
+Before: ` + "`func calc(a []int) int`" + `
+After: ` + "`func SumIntegers(numbers []int) int`" + `
+
+Variables:
+- ` + "`t`" + ` → ` + "`total`" + `
+- ` + "`v`" + ` → ` + "`num`" + ` or ` + "`number`" + `
+
+### Step 2: Rename f function
+Before: ` + "`func f(s string) string`" + `
+After: ` + "`func ReverseString(input string) string`" + `
+
+Variables:
+- ` + "`r`" + ` → ` + "`reversed`" + ` or ` + "`result`" + `
+- ` + "`i`" + ` is okay for loop index
+
+### Step 3: Rename proc function
+Before: ` + "`func proc(d []map[string]interface{}) []string`" + `
+After: ` + "`func GetAdultNames(people []map[string]interface{}) []string`" + `
+
+Variables:
+- ` + "`d`" + ` → ` + "`people`" + `
+- ` + "`n`" + ` → ` + "`name`" + `
+- ` + "`a`" + ` → ` + "`age`" + `
+- ` + "`res`" + ` → ` + "`adultNames`" + `
+
+### Step 4: Rename struct U
+Before: ` + "`type U struct`" + `
+After: ` + "`type User struct`" + `
+
+Fields:
+- ` + "`N`" + ` → ` + "`Name`" + `
+- ` + "`E`" + ` → ` + "`Email`" + `
+- ` + "`P`" + ` → ` + "`Password`" + `
+- ` + "`V()`" + ` → ` + "`IsValid()`" + `
+
+## Naming Guidelines
+1. Use descriptive names that reveal intent
+2. Avoid abbreviations unless universally known
+3. Use verbs for functions (Calculate, Get, Process)
+4. Use nouns for structs (User, Order, Product)
+5. Boolean methods should start with Is/Has/Can
+`
+
+// Code Review Exercise Templates
+var codeReviewReadmeTmpl = `# Code Review Exercises 🐛
+
+Practice finding bugs in code!
+
+## How to Play
+
+1. Each folder has a ` + "`buggy.go`" + ` file with a bug
+2. There's also a ` + "`buggy_test.go`" + ` that FAILS
+3. Find and fix the bug!
+4. Your goal: make all tests pass
+
+## Exercises
+
+### 01 - Off By One
+Classic array indexing bug.
+
+### 02 - Nil Pointer
+Accessing nil references.
+
+### 03 - Race Condition
+Concurrent access issues.
+
+## Tips
+
+- Run tests first: ` + "`go test -v`" + `
+- Read error messages carefully
+- For race conditions: ` + "`go test -race`" + `
+
+Good luck, bug hunter! 🔍
+`
+
+var codeReview01BuggyTmpl = `package main
+
+// BUG: There's an off-by-one error in this function
+// Can you find and fix it?
+
+// GetLastN returns the last n elements of a slice
+func GetLastN(slice []int, n int) []int {
+	if n <= 0 || len(slice) == 0 {
+		return []int{}
+	}
+	if n >= len(slice) {
+		return slice
+	}
+	// Bug is somewhere here...
+	start := len(slice) - n - 1
+	return slice[start:]
+}
+
+// BUG: There's another off-by-one error here
+// FindIndex returns the index of target, or -1 if not found
+func FindIndex(slice []int, target int) int {
+	for i := 1; i <= len(slice); i++ {
+		if slice[i] == target {
+			return i
+		}
+	}
+	return -1
+}
+`
+
+var codeReview01TestTmpl = `package main
+
+import (
+	"reflect"
+	"testing"
+)
+
+func TestGetLastN(t *testing.T) {
+	tests := []struct {
+		slice []int
+		n     int
+		want  []int
+	}{
+		{[]int{1, 2, 3, 4, 5}, 3, []int{3, 4, 5}},
+		{[]int{1, 2, 3}, 5, []int{1, 2, 3}},
+		{[]int{1, 2, 3}, 0, []int{}},
+		{[]int{}, 3, []int{}},
+		{[]int{1, 2, 3, 4, 5}, 1, []int{5}},
+	}
+
+	for _, tt := range tests {
+		got := GetLastN(tt.slice, tt.n)
+		if !reflect.DeepEqual(got, tt.want) {
+			t.Errorf("GetLastN(%v, %d) = %v, want %v", tt.slice, tt.n, got, tt.want)
+		}
+	}
+}
+
+func TestFindIndex(t *testing.T) {
+	slice := []int{10, 20, 30, 40, 50}
+
+	tests := []struct {
+		target int
+		want   int
+	}{
+		{10, 0},
+		{30, 2},
+		{50, 4},
+		{99, -1},
+	}
+
+	for _, tt := range tests {
+		got := FindIndex(slice, tt.target)
+		if got != tt.want {
+			t.Errorf("FindIndex(slice, %d) = %d, want %d", tt.target, got, tt.want)
+		}
+	}
+}
+`
+
+var codeReview02BuggyTmpl = `package main
+
+import "fmt"
+
+// BUG: This code has nil pointer issues
+// Can you find and fix them?
+
+type Person struct {
+	Name    string
+	Address *Address
+}
+
+type Address struct {
+	Street string
+	City   string
+}
+
+// GetCity returns the city of a person
+func GetCity(p *Person) string {
+	// Bug: what if p is nil? what if p.Address is nil?
+	return p.Address.City
+}
+
+// FormatAddress returns formatted address
+func FormatAddress(p *Person) string {
+	return fmt.Sprintf("%s, %s", p.Address.Street, p.Address.City)
+}
+
+type Config struct {
+	Database *DatabaseConfig
+}
+
+type DatabaseConfig struct {
+	Host string
+	Port int
+}
+
+// GetDatabaseHost returns the database host from config
+func GetDatabaseHost(cfg *Config) string {
+	// Bug: nil checks missing
+	return cfg.Database.Host
+}
+`
+
+var codeReview02TestTmpl = `package main
+
+import "testing"
+
+func TestGetCity(t *testing.T) {
+	// Test with valid person
+	p := &Person{
+		Name:    "Alice",
+		Address: &Address{City: "NYC", Street: "123 Main St"},
+	}
+	if got := GetCity(p); got != "NYC" {
+		t.Errorf("GetCity(valid) = %q, want %q", got, "NYC")
+	}
+
+	// Test with nil person - should not panic
+	defer func() {
+		if r := recover(); r != nil {
+			t.Error("GetCity(nil) panicked, should return empty string")
+		}
+	}()
+	if got := GetCity(nil); got != "" {
+		t.Errorf("GetCity(nil) = %q, want empty", got)
+	}
+
+	// Test with nil address - should not panic
+	p2 := &Person{Name: "Bob", Address: nil}
+	if got := GetCity(p2); got != "" {
+		t.Errorf("GetCity(nil address) = %q, want empty", got)
+	}
+}
+
+func TestFormatAddress(t *testing.T) {
+	p := &Person{
+		Name:    "Alice",
+		Address: &Address{Street: "123 Main St", City: "NYC"},
+	}
+	want := "123 Main St, NYC"
+	if got := FormatAddress(p); got != want {
+		t.Errorf("FormatAddress(valid) = %q, want %q", got, want)
+	}
+
+	// Should handle nil gracefully
+	defer func() {
+		if r := recover(); r != nil {
+			t.Error("FormatAddress(nil) panicked")
+		}
+	}()
+	FormatAddress(nil)
+	FormatAddress(&Person{Name: "Bob"})
+}
+
+func TestGetDatabaseHost(t *testing.T) {
+	cfg := &Config{
+		Database: &DatabaseConfig{Host: "localhost", Port: 5432},
+	}
+	if got := GetDatabaseHost(cfg); got != "localhost" {
+		t.Errorf("GetDatabaseHost(valid) = %q, want %q", got, "localhost")
+	}
+
+	// Should handle nil gracefully
+	defer func() {
+		if r := recover(); r != nil {
+			t.Error("GetDatabaseHost panicked with nil")
+		}
+	}()
+	GetDatabaseHost(nil)
+	GetDatabaseHost(&Config{})
+}
+`
+
+var codeReview03BuggyTmpl = `package main
+
+import (
+	"sync"
+)
+
+// BUG: This code has race conditions
+// Run with: go test -race
+// Can you find and fix them?
+
+type Counter struct {
+	value int
+}
+
+// Increment adds 1 to the counter
+// BUG: Not safe for concurrent access
+func (c *Counter) Increment() {
+	c.value++
+}
+
+// Value returns the current counter value
+func (c *Counter) Value() int {
+	return c.value
+}
+
+// BUG: This map has race conditions
+var cache = make(map[string]string)
+
+func GetFromCache(key string) (string, bool) {
+	val, ok := cache[key]
+	return val, ok
+}
+
+func SetCache(key, value string) {
+	cache[key] = value
+}
+
+// BUG: This slice append has race conditions
+type Logger struct {
+	logs []string
+}
+
+func (l *Logger) Log(msg string) {
+	l.logs = append(l.logs, msg)
+}
+
+func (l *Logger) GetLogs() []string {
+	return l.logs
+}
+
+// Hint: You'll need sync.Mutex or sync.RWMutex
+var _ = sync.Mutex{}
+`
+
+var codeReview03TestTmpl = `package main
+
+import (
+	"sync"
+	"testing"
+)
+
+func TestCounterConcurrent(t *testing.T) {
+	c := &Counter{}
+	var wg sync.WaitGroup
+	
+	// 100 goroutines each incrementing 100 times
+	for i := 0; i < 100; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for j := 0; j < 100; j++ {
+				c.Increment()
+			}
+		}()
+	}
+	
+	wg.Wait()
+	
+	if c.Value() != 10000 {
+		t.Errorf("Counter = %d, want 10000", c.Value())
+	}
+}
+
+func TestCacheConcurrent(t *testing.T) {
+	var wg sync.WaitGroup
+	
+	// Concurrent writes
+	for i := 0; i < 100; i++ {
+		wg.Add(1)
+		go func(n int) {
+			defer wg.Done()
+			key := string(rune('a' + n%26))
+			SetCache(key, "value")
+			GetFromCache(key)
+		}(i)
+	}
+	
+	wg.Wait()
+	// If we get here without panic, the test passes
+}
+
+func TestLoggerConcurrent(t *testing.T) {
+	l := &Logger{}
+	var wg sync.WaitGroup
+	
+	// 100 goroutines each logging 10 times
+	for i := 0; i < 100; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for j := 0; j < 10; j++ {
+				l.Log("message")
+			}
+		}()
+	}
+	
+	wg.Wait()
+	
+	if len(l.GetLogs()) != 1000 {
+		t.Errorf("Logger has %d logs, want 1000", len(l.GetLogs()))
 	}
 }
 `
