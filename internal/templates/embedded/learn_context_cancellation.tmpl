@@ -1,0 +1,30 @@
+package main
+
+import (
+	"context"
+	"fmt"
+	"time"
+)
+
+// TODO: Implement a function that respects context cancellation
+func DoWork(ctx context.Context) error {
+	for i := 0; i < 10; i++ {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+			fmt.Printf("Working... %d\n", i)
+			time.Sleep(100 * time.Millisecond)
+		}
+	}
+	return nil
+}
+
+func main() {
+	ctx, cancel := context.WithCancel(context.Background())
+	go func() {
+		time.Sleep(300 * time.Millisecond)
+		cancel()
+	}()
+	DoWork(ctx)
+}

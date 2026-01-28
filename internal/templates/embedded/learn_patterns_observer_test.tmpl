@@ -1,0 +1,11 @@
+package behavioral
+
+import "testing"
+
+func TestObserver(t *testing.T) {
+	subject := &Subject{}
+	sub := &EmailSubscriber{}
+	subject.Register(sub)
+	subject.Notify("Hello!")
+	if len(sub.Messages) != 1 { t.Error("Observer failed") }
+}

@@ -1,0 +1,21 @@
+package main
+
+import (
+	"log"
+	"net/http"
+
+	"{{.ProjectName}}/pkg/shared"
+)
+
+func main() {
+	cfg := shared.LoadConfig()
+	logger := shared.NewLogger("api")
+	
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		logger.Info("Request received")
+		w.Write([]byte("API Service"))
+	})
+	
+	logger.Info("API starting on " + cfg.APIPort)
+	log.Fatal(http.ListenAndServe(cfg.APIPort, nil))
+}

@@ -1,0 +1,56 @@
+# Hints for Exercise 01: Long Function
+
+## Code Smells
+1. `processOrder` does 5 different things
+2. Hard to test individual pieces
+3. Hard to reuse parts of the logic
+
+## Suggested Refactoring
+
+### Step 1: Extract Calculation Functions
+```go" + `
+func calculateSubtotal(quantities []int, prices []float64) float64
+func applyDiscounts(total float64, isVIP bool) float64
+func calculateTax(amount float64) float64
+```
+
+### Step 2: Create an Order struct
+```go" + `
+type Order struct {
+    Items      []OrderItem
+    Customer   string
+    IsVIP      bool
+}
+
+type OrderItem struct {
+    Name     string
+    Quantity int
+    Price    float64
+}
+```
+
+### Step 3: Extract Printing, DB, and Email
+```go" + `
+func (o *Order) PrintReceipt()
+func (o *Order) SaveToDatabase()
+func (o *Order) SendConfirmation()
+```
+
+### Step 4: Create Clean Main Function
+```go" + `
+func ProcessOrder(order Order) {
+    subtotal := order.CalculateSubtotal()
+    discounted := applyDiscounts(subtotal, order.IsVIP)
+    tax := calculateTax(discounted)
+    
+    order.PrintReceipt(discounted, tax)
+    order.SaveToDatabase()
+    order.SendConfirmation()
+}
+```
+
+## Benefits After Refactoring
+- Each function has a single responsibility
+- Easy to test individual functions
+- Easy to modify one part without affecting others
+- More readable and maintainable

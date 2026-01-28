@@ -1,0 +1,23 @@
+package main
+
+import (
+	"log"
+	"net/http"
+
+	"{{.ProjectName}}-backend/internal/handler"
+	"{{.ProjectName}}-backend/internal/middleware"
+)
+
+func main() {
+	h := handler.New()
+
+	mux := http.NewServeMux()
+	mux.HandleFunc("/api/health", h.Health)
+	mux.HandleFunc("/api/message", h.GetMessage)
+
+	// Wrap with CORS middleware
+	corsHandler := middleware.CORS(mux)
+
+	log.Println("🚀 Backend server running on http://localhost:8080")
+	log.Fatal(http.ListenAndServe(":8080", corsHandler))
+}

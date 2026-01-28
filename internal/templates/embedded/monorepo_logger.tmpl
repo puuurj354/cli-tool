@@ -1,0 +1,26 @@
+package shared
+
+import (
+	"log"
+	"os"
+)
+
+type Logger struct {
+	service string
+	logger  *log.Logger
+}
+
+func NewLogger(service string) *Logger {
+	return &Logger{
+		service: service,
+		logger:  log.New(os.Stdout, "", log.LstdFlags),
+	}
+}
+
+func (l *Logger) Info(msg string) {
+	l.logger.Printf("[%s] INFO: %s", l.service, msg)
+}
+
+func (l *Logger) Error(msg string) {
+	l.logger.Printf("[%s] ERROR: %s", l.service, msg)
+}

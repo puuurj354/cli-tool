@@ -1,0 +1,20 @@
+package scheduler
+
+import (
+	"github.com/robfig/cron/v3"
+)
+
+type Scheduler struct {
+	cron *cron.Cron
+}
+
+func New() *Scheduler {
+	return &Scheduler{cron: cron.New()}
+}
+
+func (s *Scheduler) Schedule(spec string, job func()) {
+	s.cron.AddFunc(spec, job)
+}
+
+func (s *Scheduler) Start() { s.cron.Start() }
+func (s *Scheduler) Stop()  { s.cron.Stop() }

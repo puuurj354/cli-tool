@@ -1,0 +1,13 @@
+package main
+
+import (
+	"context"
+	"testing"
+)
+
+func TestContextValues(t *testing.T) {
+	ctx := WithUserID(context.Background(), "user123")
+	if id, ok := GetUserID(ctx); !ok || id != "user123" { t.Error("Value failed") }
+	
+	if _, ok := GetUserID(context.Background()); ok { t.Error("Should not find value") }
+}

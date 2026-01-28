@@ -1,0 +1,15 @@
+package main
+
+import (
+	"log"
+	"{{.ProjectName}}/internal/cache"
+)
+
+func main() {
+	client := cache.NewRedisClient("localhost:6379")
+	defer client.Close()
+	
+	client.Set("key", "value", 0)
+	val, _ := client.Get("key")
+	log.Printf("Got: %s\n", val)
+}

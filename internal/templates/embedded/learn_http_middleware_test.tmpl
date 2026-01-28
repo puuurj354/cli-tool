@@ -1,0 +1,17 @@
+package main
+
+import (
+	"net/http"
+	"net/http/httptest"
+	"testing"
+)
+
+func TestLoggingMiddleware(t *testing.T) {
+	handler := LoggingMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(200)
+	}))
+	req := httptest.NewRequest("GET", "/test", nil)
+	w := httptest.NewRecorder()
+	handler.ServeHTTP(w, req)
+	if w.Code != 200 { t.Error("Middleware failed") }
+}

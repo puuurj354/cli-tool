@@ -1,0 +1,15 @@
+package main
+
+import "testing"
+
+func TestSum(t *testing.T) {
+	if Sum([]int{1, 2, 3}) != 6 { t.Error("Sum ints failed") }
+	if Sum([]float64{1.5, 2.5}) != 4.0 { t.Error("Sum floats failed") }
+}
+
+func TestStack(t *testing.T) {
+	s := &Stack[string]{}
+	s.Push("hello")
+	s.Push("world")
+	if v, ok := s.Pop(); !ok || v != "world" { t.Error("Pop failed") }
+}

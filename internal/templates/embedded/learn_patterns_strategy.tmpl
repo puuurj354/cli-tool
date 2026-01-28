@@ -1,0 +1,25 @@
+package behavioral
+
+// Strategy Pattern - swap algorithms at runtime
+
+type PaymentStrategy interface {
+	Pay(amount float64) string
+}
+
+type CreditCard struct{}
+func (c CreditCard) Pay(amount float64) string { return "Paid with credit card" }
+
+type PayPal struct{}
+func (p PayPal) Pay(amount float64) string { return "Paid with PayPal" }
+
+type Checkout struct {
+	strategy PaymentStrategy
+}
+
+func (c *Checkout) SetStrategy(s PaymentStrategy) {
+	c.strategy = s
+}
+
+func (c *Checkout) Process(amount float64) string {
+	return c.strategy.Pay(amount)
+}

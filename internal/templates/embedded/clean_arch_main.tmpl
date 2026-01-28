@@ -1,0 +1,22 @@
+package main
+
+import (
+	"log"
+	"net/http"
+
+	"{{.ProjectName}}/internal/delivery/http"
+	"{{.ProjectName}}/internal/repository"
+	"{{.ProjectName}}/internal/usecase"
+)
+
+func main() {
+	repo := repository.NewUserRepository()
+	uc := usecase.NewUserUsecase(repo)
+	handler := http.NewHandler(uc)
+	
+	mux := http.NewServeMux()
+	mux.HandleFunc("/users", handler.GetUsers)
+	
+	log.Println("Server on :8080")
+	log.Fatal(http.ListenAndServe(":8080", mux))
+}

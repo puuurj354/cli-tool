@@ -1,0 +1,28 @@
+package main
+
+import (
+	"log"
+	"os"
+	"os/signal"
+	"syscall"
+
+	"{{.ProjectName}}/internal/jobs"
+	"{{.ProjectName}}/internal/scheduler"
+)
+
+func main() {
+	s := scheduler.New()
+	
+	s.Schedule("*/5 * * * *", jobs.CleanupJob)
+	s.Schedule("0 * * * *", jobs.ReportJob)
+	
+	s.Start()
+	log.Println("Scheduler started")
+	
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+	
+	s.Stop()
+	log.Println("Scheduler stopped")
+}

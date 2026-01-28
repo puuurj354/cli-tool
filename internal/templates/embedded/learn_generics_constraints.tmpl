@@ -1,0 +1,30 @@
+package main
+
+import "golang.org/x/exp/constraints"
+
+// Number constraint for numeric types
+type Number interface {
+	constraints.Integer | constraints.Float
+}
+
+// TODO: Implement Sum using Number constraint
+func Sum[T Number](nums []T) T {
+	// YOUR CODE HERE
+	var zero T
+	return zero
+}
+
+// TODO: Implement a generic Stack with any type
+type Stack[T any] struct {
+	items []T
+}
+
+func (s *Stack[T]) Push(item T) {
+	// YOUR CODE HERE
+}
+
+func (s *Stack[T]) Pop() (T, bool) {
+	// YOUR CODE HERE
+	var zero T
+	return zero, false
+}

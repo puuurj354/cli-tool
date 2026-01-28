@@ -1,0 +1,24 @@
+package main
+
+import (
+	"log"
+	"net/http"
+	"time"
+)
+
+// TODO: Implement logging middleware
+func LoggingMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+		next.ServeHTTP(w, r)
+		log.Printf("%s %s %v", r.Method, r.URL.Path, time.Since(start))
+	})
+}
+
+// TODO: Implement auth middleware
+func AuthMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// YOUR CODE HERE - check Authorization header
+		next.ServeHTTP(w, r)
+	})
+}

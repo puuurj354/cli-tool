@@ -1,0 +1,20 @@
+package main
+
+import (
+	"log"
+	"time"
+
+	"{{.ProjectName}}/pkg/shared"
+)
+
+func main() {
+	cfg := shared.LoadConfig()
+	logger := shared.NewLogger("worker")
+	
+	logger.Info("Worker starting...")
+	
+	for {
+		logger.Info("Processing job...")
+		time.Sleep(time.Duration(cfg.WorkerInterval) * time.Second)
+	}
+}

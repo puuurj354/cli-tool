@@ -1,0 +1,13 @@
+.PHONY: build deploy test
+
+build:
+	GOOS=linux GOARCH=amd64 go build -o bootstrap ./cmd/lambda
+
+deploy: build
+	sam deploy --guided
+
+test:
+	go test -v ./...
+
+local:
+	sam local start-api

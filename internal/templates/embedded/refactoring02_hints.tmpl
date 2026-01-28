@@ -1,0 +1,59 @@
+# Hints for Exercise 02: Magic Numbers
+
+## Code Smells
+1. Numbers like 0.5, 1.5, 100, 50, 8, 128 have no context
+2. Priority 1, 2, 3 are unclear
+3. Discount codes are hardcoded
+
+## Suggested Refactoring
+
+### Step 1: Define Constants for Shipping
+```go" + `
+const (
+    BaseRatePerKg     = 0.5
+    LongDistanceThreshold  = 100.0
+    MediumDistanceThreshold = 50.0
+    LongDistanceMultiplier  = 1.5
+    MediumDistanceMultiplier = 1.25
+    MinShippingCost = 5.0
+    MaxShippingCost = 500.0
+)
+```
+
+### Step 2: Use Named Constants for Priority
+```go" + `
+const (
+    PriorityExpress  = 1
+    PriorityFast     = 2
+    PriorityStandard = 3
+)
+
+var priorityMultipliers = map[int]float64{
+    PriorityExpress:  3.0,
+    PriorityFast:     2.0,
+    PriorityStandard: 1.5,
+}
+```
+
+### Step 3: Define Password Constraints
+```go" + `
+const (
+    MinPasswordLength = 8
+    MaxPasswordLength = 128
+)
+```
+
+### Step 4: Use a Discounts Map
+```go" + `
+var discounts = map[string]float64{
+    "SAVE10": 0.10,
+    "SAVE20": 0.20,
+    "HALF":   0.50,
+}
+```
+
+## Benefits
+- Self-documenting code
+- Easy to change values in one place
+- Prevents typos with repeated numbers
+- More readable conditions

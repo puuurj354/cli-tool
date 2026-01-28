@@ -1,0 +1,12 @@
+package main
+
+import "testing"
+
+func TestValidateAge(t *testing.T) {
+	err := ValidateAge(-1)
+	if ve, ok := err.(*ValidationError); !ok || ve.Field != "age" {
+		t.Error("Should be ValidationError")
+	}
+	
+	if err := ValidateAge(25); err != nil { t.Error("Should pass") }
+}

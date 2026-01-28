@@ -1,0 +1,15 @@
+package main
+
+import (
+	"context"
+	"testing"
+	"time"
+)
+
+func TestFetchWithTimeout(t *testing.T) {
+	_, err := FetchWithTimeout(context.Background(), 100*time.Millisecond)
+	if err != context.DeadlineExceeded { t.Error("Should timeout") }
+	
+	data, err := FetchWithTimeout(context.Background(), 1*time.Second)
+	if err != nil || data != "data" { t.Error("Should succeed") }
+}

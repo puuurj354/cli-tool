@@ -1,0 +1,17 @@
+package main
+
+import (
+	"context"
+	"testing"
+	"time"
+)
+
+func TestDoWork_Cancellation(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	go func() {
+		time.Sleep(50 * time.Millisecond)
+		cancel()
+	}()
+	err := DoWork(ctx)
+	if err != context.Canceled { t.Error("Should return context.Canceled") }
+}

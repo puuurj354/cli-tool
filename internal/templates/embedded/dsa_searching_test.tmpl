@@ -1,0 +1,38 @@
+package searching
+
+import "testing"
+
+func TestLinearSearch(t *testing.T) {
+	arr := []int{1, 5, 3, 9, 2}
+	
+	if got := LinearSearch(arr, 9); got != 3 {
+		t.Errorf("LinearSearch(arr, 9) = %d; want 3", got)
+	}
+	if got := LinearSearch(arr, 99); got != -1 {
+		t.Errorf("LinearSearch(arr, 99) = %d; want -1", got)
+	}
+}
+
+func TestBinarySearch(t *testing.T) {
+	arr := []int{1, 2, 3, 5, 9} // sorted
+	
+	if got := BinarySearch(arr, 5); got != 3 {
+		t.Errorf("BinarySearch(arr, 5) = %d; want 3", got)
+	}
+	if got := BinarySearch(arr, 1); got != 0 {
+		t.Errorf("BinarySearch(arr, 1) = %d; want 0", got)
+	}
+	if got := BinarySearch(arr, 99); got != -1 {
+		t.Errorf("BinarySearch(arr, 99) = %d; want -1", got)
+	}
+}
+
+func TestTwoSum(t *testing.T) {
+	arr := []int{2, 7, 11, 15}
+	
+	got := TwoSum(arr, 9)
+	// 2 + 7 = 9, indices 0 and 1
+	if got != [2]int{0, 1} && got != [2]int{1, 0} {
+		t.Errorf("TwoSum(arr, 9) = %v; want [0, 1]", got)
+	}
+}

@@ -1,0 +1,21 @@
+package handler
+
+import (
+	"context"
+	"fmt"
+)
+
+type Request struct {
+	Name string `json:\"name\`
+}
+
+type Response struct {
+	Message string `json:\"message\`
+}
+
+func HandleRequest(ctx context.Context, req Request) (Response, error) {
+	if req.Name == "" {
+		req.Name = "World"
+	}
+	return Response{Message: fmt.Sprintf("Hello, %s!", req.Name)}, nil
+}

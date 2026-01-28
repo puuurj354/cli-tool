@@ -1,0 +1,48 @@
+# {{.ProjectName}}
+
+Fullstack application with Go backend and React frontend.
+
+## Tech Stack
+
+**Backend:**
+- Go 1.21+
+- Net/HTTP (standard library)
+
+**Frontend:**
+- React 18 + TypeScript
+- Vite (dev server & build)
+- Tailwind CSS
+- Bun (package manager)
+
+## Getting Started
+
+### Prerequisites
+- Go 1.21+
+- Bun (https://bun.sh)
+
+### Installation
+
+```bash" + `
+# Install frontend dependencies
+cd frontend
+bun install
+```
+
+### Running
+
+```bash" + `
+# Terminal 1: Start backend
+make backend
+
+# Terminal 2: Start frontend
+make frontend
+```
+
+Or use the Makefile:
+```bash" + `
+make dev  # Runs both in parallel
+```
+
+### URLs
+- Frontend: http://localhost:5173
+- Backend API: http://localhost:8080

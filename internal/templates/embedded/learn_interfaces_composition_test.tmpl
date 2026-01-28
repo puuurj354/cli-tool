@@ -1,0 +1,12 @@
+package main
+
+import "testing"
+
+func TestBuffer(t *testing.T) {
+	var rw ReadWriter = &Buffer{}
+	rw.Write([]byte("hello"))
+	
+	p := make([]byte, 5)
+	n, _ := rw.Read(p)
+	if n != 5 || string(p) != "hello" { t.Error("Buffer failed") }
+}

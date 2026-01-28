@@ -1,0 +1,132 @@
+package main
+
+import (
+	"crypto/rand"
+	"encoding/hex"
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"strings"
+	"sync"
+)
+
+type URLStore struct {
+	mu    sync.RWMutex
+	urls  map[string]string // code -> original URL
+	visits map[string]int   // code -> visit count
+}
+
+func NewURLStore() *URLStore {
+	return &URLStore{
+		urls:   make(map[string]string),
+		visits: make(map[string]int),
+	}
+}
+
+// TODO: Implement GenerateCode function
+// Generate a random 6-character hex code
+func GenerateCode() string {
+	// YOUR CODE HERE (hint: use crypto/rand)
+	return ""
+}
+
+// TODO: Implement Shorten method
+// Store the URL and return the generated code
+func (s *URLStore) Shorten(url string) (string, error) {
+	// YOUR CODE HERE
+	// 1. Validate URL (must start with http:// or https://)
+	// 2. Generate code
+	// 3. Store URL
+	// 4. Return code
+	return "", nil
+}
+
+// TODO: Implement Get method
+// Return the original URL for a code, increment visits
+func (s *URLStore) Get(code string) (string, bool) {
+	// YOUR CODE HERE
+	return "", false
+}
+
+// TODO: Implement Stats method
+// Return URL and visit count for a code
+func (s *URLStore) Stats(code string) (url string, visits int, found bool) {
+	// YOUR CODE HERE
+	return "", 0, false
+}
+
+var store = NewURLStore()
+
+func shortenHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var req struct {
+		URL string `json:\"url\`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		return
+	}
+
+	code, err := store.Shorten(req.URL)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	resp := map[string]string{
+		"code":      code,
+		"short_url": fmt.Sprintf("http://localhost:8080/%s", code),
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(resp)
+}
+
+func redirectHandler(w http.ResponseWriter, r *http.Request) {
+	code := strings.TrimPrefix(r.URL.Path, "/")
+	if code == "" || code == "shorten" || strings.HasPrefix(code, "stats/") {
+		http.NotFound(w, r)
+		return
+	}
+
+	url, found := store.Get(code)
+	if !found {
+		http.NotFound(w, r)
+		return
+	}
+
+	http.Redirect(w, r, url, http.StatusFound)
+}
+
+func statsHandler(w http.ResponseWriter, r *http.Request) {
+	code := strings.TrimPrefix(r.URL.Path, "/stats/")
+	url, visits, found := store.Stats(code)
+	if !found {
+		http.NotFound(w, r)
+		return
+	}
+
+	resp := map[string]interface{}{
+		"code":   code,
+		"url":    url,
+		"visits": visits,
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(resp)
+}
+
+func main() {
+	http.HandleFunc("/shorten", shortenHandler)
+	http.HandleFunc("/stats/", statsHandler)
+	http.HandleFunc("/", redirectHandler)
+
+	fmt.Println("URL Shortener running on :8080")
+	http.ListenAndServe(":8080", nil)
+}
+
+// Helpers you can use
+var _ = rand.Read
+var _ = hex.EncodeToString

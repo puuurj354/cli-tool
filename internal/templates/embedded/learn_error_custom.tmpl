@@ -1,0 +1,24 @@
+package main
+
+import "fmt"
+
+// TODO: Implement custom error type
+type ValidationError struct {
+	Field   string
+	Message string
+}
+
+func (e *ValidationError) Error() string {
+	return fmt.Sprintf("%s: %s", e.Field, e.Message)
+}
+
+// TODO: Create error with type assertion
+func ValidateAge(age int) error {
+	if age < 0 {
+		return &ValidationError{Field: "age", Message: "must be positive"}
+	}
+	if age > 150 {
+		return &ValidationError{Field: "age", Message: "too large"}
+	}
+	return nil
+}

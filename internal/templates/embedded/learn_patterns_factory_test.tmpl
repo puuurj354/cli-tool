@@ -1,0 +1,11 @@
+package creational
+
+import "testing"
+
+func TestFactory(t *testing.T) {
+	dog := NewAnimal("dog")
+	if dog.Speak() != "Woof!" { t.Error("Dog factory failed") }
+	
+	cat := NewAnimal("cat")
+	if cat.Speak() != "Meow!" { t.Error("Cat factory failed") }
+}

@@ -1,0 +1,11 @@
+package {{.PackageName}}
+
+import "testing"
+
+func TestHello(t *testing.T) {
+	got := Hello()
+	want := "Hello from {{.ProjectName}}!"
+	if got != want {
+		t.Errorf("Hello() = %q, want %q", got, want)
+	}
+}

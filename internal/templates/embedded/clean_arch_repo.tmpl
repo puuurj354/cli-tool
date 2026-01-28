@@ -1,0 +1,27 @@
+package repository
+
+import "{{.ProjectName}}/internal/entity"
+
+type UserRepository struct {
+	users []entity.User
+}
+
+func NewUserRepository() *UserRepository {
+	return &UserRepository{
+		users: []entity.User{
+			{ID: 1, Name: "Alice", Email: "alice@example.com"},
+			{ID: 2, Name: "Bob", Email: "bob@example.com"},
+		},
+	}
+}
+
+func (r *UserRepository) FindAll() ([]entity.User, error) {
+	return r.users, nil
+}
+
+func (r *UserRepository) FindByID(id int64) (*entity.User, error) {
+	for _, u := range r.users {
+		if u.ID == id { return &u, nil }
+	}
+	return nil, nil
+}

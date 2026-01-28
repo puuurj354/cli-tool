@@ -1,0 +1,14 @@
+package main
+
+import (
+	"net/http"
+	"net/http/httptest"
+	"testing"
+)
+
+func TestUserHandler(t *testing.T) {
+	req := httptest.NewRequest("GET", "/user/1", nil)
+	w := httptest.NewRecorder()
+	UserHandler(w, req)
+	if w.Code != 200 { t.Errorf("got %d, want 200", w.Code) }
+}

@@ -1,0 +1,11 @@
+package main
+
+import "testing"
+
+func TestSpeaker(t *testing.T) {
+	dog := Dog{Name: "Rex"}
+	cat := Cat{Name: "Whiskers"}
+	
+	if MakeSpeak(dog) != "Rex says Woof!" { t.Error("Dog failed") }
+	if MakeSpeak(cat) != "Whiskers says Meow!" { t.Error("Cat failed") }
+}

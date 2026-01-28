@@ -1,0 +1,15 @@
+package errors
+
+import "errors"
+
+var (
+	ErrNotFound = errors.New("not found")
+	ErrInvalid  = errors.New("invalid input")
+)
+
+type AppError struct {
+	Code    int
+	Message string
+}
+
+func (e *AppError) Error() string { return e.Message }

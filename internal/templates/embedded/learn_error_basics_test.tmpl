@@ -1,0 +1,17 @@
+package main
+
+import (
+	"errors"
+	"testing"
+)
+
+func TestFindUser(t *testing.T) {
+	_, err := FindUser(-1)
+	if !errors.Is(err, ErrInvalid) { t.Error("Should be ErrInvalid") }
+	
+	_, err = FindUser(0)
+	if !errors.Is(err, ErrNotFound) { t.Error("Should be ErrNotFound") }
+	
+	name, err := FindUser(1)
+	if err != nil || name != "User1" { t.Error("Should succeed") }
+}

@@ -1,0 +1,30 @@
+package main
+
+// TODO: Compose interfaces
+type Reader interface {
+	Read(p []byte) (n int, err error)
+}
+
+type Writer interface {
+	Write(p []byte) (n int, err error)
+}
+
+type ReadWriter interface {
+	Reader
+	Writer
+}
+
+// Buffer implements ReadWriter
+type Buffer struct {
+	data []byte
+}
+
+func (b *Buffer) Read(p []byte) (int, error) {
+	n := copy(p, b.data)
+	return n, nil
+}
+
+func (b *Buffer) Write(p []byte) (int, error) {
+	b.data = append(b.data, p...)
+	return len(p), nil
+}

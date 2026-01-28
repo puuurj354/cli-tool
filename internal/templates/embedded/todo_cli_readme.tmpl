@@ -1,0 +1,41 @@
+# Todo CLI
+
+Build a command-line todo list manager!
+
+## Features to Implement
+
+1. **Add todo**: `todo add \"Buy groceries\`
+2. **List todos**: `todo list`
+3. **Complete todo**: `todo done 1`
+4. **Delete todo**: `todo delete 1`
+
+## Requirements
+
+- Store todos in a JSON file (todos.json)
+- Each todo has: id, text, completed, createdAt
+- Handle edge cases (invalid id, empty list, etc.)
+
+## Example Usage
+
+```
+$ todo add "Learn Go"
+Added: Learn Go (id: 1)
+
+$ todo add "Build CLI"
+Added: Build CLI (id: 2)
+
+$ todo list
+[ ] 1. Learn Go
+[ ] 2. Build CLI
+
+$ todo done 1
+Completed: Learn Go
+
+$ todo list
+[x] 1. Learn Go
+[ ] 2. Build CLI
+```
+
+## Testing
+
+Run `go test -v` to check your implementation.

@@ -1,0 +1,29 @@
+package behavioral
+
+// Observer Pattern - notify subscribers of changes
+
+type Observer interface {
+	Update(message string)
+}
+
+type Subject struct {
+	observers []Observer
+}
+
+func (s *Subject) Register(o Observer) {
+	s.observers = append(s.observers, o)
+}
+
+func (s *Subject) Notify(message string) {
+	for _, o := range s.observers {
+		o.Update(message)
+	}
+}
+
+type EmailSubscriber struct {
+	Messages []string
+}
+
+func (e *EmailSubscriber) Update(message string) {
+	e.Messages = append(e.Messages, message)
+}

@@ -1,0 +1,33 @@
+package graph
+
+type Resolver struct {
+	todos []Todo
+}
+
+type Todo struct {
+	ID   string
+	Text string
+	Done bool
+}
+
+func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
+func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
+
+type queryResolver struct{ *Resolver }
+type mutationResolver struct{ *Resolver }
+
+func (r *queryResolver) Todos() ([]Todo, error) { return r.todos, nil }
+func (r *queryResolver) Todo(id string) (*Todo, error) {
+	for _, t := range r.todos {
+		if t.ID == id { return &t, nil }
+	}
+	return nil, nil
+}
+
+func (r *mutationResolver) CreateTodo(input NewTodo) (Todo, error) {
+	todo := Todo{ID: fmt.Sprintf("%d", len(r.todos)+1), Text: input.Text}
+	r.todos = append(r.todos, todo)
+	return todo, nil
+}
+
+type NewTodo struct { Text string }

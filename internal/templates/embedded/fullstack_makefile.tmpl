@@ -1,0 +1,23 @@
+.PHONY: dev backend frontend install
+
+# Run both servers
+dev:
+	@echo "Starting backend and frontend..."
+	@make -j2 backend frontend
+
+# Run Go backend
+backend:
+	cd backend && go run ./cmd/api
+
+# Run React frontend
+frontend:
+	cd frontend && bun run dev
+
+# Install frontend dependencies
+install:
+	cd frontend && bun install
+
+# Build for production
+build:
+	cd backend && go build -o ../dist/api ./cmd/api
+	cd frontend && bun run build

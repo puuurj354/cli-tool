@@ -1,0 +1,9 @@
+package creational
+
+import "testing"
+
+func TestSingleton(t *testing.T) {
+	db1 := GetDatabase()
+	db2 := GetDatabase()
+	if db1 != db2 { t.Error("Should be same instance") }
+}

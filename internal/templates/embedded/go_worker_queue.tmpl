@@ -1,0 +1,32 @@
+package queue
+
+import (
+	"{{.ModuleName}}/internal/job"
+)
+
+type Queue struct {
+	jobs chan job.Job
+}
+
+func New(size int) *Queue {
+	return &Queue{
+		jobs: make(chan job.Job, size),
+	}
+}
+
+func (q *Queue) Enqueue(j job.Job) {
+	q.jobs <- j
+}
+
+func (q *Queue) Dequeue() (job.Job, bool) {
+	select {
+	case j := <-q.jobs:
+		return j, true
+	default:
+		return job.Job{}, false
+	}
+}
+
+func (q *Queue) Close() {
+	close(q.jobs)
+}

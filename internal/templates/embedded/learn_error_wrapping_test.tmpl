@@ -1,0 +1,12 @@
+package main
+
+import (
+	"strings"
+	"testing"
+)
+
+func TestLoadConfig(t *testing.T) {
+	err := LoadConfig("/etc/app.conf")
+	if err == nil { t.Error("Should error") }
+	if !strings.Contains(err.Error(), "loading config") { t.Error("Should wrap") }
+}

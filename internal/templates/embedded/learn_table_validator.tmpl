@@ -1,0 +1,15 @@
+package table
+
+import "regexp"
+
+// IsValidEmail checks if the email format is valid
+func IsValidEmail(email string) bool {
+	pattern := `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
+	re := regexp.MustCompile(pattern)
+	return re.MatchString(email)
+}
+
+// IsValidAge checks if age is within valid range
+func IsValidAge(age int) bool {
+	return age >= 0 && age <= 150
+}

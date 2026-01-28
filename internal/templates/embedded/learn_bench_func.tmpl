@@ -1,0 +1,21 @@
+package benchmark
+
+import "strings"
+
+// ConcatPlus concatenates strings using +
+func ConcatPlus(strs []string) string {
+	result := ""
+	for _, s := range strs {
+		result += s
+	}
+	return result
+}
+
+// ConcatBuilder concatenates strings using strings.Builder
+func ConcatBuilder(strs []string) string {
+	var builder strings.Builder
+	for _, s := range strs {
+		builder.WriteString(s)
+	}
+	return builder.String()
+}

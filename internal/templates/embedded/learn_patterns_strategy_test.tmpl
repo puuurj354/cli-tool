@@ -1,0 +1,13 @@
+package behavioral
+
+import "testing"
+
+func TestStrategy(t *testing.T) {
+	checkout := &Checkout{}
+	
+	checkout.SetStrategy(CreditCard{})
+	if checkout.Process(100) != "Paid with credit card" { t.Error("CC failed") }
+	
+	checkout.SetStrategy(PayPal{})
+	if checkout.Process(100) != "Paid with PayPal" { t.Error("PayPal failed") }
+}

@@ -1,0 +1,51 @@
+# Hints for Exercise 03: Poor Naming
+
+## Code Smells
+1. Single-letter variable names (a, t, v, r, s, d, n, etc.)
+2. Abbreviated function names (calc, f, proc, V)
+3. Unclear struct name (U) and fields (N, E, P)
+
+## Suggested Refactoring
+
+### Step 1: Rename calc function
+Before: `func calc(a []int) int`
+After: `func SumIntegers(numbers []int) int`
+
+Variables:
+- `t` → `total`
+- `v` → `num` or `number`
+
+### Step 2: Rename f function
+Before: `func f(s string) string`
+After: `func ReverseString(input string) string`
+
+Variables:
+- `r` → `reversed` or `result`
+- `i` is okay for loop index
+
+### Step 3: Rename proc function
+Before: `func proc(d []map[string]interface{}) []string`
+After: `func GetAdultNames(people []map[string]interface{}) []string`
+
+Variables:
+- `d` → `people`
+- `n` → `name`
+- `a` → `age`
+- `res` → `adultNames`
+
+### Step 4: Rename struct U
+Before: `type U struct`
+After: `type User struct`
+
+Fields:
+- `N` → `Name`
+- `E` → `Email`
+- `P` → `Password`
+- `V()` → `IsValid()`
+
+## Naming Guidelines
+1. Use descriptive names that reveal intent
+2. Avoid abbreviations unless universally known
+3. Use verbs for functions (Calculate, Get, Process)
+4. Use nouns for structs (User, Order, Product)
+5. Boolean methods should start with Is/Has/Can

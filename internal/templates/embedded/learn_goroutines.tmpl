@@ -1,0 +1,31 @@
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+func main() {
+	// Basic goroutine
+	go sayHello("World")
+
+	// Anonymous goroutine
+	go func() {
+		fmt.Println("Hello from anonymous goroutine!")
+	}()
+
+	// Multiple goroutines
+	for i := 1; i <= 5; i++ {
+		go func(n int) {
+			fmt.Printf("Goroutine %d\n", n)
+		}(i)
+	}
+
+	// Wait for goroutines (simple approach - use sync.WaitGroup in production)
+	time.Sleep(100 * time.Millisecond)
+	fmt.Println("Done!")
+}
+
+func sayHello(name string) {
+	fmt.Printf("Hello, %s!\n", name)
+}

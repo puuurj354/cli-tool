@@ -1,0 +1,14 @@
+.PHONY: api worker build-all
+
+api:
+	go run ./services/api
+
+worker:
+	go run ./services/worker
+
+build-all:
+	go build -o bin/api ./services/api
+	go build -o bin/worker ./services/worker
+
+test:
+	go test -v ./...

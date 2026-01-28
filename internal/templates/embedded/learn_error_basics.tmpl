@@ -1,0 +1,23 @@
+package main
+
+import (
+	"errors"
+	"fmt"
+)
+
+var ErrNotFound = errors.New("not found")
+var ErrInvalid = errors.New("invalid input")
+
+// TODO: Implement a function that returns appropriate errors
+func FindUser(id int) (string, error) {
+	if id < 0 { return "", ErrInvalid }
+	if id == 0 { return "", ErrNotFound }
+	return fmt.Sprintf("User%d", id), nil
+}
+
+// TODO: Check specific error types
+func HandleError(err error) string {
+	if errors.Is(err, ErrNotFound) { return "user not found" }
+	if errors.Is(err, ErrInvalid) { return "invalid id" }
+	return "unknown error"
+}

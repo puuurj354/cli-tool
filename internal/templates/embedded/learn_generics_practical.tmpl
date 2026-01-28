@@ -1,0 +1,34 @@
+package main
+
+// TODO: Implement a generic Result type for error handling
+type Result[T any] struct {
+	Value T
+	Err   error
+}
+
+func Ok[T any](value T) Result[T] {
+	return Result[T]{Value: value}
+}
+
+func Err[T any](err error) Result[T] {
+	return Result[T]{Err: err}
+}
+
+// TODO: Implement generic cache
+type Cache[K comparable, V any] struct {
+	data map[K]V
+}
+
+func NewCache[K comparable, V any]() *Cache[K, V] {
+	return &Cache[K, V]{data: make(map[K]V)}
+}
+
+func (c *Cache[K, V]) Set(key K, value V) {
+	// YOUR CODE HERE
+}
+
+func (c *Cache[K, V]) Get(key K) (V, bool) {
+	// YOUR CODE HERE
+	var zero V
+	return zero, false
+}

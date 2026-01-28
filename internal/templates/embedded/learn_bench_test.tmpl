@@ -1,0 +1,17 @@
+package benchmark
+
+import "testing"
+
+var testStrings = []string{"hello", "world", "this", "is", "a", "test", "of", "string", "concatenation"}
+
+func BenchmarkConcatPlus(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		ConcatPlus(testStrings)
+	}
+}
+
+func BenchmarkConcatBuilder(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		ConcatBuilder(testStrings)
+	}
+}

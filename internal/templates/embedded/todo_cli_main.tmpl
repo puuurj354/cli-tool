@@ -1,0 +1,134 @@
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+	"os"
+	"time"
+)
+
+const dataFile = "todos.json"
+
+type Todo struct {
+	ID        int       `json:\"id\`
+	Text      string    `json:\"text\`
+	Completed bool      `json:\"completed\`
+	CreatedAt time.Time `json:\"created_at\`
+}
+
+type TodoList struct {
+	Todos  []Todo `json:\"todos\`
+	NextID int    `json:\"next_id\`
+}
+
+// TODO: Implement Load function
+// Load todos from the JSON file. Return empty TodoList if file doesn't exist.
+func Load() (*TodoList, error) {
+	// YOUR CODE HERE
+	return &TodoList{NextID: 1}, nil
+}
+
+// TODO: Implement Save function
+// Save the TodoList to the JSON file
+func (tl *TodoList) Save() error {
+	// YOUR CODE HERE
+	return nil
+}
+
+// TODO: Implement Add function
+// Add a new todo item and return its ID
+func (tl *TodoList) Add(text string) int {
+	// YOUR CODE HERE
+	return 0
+}
+
+// TODO: Implement List function
+// Return all todos
+func (tl *TodoList) List() []Todo {
+	// YOUR CODE HERE
+	return nil
+}
+
+// TODO: Implement Complete function
+// Mark a todo as completed by ID. Return error if not found.
+func (tl *TodoList) Complete(id int) error {
+	// YOUR CODE HERE
+	return fmt.Errorf("todo not found: %d", id)
+}
+
+// TODO: Implement Delete function
+// Delete a todo by ID. Return error if not found.
+func (tl *TodoList) Delete(id int) error {
+	// YOUR CODE HERE
+	return fmt.Errorf("todo not found: %d", id)
+}
+
+func main() {
+	if len(os.Args) < 2 {
+		fmt.Println("Usage: todo <command> [args]")
+		fmt.Println("Commands: add, list, done, delete")
+		return
+	}
+
+	tl, err := Load()
+	if err != nil {
+		fmt.Println("Error loading todos:", err)
+		return
+	}
+
+	cmd := os.Args[1]
+	switch cmd {
+	case "add":
+		if len(os.Args) < 3 {
+			fmt.Println("Usage: todo add <text>")
+			return
+		}
+		id := tl.Add(os.Args[2])
+		tl.Save()
+		fmt.Printf("Added: %s (id: %d)\n", os.Args[2], id)
+	case "list":
+		todos := tl.List()
+		if len(todos) == 0 {
+			fmt.Println("No todos!")
+			return
+		}
+		for _, t := range todos {
+			status := "[ ]"
+			if t.Completed {
+				status = "[x]"
+			}
+			fmt.Printf("%s %d. %s\n", status, t.ID, t.Text)
+		}
+	case "done":
+		if len(os.Args) < 3 {
+			fmt.Println("Usage: todo done <id>")
+			return
+		}
+		var id int
+		fmt.Sscanf(os.Args[2], "%d", &id)
+		if err := tl.Complete(id); err != nil {
+			fmt.Println(err)
+			return
+		}
+		tl.Save()
+		fmt.Println("Marked as done!")
+	case "delete":
+		if len(os.Args) < 3 {
+			fmt.Println("Usage: todo delete <id>")
+			return
+		}
+		var id int
+		fmt.Sscanf(os.Args[2], "%d", &id)
+		if err := tl.Delete(id); err != nil {
+			fmt.Println(err)
+			return
+		}
+		tl.Save()
+		fmt.Println("Deleted!")
+	default:
+		fmt.Println("Unknown command:", cmd)
+	}
+}
+
+// Helper (you can use this)
+var _ = json.Marshal

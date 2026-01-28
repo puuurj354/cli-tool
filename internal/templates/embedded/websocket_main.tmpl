@@ -1,0 +1,21 @@
+package main
+
+import (
+	"log"
+	"net/http"
+
+	"{{.ProjectName}}/internal/hub"
+)
+
+func main() {
+	h := hub.NewHub()
+	go h.Run()
+
+	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
+		hub.ServeWs(h, w, r)
+	})
+	http.Handle("/", http.FileServer(http.Dir("./web")))
+
+	log.Println("Server starting on :8080")
+	log.Fatal(http.ListenAndServe(":8080", nil))
+}

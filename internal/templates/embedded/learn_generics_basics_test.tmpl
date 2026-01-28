@@ -1,0 +1,18 @@
+package main
+
+import "testing"
+
+func TestMin(t *testing.T) {
+	if Min(3, 5) != 3 { t.Error("Min(3,5) should be 3") }
+	if Min(5.5, 2.2) != 2.2 { t.Error("Min(5.5,2.2) should be 2.2") }
+}
+
+func TestMap(t *testing.T) {
+	doubled := Map([]int{1, 2, 3}, func(x int) int { return x * 2 })
+	if len(doubled) != 3 || doubled[0] != 2 { t.Error("Map failed") }
+}
+
+func TestFilter(t *testing.T) {
+	evens := Filter([]int{1, 2, 3, 4}, func(x int) bool { return x%2 == 0 })
+	if len(evens) != 2 { t.Error("Filter failed") }
+}

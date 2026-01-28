@@ -1,0 +1,16 @@
+package main
+
+import (
+	"log"
+	"{{.ProjectName}}/internal/kafka"
+)
+
+func main() {
+	producer, err := kafka.NewProducer([]string{"localhost:9092"})
+	if err != nil { log.Fatal(err) }
+	defer producer.Close()
+	
+	err = producer.Send("my-topic", "Hello Kafka!")
+	if err != nil { log.Fatal(err) }
+	log.Println("Message sent!")
+}

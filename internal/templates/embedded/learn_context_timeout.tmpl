@@ -1,0 +1,19 @@
+package main
+
+import (
+	"context"
+	"time"
+)
+
+// TODO: Implement function with timeout
+func FetchWithTimeout(ctx context.Context, duration time.Duration) (string, error) {
+	ctx, cancel := context.WithTimeout(ctx, duration)
+	defer cancel()
+	
+	select {
+	case <-time.After(500 * time.Millisecond):
+		return "data", nil
+	case <-ctx.Done():
+		return "", ctx.Err()
+	}
+}

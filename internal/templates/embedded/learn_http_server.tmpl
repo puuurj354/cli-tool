@@ -1,0 +1,19 @@
+package main
+
+import (
+	"encoding/json"
+	"net/http"
+)
+
+// TODO: Implement JSON response helper
+func respondJSON(w http.ResponseWriter, status int, data interface{}) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	json.NewEncoder(w).Encode(data)
+}
+
+// TODO: Implement a handler that returns user by ID
+func UserHandler(w http.ResponseWriter, r *http.Request) {
+	// YOUR CODE HERE
+	respondJSON(w, 200, map[string]string{"id": "1", "name": "John"})
+}

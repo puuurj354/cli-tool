@@ -1,0 +1,22 @@
+package main
+
+import (
+	"log"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+)
+
+func main() {
+	conn, err := grpc.Dial("localhost:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Fatalf("did not connect: %v", err)
+	}
+	defer conn.Close()
+
+	// TODO: Create client and make RPC calls
+	// c := pb.NewYourServiceClient(conn)
+	// resp, err := c.YourMethod(context.Background(), &pb.Request{})
+
+	log.Println("Connected to gRPC server")
+}

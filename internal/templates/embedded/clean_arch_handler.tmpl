@@ -1,0 +1,25 @@
+package http
+
+import (
+	"encoding/json"
+	"net/http"
+
+	"{{.ProjectName}}/internal/usecase"
+)
+
+type Handler struct {
+	uc *usecase.UserUsecase
+}
+
+func NewHandler(uc *usecase.UserUsecase) *Handler {
+	return &Handler{uc: uc}
+}
+
+func (h *Handler) GetUsers(w http.ResponseWriter, r *http.Request) {
+	users, err := h.uc.GetUsers()
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+	json.NewEncoder(w).Encode(users)
+}

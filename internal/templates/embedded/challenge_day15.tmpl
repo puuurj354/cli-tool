@@ -1,0 +1,33 @@
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+	"net/http"
+)
+
+// TODO: Implement HealthHandler
+// It should return JSON: {"status": "ok"}
+func HealthHandler(w http.ResponseWriter, r *http.Request) {
+	// YOUR CODE HERE
+}
+
+// TODO: Implement EchoHandler
+// It should return JSON with the "message" query parameter
+// e.g., /echo?message=hello returns {"echo": "hello"}
+func EchoHandler(w http.ResponseWriter, r *http.Request) {
+	// YOUR CODE HERE
+}
+
+func main() {
+	http.HandleFunc("/health", HealthHandler)
+	http.HandleFunc("/echo", EchoHandler)
+	fmt.Println("Server running on :8080")
+	http.ListenAndServe(":8080", nil)
+}
+
+// Helper for json encoding
+func respondJSON(w http.ResponseWriter, data interface{}) {
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(data)
+}

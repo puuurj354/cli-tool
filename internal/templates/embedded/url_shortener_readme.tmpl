@@ -1,0 +1,35 @@
+# URL Shortener
+
+Build a simple URL shortening service!
+
+## Features to Implement
+
+1. **Shorten URL**: POST /shorten with {"url": "https://example.com"}
+2. **Redirect**: GET /{code} redirects to original URL
+3. **Stats**: GET /stats/{code} returns visit count
+
+## Requirements
+
+- Generate unique 6-character codes
+- Store URLs in memory (map)
+- Track visit counts
+- Validate URLs
+
+## Example Usage
+
+```
+# Shorten a URL
+curl -X POST localhost:8080/shorten -d '{"url":"https://google.com"}'
+{"code":"abc123","short_url":"http://localhost:8080/abc123"}
+
+# Access shortened URL (redirects)
+curl -L localhost:8080/abc123
+
+# Get stats
+curl localhost:8080/stats/abc123
+{"code":"abc123","url":"https://google.com","visits":1}
+```
+
+## Testing
+
+Run `go test -v` to check your implementation.

@@ -1,0 +1,20 @@
+package main
+
+import (
+	"errors"
+	"testing"
+)
+
+func TestResult(t *testing.T) {
+	ok := Ok(42)
+	if ok.Err != nil || ok.Value != 42 { t.Error("Ok failed") }
+	
+	err := Err[int](errors.New("fail"))
+	if err.Err == nil { t.Error("Err failed") }
+}
+
+func TestCache(t *testing.T) {
+	c := NewCache[string, int]()
+	c.Set("age", 30)
+	if v, ok := c.Get("age"); !ok || v != 30 { t.Error("Cache failed") }
+}

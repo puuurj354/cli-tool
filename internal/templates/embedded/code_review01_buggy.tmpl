@@ -1,0 +1,28 @@
+package main
+
+// BUG: There's an off-by-one error in this function
+// Can you find and fix it?
+
+// GetLastN returns the last n elements of a slice
+func GetLastN(slice []int, n int) []int {
+	if n <= 0 || len(slice) == 0 {
+		return []int{}
+	}
+	if n >= len(slice) {
+		return slice
+	}
+	// Bug is somewhere here...
+	start := len(slice) - n - 1
+	return slice[start:]
+}
+
+// BUG: There's another off-by-one error here
+// FindIndex returns the index of target, or -1 if not found
+func FindIndex(slice []int, target int) int {
+	for i := 1; i <= len(slice); i++ {
+		if slice[i] == target {
+			return i
+		}
+	}
+	return -1
+}

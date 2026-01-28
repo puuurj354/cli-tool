@@ -1,0 +1,24 @@
+package main
+
+import (
+	"log"
+	"os"
+	"os/signal"
+	"syscall"
+
+	"{{.ProjectName}}/internal/kafka"
+)
+
+func main() {
+	consumer, err := kafka.NewConsumer([]string{"localhost:9092"}, "my-group")
+	if err != nil { log.Fatal(err) }
+	
+	go consumer.Consume("my-topic", func(msg string) {
+		log.Printf("Received: %s\n", msg)
+	})
+	
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+	consumer.Close()
+}

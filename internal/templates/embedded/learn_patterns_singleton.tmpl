@@ -1,0 +1,22 @@
+package creational
+
+import "sync"
+
+// Singleton Pattern - ensure only one instance exists
+
+type Database struct {
+	connection string
+}
+
+var (
+	instance *Database
+	once     sync.Once
+)
+
+// TODO: Implement thread-safe singleton
+func GetDatabase() *Database {
+	once.Do(func() {
+		instance = &Database{connection: "connected"}
+	})
+	return instance
+}

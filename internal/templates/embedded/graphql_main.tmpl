@@ -1,0 +1,22 @@
+package main
+
+import (
+	"log"
+	"net/http"
+
+	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/playground"
+	"{{.ProjectName}}/graph"
+)
+
+func main() {
+	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{
+		Resolvers: &graph.Resolver{},
+	}))
+
+	http.Handle("/", playground.Handler("GraphQL", "/query"))
+	http.Handle("/query", srv)
+
+	log.Println("GraphQL server on http://localhost:8080/")
+	log.Fatal(http.ListenAndServe(":8080", nil))
+}

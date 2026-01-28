@@ -1,0 +1,17 @@
+package main
+
+import (
+	"sort"
+	"testing"
+)
+
+func TestStringer(t *testing.T) {
+	p := Person{Name: "Alice", Age: 30}
+	if p.String() != "Alice" { t.Error("Stringer failed") }
+}
+
+func TestSort(t *testing.T) {
+	people := ByAge{{Name: "B", Age: 30}, {Name: "A", Age: 20}}
+	sort.Sort(people)
+	if people[0].Name != "A" { t.Error("Sort failed") }
+}

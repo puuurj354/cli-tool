@@ -1,0 +1,30 @@
+package pubsub
+
+import (
+	"context"
+	"github.com/redis/go-redis/v9"
+)
+
+type PubSub struct {
+	client *redis.Client
+	ctx    context.Context
+}
+
+func NewPubSub(addr string) *PubSub {
+	return &PubSub{
+		client: redis.NewClient(&redis.Options{Addr: addr}),
+		ctx:    context.Background(),
+	}
+}
+
+func (p *PubSub) Publish(channel, message string) error {
+	return p.client.Publish(p.ctx, channel, message).Err()
+}
+
+func (p *PubSub) Subscribe(channel string, handler func(string)) {
+	sub := p.client.Subscribe(p.ctx, channel)
+	ch := sub.Channel()
+	for msg := range ch {
+		handler(msg.Payload)
+	}
+}

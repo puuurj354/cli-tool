@@ -1,0 +1,23 @@
+package main
+
+import (
+	"log"
+	"net/http"
+
+	"{{.ProjectName}}/internal/auth"
+	"{{.ProjectName}}/internal/handler"
+)
+
+func main() {
+	mux := http.NewServeMux()
+	
+	// Public routes
+	mux.HandleFunc("/api/login", handler.Login)
+	mux.HandleFunc("/api/register", handler.Register)
+	
+	// Protected routes
+	mux.Handle("/api/profile", auth.Middleware(http.HandlerFunc(handler.Profile)))
+	
+	log.Println("Server starting on :8080")
+	log.Fatal(http.ListenAndServe(":8080", mux))
+}
