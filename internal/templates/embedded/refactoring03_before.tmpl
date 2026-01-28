@@ -1,0 +1,71 @@
+package main
+
+import "fmt"
+
+// This code has poor naming - make it descriptive!
+func calc(a []int) int {
+	t := 0
+	for _, v := range a {
+		t += v
+	}
+	return t
+}
+
+func f(s string) string {
+	r := ""
+	for i := len(s) - 1; i >= 0; i-- {
+		r += string(s[i])
+	}
+	return r
+}
+
+func proc(d []map[string]interface{}) []string {
+	res := []string{}
+	for _, item := range d {
+		n, ok := item["n"].(string)
+		if !ok {
+			continue
+		}
+		a, ok := item["a"].(int)
+		if !ok || a < 18 {
+			continue
+		}
+		res = append(res, n)
+	}
+	return res
+}
+
+type U struct {
+	N string
+	E string
+	P string
+}
+
+func (u *U) V() bool {
+	if len(u.N) < 2 {
+		return false
+	}
+	if len(u.E) < 5 {
+		return false
+	}
+	if len(u.P) < 8 {
+		return false
+	}
+	return true
+}
+
+func main() {
+	nums := []int{1, 2, 3, 4, 5}
+	fmt.Println("Result:", calc(nums))
+	fmt.Println("Reversed:", f("hello"))
+
+	data := []map[string]interface{}{
+		{"n": "Alice", "a": 25},
+		{"n": "Bob", "a": 17},
+		{"n": "Charlie", "a": 30},
+	}
+	fmt.Println("Adults:", proc(data))
+
+	user := &U{N: "Al", E: "a@b.co", P: "password123"}
+	fmt.Println("Valid:", user.V())
+}

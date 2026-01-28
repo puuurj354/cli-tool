@@ -1,0 +1,62 @@
+package stack
+
+import "testing"
+
+func TestPush(t *testing.T) {
+	s := New()
+	s.Push(1)
+	s.Push(2)
+	s.Push(3)
+
+	if s.Size() != 3 {
+		t.Errorf("Size() = %d; want 3", s.Size())
+	}
+}
+
+func TestPop(t *testing.T) {
+	s := New()
+	s.Push(1)
+	s.Push(2)
+	s.Push(3)
+
+	if got := s.Pop(); got != 3 {
+		t.Errorf("Pop() = %d; want 3", got)
+	}
+	if got := s.Pop(); got != 2 {
+		t.Errorf("Pop() = %d; want 2", got)
+	}
+	if s.Size() != 1 {
+		t.Errorf("Size() = %d; want 1", s.Size())
+	}
+}
+
+func TestPopEmpty(t *testing.T) {
+	s := New()
+	if got := s.Pop(); got != -1 {
+		t.Errorf("Pop() on empty stack = %d; want -1", got)
+	}
+}
+
+func TestPeek(t *testing.T) {
+	s := New()
+	s.Push(42)
+	
+	if got := s.Peek(); got != 42 {
+		t.Errorf("Peek() = %d; want 42", got)
+	}
+	// Peek shouldn't remove the element
+	if s.Size() != 1 {
+		t.Errorf("Size() after Peek() = %d; want 1", s.Size())
+	}
+}
+
+func TestIsEmpty(t *testing.T) {
+	s := New()
+	if !s.IsEmpty() {
+		t.Error("IsEmpty() = false; want true for new stack")
+	}
+	s.Push(1)
+	if s.IsEmpty() {
+		t.Error("IsEmpty() = true; want false after Push")
+	}
+}

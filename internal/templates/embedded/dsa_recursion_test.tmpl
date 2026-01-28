@@ -1,0 +1,48 @@
+package recursion
+
+import "testing"
+
+func TestFactorial(t *testing.T) {
+	tests := []struct {
+		n    int
+		want int
+	}{
+		{0, 1},
+		{1, 1},
+		{5, 120},
+		{10, 3628800},
+	}
+
+	for _, tt := range tests {
+		if got := Factorial(tt.n); got != tt.want {
+			t.Errorf("Factorial(%d) = %d; want %d", tt.n, got, tt.want)
+		}
+	}
+}
+
+func TestFibonacci(t *testing.T) {
+	tests := []struct {
+		n    int
+		want int
+	}{
+		{0, 0},
+		{1, 1},
+		{2, 1},
+		{10, 55},
+	}
+
+	for _, tt := range tests {
+		if got := Fibonacci(tt.n); got != tt.want {
+			t.Errorf("Fibonacci(%d) = %d; want %d", tt.n, got, tt.want)
+		}
+	}
+}
+
+func TestReverseString(t *testing.T) {
+	if got := ReverseString("hello"); got != "olleh" {
+		t.Errorf("ReverseString(\"hello\") = %q; want \"olleh\"", got)
+	}
+}
+
+func TestSumArray(t *testing.T) {
+}

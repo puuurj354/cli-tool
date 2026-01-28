@@ -121,7 +121,50 @@ var (
 	fullstackTsconfigNodeTmpl   string
 	fullstackTailwindConfigTmpl string
 	fullstackPostcssConfigTmpl  string
+
+	// Embedded template variables (loaded from files)
+	learnChannelsTmpl       string
+	learnSelectTmpl         string
+	learnSyncTmpl           string
+	learnPatternsTmpl       string
+	learnUnitTestTmpl       string
+	learnTableTestTmpl      string
+	goWorkerMainTmpl        string
+	goTUIModelTmpl          string
+	fullstackAppTsxTmpl     string
+	dsaStackTmpl            string
+	dsaStackTestTmpl        string
+	dsaQueueTmpl            string
+	dsaQueueTestTmpl        string
+	dsaLinkedListTmpl       string
+	dsaLinkedListTestTmpl   string
+	dsaSortingTestTmpl      string
+	dsaRecursionTestTmpl    string
+	challengeDay02TestTmpl  string
+	challengeDay22Tmpl      string
+	challengeDay22TestTmpl  string
+	todoCliTestTmpl         string
+	urlShortenerTestTmpl    string
+	refactoring01BeforeTmpl string
+	refactoring02BeforeTmpl string
+	refactoring03BeforeTmpl string
+	codeReview01TestTmpl    string
+	codeReview02BuggyTmpl   string
+	codeReview02TestTmpl    string
+	codeReview03BuggyTmpl   string
+	codeReview03TestTmpl    string
+	microserviceMainTmpl    string
+	websocketHubTmpl        string
 )
+
+// loadEmbedded reads a template file from embedded filesystem
+func loadEmbedded(name string) string {
+	data, err := embeddedFS.ReadFile("embedded/" + name)
+	if err != nil {
+		panic(fmt.Sprintf("failed to load embedded template %s: %v", name, err))
+	}
+	return string(data)
+}
 
 func init() {
 	// Initialize template strings from generator functions
@@ -132,6 +175,40 @@ func init() {
 	fullstackTsconfigNodeTmpl = genTsconfigNode()
 	fullstackTailwindConfigTmpl = genTailwindConfig()
 	fullstackPostcssConfigTmpl = genPostcssConfig()
+
+	// Load templates from embedded files
+	learnChannelsTmpl = loadEmbedded("learn_channels.tmpl")
+	learnSelectTmpl = loadEmbedded("learn_select.tmpl")
+	learnSyncTmpl = loadEmbedded("learn_sync.tmpl")
+	learnPatternsTmpl = loadEmbedded("learn_patterns.tmpl")
+	learnUnitTestTmpl = loadEmbedded("learn_unit_test.tmpl")
+	learnTableTestTmpl = loadEmbedded("learn_table_test.tmpl")
+	goWorkerMainTmpl = loadEmbedded("go_worker_main.tmpl")
+	goTUIModelTmpl = loadEmbedded("go_t_u_i_model.tmpl")
+	fullstackAppTsxTmpl = loadEmbedded("fullstack_app_tsx.tmpl")
+	dsaStackTmpl = loadEmbedded("dsa_stack.tmpl")
+	dsaStackTestTmpl = loadEmbedded("dsa_stack_test.tmpl")
+	dsaQueueTmpl = loadEmbedded("dsa_queue.tmpl")
+	dsaQueueTestTmpl = loadEmbedded("dsa_queue_test.tmpl")
+	dsaLinkedListTmpl = loadEmbedded("dsa_linked_list.tmpl")
+	dsaLinkedListTestTmpl = loadEmbedded("dsa_linked_list_test.tmpl")
+	dsaSortingTestTmpl = loadEmbedded("dsa_sorting_test.tmpl")
+	dsaRecursionTestTmpl = loadEmbedded("dsa_recursion_test.tmpl")
+	challengeDay02TestTmpl = loadEmbedded("challenge_day02_test.tmpl")
+	challengeDay22Tmpl = loadEmbedded("challenge_day22.tmpl")
+	challengeDay22TestTmpl = loadEmbedded("challenge_day22_test.tmpl")
+	todoCliTestTmpl = loadEmbedded("todo_cli_test.tmpl")
+	urlShortenerTestTmpl = loadEmbedded("url_shortener_test.tmpl")
+	refactoring01BeforeTmpl = loadEmbedded("refactoring01_before.tmpl")
+	refactoring02BeforeTmpl = loadEmbedded("refactoring02_before.tmpl")
+	refactoring03BeforeTmpl = loadEmbedded("refactoring03_before.tmpl")
+	codeReview01TestTmpl = loadEmbedded("code_review01_test.tmpl")
+	codeReview02BuggyTmpl = loadEmbedded("code_review02_buggy.tmpl")
+	codeReview02TestTmpl = loadEmbedded("code_review02_test.tmpl")
+	codeReview03BuggyTmpl = loadEmbedded("code_review03_buggy.tmpl")
+	codeReview03TestTmpl = loadEmbedded("code_review03_test.tmpl")
+	microserviceMainTmpl = loadEmbedded("microservice_main.tmpl")
+	websocketHubTmpl = loadEmbedded("websocket_hub.tmpl")
 
 	// Initialize builtInTemplates map after all strings are set
 	initBuiltInTemplates()
@@ -1035,251 +1112,9 @@ func sayHello(name string) {
 }
 `
 
-var learnChannelsTmpl = `package main
 
-import "fmt"
 
-func main() {
-	// Unbuffered channel
-	ch := make(chan string)
-	go func() {
-		ch <- "Hello from channel!"
-	}()
-	msg := <-ch
-	fmt.Println(msg)
 
-	// Buffered channel
-	buffered := make(chan int, 3)
-	buffered <- 1
-	buffered <- 2
-	buffered <- 3
-	fmt.Println(<-buffered, <-buffered, <-buffered)
-
-	// Channel with range
-	numbers := make(chan int)
-	go func() {
-		for i := 1; i <= 5; i++ {
-			numbers <- i
-		}
-		close(numbers)
-	}()
-	for n := range numbers {
-		fmt.Printf("Received: %d\n", n)
-	}
-
-	// Channel direction (send-only, receive-only)
-	ping := make(chan string, 1)
-	pong := make(chan string, 1)
-	pingPong(ping, pong)
-}
-
-func pingPong(ping chan<- string, pong <-chan string) {
-	ping <- "ping"
-	// This demonstrates send-only and receive-only channels
-}
-`
-
-var learnSelectTmpl = `package main
-
-import (
-	"fmt"
-	"time"
-)
-
-func main() {
-	ch1 := make(chan string)
-	ch2 := make(chan string)
-
-	go func() {
-		time.Sleep(50 * time.Millisecond)
-		ch1 <- "from channel 1"
-	}()
-
-	go func() {
-		time.Sleep(100 * time.Millisecond)
-		ch2 <- "from channel 2"
-	}()
-
-	// Select receives from whichever channel is ready first
-	for i := 0; i < 2; i++ {
-		select {
-		case msg1 := <-ch1:
-			fmt.Println("Received", msg1)
-		case msg2 := <-ch2:
-			fmt.Println("Received", msg2)
-		}
-	}
-
-	// Select with timeout
-	timeout := make(chan string)
-	select {
-	case msg := <-timeout:
-		fmt.Println(msg)
-	case <-time.After(10 * time.Millisecond):
-		fmt.Println("Timeout!")
-	}
-
-	// Non-blocking select with default
-	nonBlocking := make(chan string)
-	select {
-	case msg := <-nonBlocking:
-		fmt.Println(msg)
-	default:
-		fmt.Println("No message available")
-	}
-}
-`
-
-var learnSyncTmpl = `package main
-
-import (
-	"fmt"
-	"sync"
-	"sync/atomic"
-)
-
-func main() {
-	// WaitGroup - wait for goroutines to finish
-	var wg sync.WaitGroup
-	for i := 1; i <= 3; i++ {
-		wg.Add(1)
-		go func(n int) {
-			defer wg.Done()
-			fmt.Printf("Worker %d done\n", n)
-		}(i)
-	}
-	wg.Wait()
-	fmt.Println("All workers done!")
-
-	// Mutex - protect shared data
-	var mu sync.Mutex
-	counter := 0
-	var wg2 sync.WaitGroup
-	for i := 0; i < 100; i++ {
-		wg2.Add(1)
-		go func() {
-			defer wg2.Done()
-			mu.Lock()
-			counter++
-			mu.Unlock()
-		}()
-	}
-	wg2.Wait()
-	fmt.Printf("Counter: %d\n", counter)
-
-	// Atomic operations
-	var atomicCounter int64
-	var wg3 sync.WaitGroup
-	for i := 0; i < 100; i++ {
-		wg3.Add(1)
-		go func() {
-			defer wg3.Done()
-			atomic.AddInt64(&atomicCounter, 1)
-		}()
-	}
-	wg3.Wait()
-	fmt.Printf("Atomic counter: %d\n", atomicCounter)
-
-	// Once - do something only once
-	var once sync.Once
-	for i := 0; i < 3; i++ {
-		once.Do(func() {
-			fmt.Println("This prints only once!")
-		})
-	}
-}
-`
-
-var learnPatternsTmpl = `package main
-
-import (
-	"fmt"
-	"sync"
-	"time"
-)
-
-func main() {
-	// Worker Pool Pattern
-	fmt.Println("=== Worker Pool ===")
-	jobs := make(chan int, 10)
-	results := make(chan int, 10)
-
-	// Start 3 workers
-	for w := 1; w <= 3; w++ {
-		go worker(w, jobs, results)
-	}
-
-	// Send 5 jobs
-	for j := 1; j <= 5; j++ {
-		jobs <- j
-	}
-	close(jobs)
-
-	// Collect results
-	for r := 1; r <= 5; r++ {
-		fmt.Printf("Result: %d\n", <-results)
-	}
-
-	// Fan-out, Fan-in Pattern
-	fmt.Println("\n=== Fan-out, Fan-in ===")
-	input := generate(1, 2, 3, 4, 5)
-	c1 := square(input)
-	c2 := square(input)
-	for n := range merge(c1, c2) {
-		fmt.Println(n)
-	}
-}
-
-func worker(id int, jobs <-chan int, results chan<- int) {
-	for j := range jobs {
-		fmt.Printf("Worker %d processing job %d\n", id, j)
-		time.Sleep(10 * time.Millisecond)
-		results <- j * 2
-	}
-}
-
-func generate(nums ...int) <-chan int {
-	out := make(chan int)
-	go func() {
-		for _, n := range nums {
-			out <- n
-		}
-		close(out)
-	}()
-	return out
-}
-
-func square(in <-chan int) <-chan int {
-	out := make(chan int)
-	go func() {
-		for n := range in {
-			out <- n * n
-		}
-		close(out)
-	}()
-	return out
-}
-
-func merge(cs ...<-chan int) <-chan int {
-	var wg sync.WaitGroup
-	out := make(chan int)
-	output := func(c <-chan int) {
-		for n := range c {
-			out <- n
-		}
-		wg.Done()
-	}
-	wg.Add(len(cs))
-	for _, c := range cs {
-		go output(c)
-	}
-	go func() {
-		wg.Wait()
-		close(out)
-	}()
-	return out
-}
-`
 
 // ============== Learn Testing Templates ==============
 
@@ -1337,47 +1172,6 @@ func Divide(a, b int) (int, error) {
 var ErrDivideByZero = fmt.Errorf("cannot divide by zero")
 `
 
-var learnUnitTestTmpl = `package unit
-
-import (
-	"testing"
-)
-
-func TestAdd(t *testing.T) {
-	got := Add(2, 3)
-	want := 5
-	if got != want {
-		t.Errorf("Add(2, 3) = %d; want %d", got, want)
-	}
-}
-
-func TestSubtract(t *testing.T) {
-	got := Subtract(5, 3)
-	want := 2
-	if got != want {
-		t.Errorf("Subtract(5, 3) = %d; want %d", got, want)
-	}
-}
-
-func TestDivide(t *testing.T) {
-	t.Run("valid division", func(t *testing.T) {
-		got, err := Divide(10, 2)
-		if err != nil {
-			t.Fatalf("unexpected error: %v", err)
-		}
-		if got != 5 {
-			t.Errorf("Divide(10, 2) = %d; want 5", got)
-		}
-	})
-
-	t.Run("divide by zero", func(t *testing.T) {
-		_, err := Divide(10, 0)
-		if err == nil {
-			t.Error("expected error for divide by zero")
-		}
-	})
-}
-`
 
 var learnTableValidatorTmpl = `package table
 
@@ -1396,56 +1190,6 @@ func IsValidAge(age int) bool {
 }
 `
 
-var learnTableTestTmpl = `package table
-
-import "testing"
-
-func TestIsValidEmail(t *testing.T) {
-	tests := []struct {
-		name  string
-		email string
-		want  bool
-	}{
-		{"valid email", "user@example.com", true},
-		{"valid with subdomain", "user@mail.example.com", true},
-		{"missing @", "userexample.com", false},
-		{"missing domain", "user@", false},
-		{"empty string", "", false},
-		{"with plus", "user+tag@example.com", true},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := IsValidEmail(tt.email)
-			if got != tt.want {
-				t.Errorf("IsValidEmail(%q) = %v; want %v", tt.email, got, tt.want)
-			}
-		})
-	}
-}
-
-func TestIsValidAge(t *testing.T) {
-	tests := []struct {
-		age  int
-		want bool
-	}{
-		{0, true},
-		{25, true},
-		{150, true},
-		{-1, false},
-		{151, false},
-	}
-
-	for _, tt := range tests {
-		t.Run("", func(t *testing.T) {
-			got := IsValidAge(tt.age)
-			if got != tt.want {
-				t.Errorf("IsValidAge(%d) = %v; want %v", tt.age, got, tt.want)
-			}
-		})
-	}
-}
-`
 
 var learnBenchFuncTmpl = `package benchmark
 
@@ -1578,68 +1322,6 @@ run-client:
 
 // ============== Worker Templates ==============
 
-var goWorkerMainTmpl = `package main
-
-import (
-	"context"
-	"fmt"
-	"log"
-	"os"
-	"os/signal"
-	"syscall"
-
-	"{{.ModuleName}}/internal/job"
-	"{{.ModuleName}}/internal/queue"
-)
-
-func main() {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	// Handle shutdown gracefully
-	sigCh := make(chan os.Signal, 1)
-	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
-	go func() {
-		<-sigCh
-		log.Println("Shutting down...")
-		cancel()
-	}()
-
-	// Create job queue
-	q := queue.New(10)
-
-	// Start workers
-	numWorkers := 3
-	for i := 1; i <= numWorkers; i++ {
-		go worker(ctx, i, q)
-	}
-
-	// Add some sample jobs
-	for i := 1; i <= 10; i++ {
-		q.Enqueue(job.Job{ID: i, Payload: fmt.Sprintf("Task %d", i)})
-	}
-
-	// Wait for context cancellation
-	<-ctx.Done()
-	log.Println("Worker stopped")
-}
-
-func worker(ctx context.Context, id int, q *queue.Queue) {
-	for {
-		select {
-		case <-ctx.Done():
-			return
-		default:
-			j, ok := q.Dequeue()
-			if !ok {
-				continue
-			}
-			log.Printf("Worker %d processing: %s", id, j.Payload)
-			j.Process()
-		}
-	}
-}
-`
 
 var goWorkerJobTmpl = `package job
 
@@ -1716,96 +1398,6 @@ func main() {
 }
 `
 
-var goTUIModelTmpl = `package ui
-
-import (
-	"fmt"
-
-	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
-)
-
-var (
-	titleStyle = lipgloss.NewStyle().
-			Bold(true).
-			Foreground(lipgloss.Color("#FAFAFA")).
-			Background(lipgloss.Color("#7D56F4")).
-			Padding(0, 1)
-
-	itemStyle = lipgloss.NewStyle().
-			PaddingLeft(2)
-
-	selectedStyle = lipgloss.NewStyle().
-			PaddingLeft(2).
-			Foreground(lipgloss.Color("#7D56F4")).
-			Bold(true)
-)
-
-type Model struct {
-	choices  []string
-	cursor   int
-	selected map[int]struct{}
-}
-
-func NewModel() Model {
-	return Model{
-		choices:  []string{"Option 1", "Option 2", "Option 3", "Option 4"},
-		selected: make(map[int]struct{}),
-	}
-}
-
-func (m Model) Init() tea.Cmd {
-	return nil
-}
-
-func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	switch msg := msg.(type) {
-	case tea.KeyMsg:
-		switch msg.String() {
-		case "ctrl+c", "q":
-			return m, tea.Quit
-		case "up", "k":
-			if m.cursor > 0 {
-				m.cursor--
-			}
-		case "down", "j":
-			if m.cursor < len(m.choices)-1 {
-				m.cursor++
-			}
-		case "enter", " ":
-			if _, ok := m.selected[m.cursor]; ok {
-				delete(m.selected, m.cursor)
-			} else {
-				m.selected[m.cursor] = struct{}{}
-			}
-		}
-	}
-	return m, nil
-}
-
-func (m Model) View() string {
-	s := titleStyle.Render("{{.ProjectName}}") + "\n\n"
-
-	for i, choice := range m.choices {
-		cursor := " "
-		style := itemStyle
-		if m.cursor == i {
-			cursor = ">"
-			style = selectedStyle
-		}
-
-		checked := " "
-		if _, ok := m.selected[i]; ok {
-			checked = "x"
-		}
-
-		s += style.Render(fmt.Sprintf("%s [%s] %s", cursor, checked, choice)) + "\n"
-	}
-
-	s += "\n(q to quit)\n"
-	return s
-}
-`
 
 // ============== Fullstack Templates ==============
 
@@ -1958,61 +1550,6 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 )
 `
 
-var fullstackAppTsxTmpl = `import { useState, useEffect } from 'react'
-import { api } from './lib/api'
-import { Header } from './components/Header'
-
-function App() {
-  const [message, setMessage] = useState<string>('')
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    const fetchMessage = async () => {
-      try {
-        const data = await api.getMessage()
-        setMessage(data.message)
-      } catch (error) {
-        setMessage('Failed to connect to backend')
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchMessage()
-  }, [])
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      <Header />
-      <main className="container mx-auto px-4 py-16">
-        <div className="text-center">
-          <h1 className="text-5xl font-bold text-white mb-8">
-            Welcome to <span className="text-purple-400">{{.ProjectName}}</span>
-          </h1>
-          <div className="bg-white/10 backdrop-blur-lg rounded-xl p-8 max-w-md mx-auto">
-            <p className="text-gray-300 mb-4">Message from Go Backend:</p>
-            {loading ? (
-              <div className="animate-pulse bg-purple-500/20 h-8 rounded"></div>
-            ) : (
-              <p className="text-2xl font-semibold text-purple-400">{message}</p>
-            )}
-          </div>
-          <div className="mt-12 flex justify-center gap-4">
-            <a
-              href="http://localhost:8080/api/health"
-              target="_blank"
-              className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
-            >
-              Check API Health
-            </a>
-          </div>
-        </div>
-      </main>
-    </div>
-  )
-}
-
-export default App
-`
 
 var fullstackIndexCssTmpl = `@tailwind base;
 @tailwind components;
@@ -2173,341 +1710,11 @@ go test -v ./algorithms/sorting/
 ` + "```" + `
 `
 
-var dsaStackTmpl = `package stack
 
-// Stack represents a LIFO data structure
-type Stack struct {
-	items []int
-}
 
-// New creates a new empty stack
-func New() *Stack {
-	return &Stack{items: []int{}}
-}
 
-// Push adds an element to the top of the stack
-// TODO: Implement this
-func (s *Stack) Push(item int) {
-	// Your code here
-}
 
-// Pop removes and returns the top element
-// Returns -1 if stack is empty
-// TODO: Implement this
-func (s *Stack) Pop() int {
-	// Your code here
-	return -1
-}
 
-// Peek returns the top element without removing it
-// Returns -1 if stack is empty
-// TODO: Implement this
-func (s *Stack) Peek() int {
-	// Your code here
-	return -1
-}
-
-// IsEmpty returns true if the stack has no elements
-// TODO: Implement this
-func (s *Stack) IsEmpty() bool {
-	// Your code here
-	return true
-}
-
-// Size returns the number of elements in the stack
-// TODO: Implement this
-func (s *Stack) Size() int {
-	// Your code here
-	return 0
-}
-`
-
-var dsaStackTestTmpl = `package stack
-
-import "testing"
-
-func TestPush(t *testing.T) {
-	s := New()
-	s.Push(1)
-	s.Push(2)
-	s.Push(3)
-
-	if s.Size() != 3 {
-		t.Errorf("Size() = %d; want 3", s.Size())
-	}
-}
-
-func TestPop(t *testing.T) {
-	s := New()
-	s.Push(1)
-	s.Push(2)
-	s.Push(3)
-
-	if got := s.Pop(); got != 3 {
-		t.Errorf("Pop() = %d; want 3", got)
-	}
-	if got := s.Pop(); got != 2 {
-		t.Errorf("Pop() = %d; want 2", got)
-	}
-	if s.Size() != 1 {
-		t.Errorf("Size() = %d; want 1", s.Size())
-	}
-}
-
-func TestPopEmpty(t *testing.T) {
-	s := New()
-	if got := s.Pop(); got != -1 {
-		t.Errorf("Pop() on empty stack = %d; want -1", got)
-	}
-}
-
-func TestPeek(t *testing.T) {
-	s := New()
-	s.Push(42)
-	
-	if got := s.Peek(); got != 42 {
-		t.Errorf("Peek() = %d; want 42", got)
-	}
-	// Peek shouldn't remove the element
-	if s.Size() != 1 {
-		t.Errorf("Size() after Peek() = %d; want 1", s.Size())
-	}
-}
-
-func TestIsEmpty(t *testing.T) {
-	s := New()
-	if !s.IsEmpty() {
-		t.Error("IsEmpty() = false; want true for new stack")
-	}
-	s.Push(1)
-	if s.IsEmpty() {
-		t.Error("IsEmpty() = true; want false after Push")
-	}
-}
-`
-
-var dsaQueueTmpl = `package queue
-
-// Queue represents a FIFO data structure
-type Queue struct {
-	items []int
-}
-
-// New creates a new empty queue
-func New() *Queue {
-	return &Queue{items: []int{}}
-}
-
-// Enqueue adds an element to the back of the queue
-// TODO: Implement this
-func (q *Queue) Enqueue(item int) {
-	// Your code here
-}
-
-// Dequeue removes and returns the front element
-// Returns -1 if queue is empty
-// TODO: Implement this
-func (q *Queue) Dequeue() int {
-	// Your code here
-	return -1
-}
-
-// Front returns the front element without removing it
-// Returns -1 if queue is empty
-// TODO: Implement this
-func (q *Queue) Front() int {
-	// Your code here
-	return -1
-}
-
-// IsEmpty returns true if the queue has no elements
-// TODO: Implement this
-func (q *Queue) IsEmpty() bool {
-	// Your code here
-	return true
-}
-
-// Size returns the number of elements in the queue
-// TODO: Implement this
-func (q *Queue) Size() int {
-	// Your code here
-	return 0
-}
-`
-
-var dsaQueueTestTmpl = `package queue
-
-import "testing"
-
-func TestEnqueue(t *testing.T) {
-	q := New()
-	q.Enqueue(1)
-	q.Enqueue(2)
-	q.Enqueue(3)
-
-	if q.Size() != 3 {
-		t.Errorf("Size() = %d; want 3", q.Size())
-	}
-}
-
-func TestDequeue(t *testing.T) {
-	q := New()
-	q.Enqueue(1)
-	q.Enqueue(2)
-	q.Enqueue(3)
-
-	// FIFO: first in, first out
-	if got := q.Dequeue(); got != 1 {
-		t.Errorf("Dequeue() = %d; want 1", got)
-	}
-	if got := q.Dequeue(); got != 2 {
-		t.Errorf("Dequeue() = %d; want 2", got)
-	}
-}
-
-func TestFront(t *testing.T) {
-	q := New()
-	q.Enqueue(42)
-	q.Enqueue(100)
-
-	if got := q.Front(); got != 42 {
-		t.Errorf("Front() = %d; want 42", got)
-	}
-	// Front shouldn't remove the element
-	if q.Size() != 2 {
-		t.Errorf("Size() after Front() = %d; want 2", q.Size())
-	}
-}
-`
-
-var dsaLinkedListTmpl = `package linkedlist
-
-// Node represents a node in the linked list
-type Node struct {
-	Value int
-	Next  *Node
-}
-
-// LinkedList represents a singly linked list
-type LinkedList struct {
-	Head *Node
-	size int
-}
-
-// New creates a new empty linked list
-func New() *LinkedList {
-	return &LinkedList{}
-}
-
-// Append adds a new node at the end
-// TODO: Implement this
-func (l *LinkedList) Append(value int) {
-	// Your code here
-}
-
-// Prepend adds a new node at the beginning
-// TODO: Implement this
-func (l *LinkedList) Prepend(value int) {
-	// Your code here
-}
-
-// Delete removes the first node with the given value
-// Returns true if deleted, false if not found
-// TODO: Implement this
-func (l *LinkedList) Delete(value int) bool {
-	// Your code here
-	return false
-}
-
-// Find returns true if value exists in the list
-// TODO: Implement this
-func (l *LinkedList) Find(value int) bool {
-	// Your code here
-	return false
-}
-
-// Size returns the number of nodes
-// TODO: Implement this
-func (l *LinkedList) Size() int {
-	// Your code here
-	return 0
-}
-
-// ToSlice converts the linked list to a slice (for testing)
-func (l *LinkedList) ToSlice() []int {
-	var result []int
-	current := l.Head
-	for current != nil {
-		result = append(result, current.Value)
-		current = current.Next
-	}
-	return result
-}
-`
-
-var dsaLinkedListTestTmpl = `package linkedlist
-
-import (
-	"reflect"
-	"testing"
-)
-
-func TestAppend(t *testing.T) {
-	l := New()
-	l.Append(1)
-	l.Append(2)
-	l.Append(3)
-
-	got := l.ToSlice()
-	want := []int{1, 2, 3}
-	if !reflect.DeepEqual(got, want) {
-		t.Errorf("ToSlice() = %v; want %v", got, want)
-	}
-}
-
-func TestPrepend(t *testing.T) {
-	l := New()
-	l.Prepend(1)
-	l.Prepend(2)
-	l.Prepend(3)
-
-	got := l.ToSlice()
-	want := []int{3, 2, 1}
-	if !reflect.DeepEqual(got, want) {
-		t.Errorf("ToSlice() = %v; want %v", got, want)
-	}
-}
-
-func TestDelete(t *testing.T) {
-	l := New()
-	l.Append(1)
-	l.Append(2)
-	l.Append(3)
-
-	if !l.Delete(2) {
-		t.Error("Delete(2) = false; want true")
-	}
-	got := l.ToSlice()
-	want := []int{1, 3}
-	if !reflect.DeepEqual(got, want) {
-		t.Errorf("ToSlice() after delete = %v; want %v", got, want)
-	}
-}
-
-func TestFind(t *testing.T) {
-	l := New()
-	l.Append(1)
-	l.Append(2)
-	l.Append(3)
-
-	if !l.Find(2) {
-		t.Error("Find(2) = false; want true")
-	}
-	if l.Find(99) {
-		t.Error("Find(99) = true; want false")
-	}
-}
-`
 
 var dsaSortingTmpl = `package sorting
 
@@ -2544,56 +1751,6 @@ func QuickSort(arr []int) []int {
 }
 `
 
-var dsaSortingTestTmpl = `package sorting
-
-import (
-	"reflect"
-	"testing"
-)
-
-func TestBubbleSort(t *testing.T) {
-	tests := []struct {
-		input []int
-		want  []int
-	}{
-		{[]int{5, 2, 8, 1, 9}, []int{1, 2, 5, 8, 9}},
-		{[]int{1, 2, 3}, []int{1, 2, 3}},
-		{[]int{3, 2, 1}, []int{1, 2, 3}},
-		{[]int{}, []int{}},
-	}
-
-	for _, tt := range tests {
-		got := BubbleSort(tt.input)
-		if !reflect.DeepEqual(got, tt.want) {
-			t.Errorf("BubbleSort(%v) = %v; want %v", tt.input, got, tt.want)
-		}
-	}
-}
-
-func TestInsertionSort(t *testing.T) {
-	got := InsertionSort([]int{5, 2, 8, 1, 9})
-	want := []int{1, 2, 5, 8, 9}
-	if !reflect.DeepEqual(got, want) {
-		t.Errorf("InsertionSort() = %v; want %v", got, want)
-	}
-}
-
-func TestMergeSort(t *testing.T) {
-	got := MergeSort([]int{5, 2, 8, 1, 9})
-	want := []int{1, 2, 5, 8, 9}
-	if !reflect.DeepEqual(got, want) {
-		t.Errorf("MergeSort() = %v; want %v", got, want)
-	}
-}
-
-func TestQuickSort(t *testing.T) {
-	got := QuickSort([]int{5, 2, 8, 1, 9})
-	want := []int{1, 2, 5, 8, 9}
-	if !reflect.DeepEqual(got, want) {
-		t.Errorf("QuickSort() = %v; want %v", got, want)
-	}
-}
-`
 
 var dsaSearchingTmpl = `package searching
 
@@ -2695,55 +1852,6 @@ func SumArray(arr []int) int {
 }
 `
 
-var dsaRecursionTestTmpl = `package recursion
-
-import "testing"
-
-func TestFactorial(t *testing.T) {
-	tests := []struct {
-		n    int
-		want int
-	}{
-		{0, 1},
-		{1, 1},
-		{5, 120},
-		{10, 3628800},
-	}
-
-	for _, tt := range tests {
-		if got := Factorial(tt.n); got != tt.want {
-			t.Errorf("Factorial(%d) = %d; want %d", tt.n, got, tt.want)
-		}
-	}
-}
-
-func TestFibonacci(t *testing.T) {
-	tests := []struct {
-		n    int
-		want int
-	}{
-		{0, 0},
-		{1, 1},
-		{2, 1},
-		{10, 55},
-	}
-
-	for _, tt := range tests {
-		if got := Fibonacci(tt.n); got != tt.want {
-			t.Errorf("Fibonacci(%d) = %d; want %d", tt.n, got, tt.want)
-		}
-	}
-}
-
-func TestReverseString(t *testing.T) {
-	if got := ReverseString("hello"); got != "olleh" {
-		t.Errorf("ReverseString(\"hello\") = %q; want \"olleh\"", got)
-	}
-}
-
-func TestSumArray(t *testing.T) {
-}
-`
 
 // ============== Skill Coding Templates ==============
 
@@ -2880,49 +1988,6 @@ func main() {
 }
 `
 
-var challengeDay02TestTmpl = `package main
-
-import "testing"
-
-func TestSwap(t *testing.T) {
-	a, b := Swap(1, 2)
-	if a != 2 || b != 1 {
-		t.Errorf("Swap(1, 2) = (%d, %d), want (2, 1)", a, b)
-	}
-}
-
-func TestIsEven(t *testing.T) {
-	tests := []struct {
-		n    int
-		want bool
-	}{
-		{0, true},
-		{1, false},
-		{2, true},
-		{-2, true},
-	}
-	for _, tt := range tests {
-		if got := IsEven(tt.n); got != tt.want {
-			t.Errorf("IsEven(%d) = %v, want %v", tt.n, got, tt.want)
-		}
-	}
-}
-
-func TestMax(t *testing.T) {
-	tests := []struct {
-		a, b, want int
-	}{
-		{5, 3, 5},
-		{1, 10, 10},
-		{7, 7, 7},
-	}
-	for _, tt := range tests {
-		if got := Max(tt.a, tt.b); got != tt.want {
-			t.Errorf("Max(%d, %d) = %d, want %d", tt.a, tt.b, got, tt.want)
-		}
-	}
-}
-`
 
 var challengeDay08Tmpl = `package main
 
@@ -3058,108 +2123,7 @@ func TestEchoHandler(t *testing.T) {
 }
 `
 
-var challengeDay22Tmpl = `package main
 
-import (
-	"fmt"
-	"sync"
-	"time"
-)
-
-// TODO: Implement ConcurrentSum
-// It should calculate sum of array elements using goroutines
-// Divide the array into chunks and sum each chunk concurrently
-func ConcurrentSum(nums []int, workers int) int {
-	// YOUR CODE HERE
-	return 0
-}
-
-// TODO: Implement WorkerPool
-// Create 'n' workers that process jobs from the jobs channel
-// Each worker should square the number and send to results channel
-func WorkerPool(jobs <-chan int, results chan<- int, n int) {
-	// YOUR CODE HERE
-}
-
-func main() {
-	nums := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
-	sum := ConcurrentSum(nums, 2)
-	fmt.Printf("ConcurrentSum = %d\n", sum)
-
-	// Worker pool example
-	jobs := make(chan int, 5)
-	results := make(chan int, 5)
-	
-	go WorkerPool(jobs, results, 3)
-	
-	for i := 1; i <= 5; i++ {
-		jobs <- i
-	}
-	close(jobs)
-	
-	time.Sleep(100 * time.Millisecond)
-	close(results)
-	
-	for r := range results {
-		fmt.Printf("Result: %d\n", r)
-	}
-}
-
-// Hint: You might need sync.WaitGroup
-var _ = sync.WaitGroup{}
-`
-
-var challengeDay22TestTmpl = `package main
-
-import (
-	"sort"
-	"testing"
-)
-
-func TestConcurrentSum(t *testing.T) {
-	tests := []struct {
-		nums    []int
-		workers int
-		want    int
-	}{
-		{[]int{1, 2, 3, 4, 5}, 2, 15},
-		{[]int{10, 20, 30}, 3, 60},
-		{[]int{}, 1, 0},
-	}
-	for _, tt := range tests {
-		got := ConcurrentSum(tt.nums, tt.workers)
-		if got != tt.want {
-			t.Errorf("ConcurrentSum(%v, %d) = %d, want %d", tt.nums, tt.workers, got, tt.want)
-		}
-	}
-}
-
-func TestWorkerPool(t *testing.T) {
-	jobs := make(chan int, 5)
-	results := make(chan int, 5)
-	
-	go WorkerPool(jobs, results, 3)
-	
-	for i := 1; i <= 5; i++ {
-		jobs <- i
-	}
-	close(jobs)
-	
-	var got []int
-	for i := 0; i < 5; i++ {
-		got = append(got, <-results)
-	}
-	
-	sort.Ints(got)
-	want := []int{1, 4, 9, 16, 25}
-	
-	for i, v := range got {
-		if v != want[i] {
-			t.Errorf("WorkerPool result mismatch at %d: got %d, want %d", i, v, want[i])
-		}
-	}
-}
-`
 
 // Mini-Project Templates
 var miniProjectReadmeTmpl = `# Mini Projects 🛠️
@@ -3369,76 +2333,6 @@ func main() {
 var _ = json.Marshal
 `
 
-var todoCliTestTmpl = `package main
-
-import (
-	"os"
-	"testing"
-)
-
-func TestTodoList(t *testing.T) {
-	// Clean up test file
-	os.Remove(dataFile)
-	defer os.Remove(dataFile)
-
-	tl := &TodoList{NextID: 1}
-
-	// Test Add
-	id1 := tl.Add("First todo")
-	if id1 != 1 {
-		t.Errorf("Add returned id %d, want 1", id1)
-	}
-
-	id2 := tl.Add("Second todo")
-	if id2 != 2 {
-		t.Errorf("Add returned id %d, want 2", id2)
-	}
-
-	// Test List
-	todos := tl.List()
-	if len(todos) != 2 {
-		t.Errorf("List returned %d todos, want 2", len(todos))
-	}
-
-	// Test Complete
-	err := tl.Complete(1)
-	if err != nil {
-		t.Errorf("Complete(1) returned error: %v", err)
-	}
-
-	todos = tl.List()
-	if !todos[0].Completed {
-		t.Error("Todo 1 should be completed")
-	}
-
-	// Test Complete non-existent
-	err = tl.Complete(999)
-	if err == nil {
-		t.Error("Complete(999) should return error")
-	}
-
-	// Test Delete
-	err = tl.Delete(1)
-	if err != nil {
-		t.Errorf("Delete(1) returned error: %v", err)
-	}
-
-	todos = tl.List()
-	if len(todos) != 1 {
-		t.Errorf("List returned %d todos after delete, want 1", len(todos))
-	}
-
-	// Test Save/Load
-	tl.Save()
-	loaded, err := Load()
-	if err != nil {
-		t.Errorf("Load returned error: %v", err)
-	}
-	if len(loaded.List()) != 1 {
-		t.Errorf("Loaded list has %d todos, want 1", len(loaded.List()))
-	}
-}
-`
 
 var urlShortenerReadmeTmpl = `# URL Shortener
 
@@ -3611,65 +2505,6 @@ var _ = rand.Read
 var _ = hex.EncodeToString
 `
 
-var urlShortenerTestTmpl = `package main
-
-import (
-	"testing"
-)
-
-func TestGenerateCode(t *testing.T) {
-	code := GenerateCode()
-	if len(code) != 6 {
-		t.Errorf("GenerateCode() returned %q (len=%d), want len=6", code, len(code))
-	}
-
-	code2 := GenerateCode()
-	if code == code2 {
-		t.Error("GenerateCode() returned same code twice")
-	}
-}
-
-func TestURLStore(t *testing.T) {
-	store := NewURLStore()
-
-	// Test Shorten with valid URL
-	code, err := store.Shorten("https://example.com")
-	if err != nil {
-		t.Errorf("Shorten returned error: %v", err)
-	}
-	if len(code) != 6 {
-		t.Errorf("Shorten returned code %q, want 6 chars", code)
-	}
-
-	// Test Shorten with invalid URL
-	_, err = store.Shorten("not-a-url")
-	if err == nil {
-		t.Error("Shorten should reject invalid URLs")
-	}
-
-	// Test Get
-	url, found := store.Get(code)
-	if !found {
-		t.Error("Get should find the shortened URL")
-	}
-	if url != "https://example.com" {
-		t.Errorf("Get returned %q, want %q", url, "https://example.com")
-	}
-
-	// Test Get increments visits
-	store.Get(code)
-	_, visits, _ := store.Stats(code)
-	if visits != 2 {
-		t.Errorf("Stats returned visits=%d, want 2", visits)
-	}
-
-	// Test Get with unknown code
-	_, found = store.Get("unknown")
-	if found {
-		t.Error("Get should not find unknown code")
-	}
-}
-`
 
 // Refactoring Exercise Templates
 var refactoringReadmeTmpl = `# Refactoring Exercises 🔧
@@ -3705,62 +2540,6 @@ Variables and functions with unclear names. Make them descriptive!
 Happy refactoring! 🧹
 `
 
-var refactoring01BeforeTmpl = `package main
-
-import "fmt"
-
-// This function does too many things - refactor it!
-func processOrder(items []string, quantities []int, prices []float64, customerName string, isVIP bool) {
-	// Calculate total
-	total := 0.0
-	for i := 0; i < len(items); i++ {
-		total += float64(quantities[i]) * prices[i]
-	}
-
-	// Apply discount
-	if isVIP {
-		total = total * 0.9
-	}
-	if total > 100 {
-		total = total * 0.95
-	}
-
-	// Calculate tax
-	tax := total * 0.1
-	finalTotal := total + tax
-
-	// Print receipt
-	fmt.Println("====== RECEIPT ======")
-	fmt.Printf("Customer: %s\n", customerName)
-	if isVIP {
-		fmt.Println("Status: VIP")
-	}
-	fmt.Println("---------------------")
-	for i := 0; i < len(items); i++ {
-		fmt.Printf("%s x%d @ $%.2f = $%.2f\n", items[i], quantities[i], prices[i], float64(quantities[i])*prices[i])
-	}
-	fmt.Println("---------------------")
-	fmt.Printf("Subtotal: $%.2f\n", total)
-	fmt.Printf("Tax (10%%): $%.2f\n", tax)
-	fmt.Printf("Total: $%.2f\n", finalTotal)
-	fmt.Println("=====================")
-
-	// Save to database (simulated)
-	fmt.Println("[DB] Saving order...")
-	fmt.Printf("[DB] Customer: %s, Total: $%.2f\n", customerName, finalTotal)
-
-	// Send email (simulated)
-	fmt.Println("[EMAIL] Sending confirmation...")
-	fmt.Printf("[EMAIL] To: %s, Subject: Order Confirmation\n", customerName)
-}
-
-func main() {
-	items := []string{"Apple", "Banana", "Orange"}
-	quantities := []int{3, 2, 5}
-	prices := []float64{1.00, 0.50, 0.75}
-	processOrder(items, quantities, prices, "John Doe", true)
-}
-`
 
 var refactoring01HintsTmpl = `# Hints for Exercise 01: Long Function
 
@@ -3820,68 +2599,6 @@ func ProcessOrder(order Order) {
 - More readable and maintainable
 `
 
-var refactoring02BeforeTmpl = `package main
-
-import "fmt"
-
-// This code has magic numbers - give them names!
-func calculateShipping(weight float64, distance float64, priority int) float64 {
-	base := weight * 0.5
-
-	if distance > 100 {
-		base *= 1.5
-	} else if distance > 50 {
-		base *= 1.25
-	}
-
-	switch priority {
-	case 1:
-		base *= 3.0
-	case 2:
-		base *= 2.0
-	case 3:
-		base *= 1.5
-	}
-
-	if base < 5.0 {
-		base = 5.0
-	}
-	if base > 500.0 {
-		base = 500.0
-	}
-
-	return base
-}
-
-func calculatePassword(length int) bool {
-	if length < 8 {
-		return false
-	}
-	if length > 128 {
-		return false
-	}
-	return true
-}
-
-func applyDiscount(price float64, code string) float64 {
-	switch code {
-	case "SAVE10":
-		return price * 0.9
-	case "SAVE20":
-		return price * 0.8
-	case "HALF":
-		return price * 0.5
-	default:
-		return price
-	}
-}
-
-func main() {
-	fmt.Printf("Shipping: $%.2f\n", calculateShipping(10, 75, 2))
-	fmt.Printf("Password valid: %v\n", calculatePassword(12))
-	fmt.Printf("After discount: $%.2f\n", applyDiscount(100, "SAVE20"))
-}
-`
 
 var refactoring02HintsTmpl = `# Hints for Exercise 02: Magic Numbers
 
@@ -3944,78 +2661,6 @@ var discounts = map[string]float64{
 - More readable conditions
 `
 
-var refactoring03BeforeTmpl = `package main
-
-import "fmt"
-
-// This code has poor naming - make it descriptive!
-func calc(a []int) int {
-	t := 0
-	for _, v := range a {
-		t += v
-	}
-	return t
-}
-
-func f(s string) string {
-	r := ""
-	for i := len(s) - 1; i >= 0; i-- {
-		r += string(s[i])
-	}
-	return r
-}
-
-func proc(d []map[string]interface{}) []string {
-	res := []string{}
-	for _, item := range d {
-		n, ok := item["n"].(string)
-		if !ok {
-			continue
-		}
-		a, ok := item["a"].(int)
-		if !ok || a < 18 {
-			continue
-		}
-		res = append(res, n)
-	}
-	return res
-}
-
-type U struct {
-	N string
-	E string
-	P string
-}
-
-func (u *U) V() bool {
-	if len(u.N) < 2 {
-		return false
-	}
-	if len(u.E) < 5 {
-		return false
-	}
-	if len(u.P) < 8 {
-		return false
-	}
-	return true
-}
-
-func main() {
-	nums := []int{1, 2, 3, 4, 5}
-	fmt.Println("Result:", calc(nums))
-	fmt.Println("Reversed:", f("hello"))
-
-	data := []map[string]interface{}{
-		{"n": "Alice", "a": 25},
-		{"n": "Bob", "a": 17},
-		{"n": "Charlie", "a": 30},
-	}
-	fmt.Println("Adults:", proc(data))
-
-	user := &U{N: "Al", E: "a@b.co", P: "password123"}
-	fmt.Println("Valid:", user.V())
-}
-`
 
 var refactoring03HintsTmpl = `# Hints for Exercise 03: Poor Naming
 
@@ -4132,293 +2777,10 @@ func FindIndex(slice []int, target int) int {
 }
 `
 
-var codeReview01TestTmpl = `package main
 
-import (
-	"reflect"
-	"testing"
-)
 
-func TestGetLastN(t *testing.T) {
-	tests := []struct {
-		slice []int
-		n     int
-		want  []int
-	}{
-		{[]int{1, 2, 3, 4, 5}, 3, []int{3, 4, 5}},
-		{[]int{1, 2, 3}, 5, []int{1, 2, 3}},
-		{[]int{1, 2, 3}, 0, []int{}},
-		{[]int{}, 3, []int{}},
-		{[]int{1, 2, 3, 4, 5}, 1, []int{5}},
-	}
 
-	for _, tt := range tests {
-		got := GetLastN(tt.slice, tt.n)
-		if !reflect.DeepEqual(got, tt.want) {
-			t.Errorf("GetLastN(%v, %d) = %v, want %v", tt.slice, tt.n, got, tt.want)
-		}
-	}
-}
 
-func TestFindIndex(t *testing.T) {
-	slice := []int{10, 20, 30, 40, 50}
-
-	tests := []struct {
-		target int
-		want   int
-	}{
-		{10, 0},
-		{30, 2},
-		{50, 4},
-		{99, -1},
-	}
-
-	for _, tt := range tests {
-		got := FindIndex(slice, tt.target)
-		if got != tt.want {
-			t.Errorf("FindIndex(slice, %d) = %d, want %d", tt.target, got, tt.want)
-		}
-	}
-}
-`
-
-var codeReview02BuggyTmpl = `package main
-
-import "fmt"
-
-// BUG: This code has nil pointer issues
-// Can you find and fix them?
-
-type Person struct {
-	Name    string
-	Address *Address
-}
-
-type Address struct {
-	Street string
-	City   string
-}
-
-// GetCity returns the city of a person
-func GetCity(p *Person) string {
-	// Bug: what if p is nil? what if p.Address is nil?
-	return p.Address.City
-}
-
-// FormatAddress returns formatted address
-func FormatAddress(p *Person) string {
-	return fmt.Sprintf("%s, %s", p.Address.Street, p.Address.City)
-}
-
-type Config struct {
-	Database *DatabaseConfig
-}
-
-type DatabaseConfig struct {
-	Host string
-	Port int
-}
-
-// GetDatabaseHost returns the database host from config
-func GetDatabaseHost(cfg *Config) string {
-	// Bug: nil checks missing
-	return cfg.Database.Host
-}
-`
-
-var codeReview02TestTmpl = `package main
-
-import "testing"
-
-func TestGetCity(t *testing.T) {
-	// Test with valid person
-	p := &Person{
-		Name:    "Alice",
-		Address: &Address{City: "NYC", Street: "123 Main St"},
-	}
-	if got := GetCity(p); got != "NYC" {
-		t.Errorf("GetCity(valid) = %q, want %q", got, "NYC")
-	}
-
-	// Test with nil person - should not panic
-	defer func() {
-		if r := recover(); r != nil {
-			t.Error("GetCity(nil) panicked, should return empty string")
-		}
-	}()
-	if got := GetCity(nil); got != "" {
-		t.Errorf("GetCity(nil) = %q, want empty", got)
-	}
-
-	// Test with nil address - should not panic
-	p2 := &Person{Name: "Bob", Address: nil}
-	if got := GetCity(p2); got != "" {
-		t.Errorf("GetCity(nil address) = %q, want empty", got)
-	}
-}
-
-func TestFormatAddress(t *testing.T) {
-	p := &Person{
-		Name:    "Alice",
-		Address: &Address{Street: "123 Main St", City: "NYC"},
-	}
-	want := "123 Main St, NYC"
-	if got := FormatAddress(p); got != want {
-		t.Errorf("FormatAddress(valid) = %q, want %q", got, want)
-	}
-
-	// Should handle nil gracefully
-	defer func() {
-		if r := recover(); r != nil {
-			t.Error("FormatAddress(nil) panicked")
-		}
-	}()
-	FormatAddress(nil)
-	FormatAddress(&Person{Name: "Bob"})
-}
-
-func TestGetDatabaseHost(t *testing.T) {
-	cfg := &Config{
-		Database: &DatabaseConfig{Host: "localhost", Port: 5432},
-	}
-	if got := GetDatabaseHost(cfg); got != "localhost" {
-		t.Errorf("GetDatabaseHost(valid) = %q, want %q", got, "localhost")
-	}
-
-	// Should handle nil gracefully
-	defer func() {
-		if r := recover(); r != nil {
-			t.Error("GetDatabaseHost panicked with nil")
-		}
-	}()
-	GetDatabaseHost(nil)
-	GetDatabaseHost(&Config{})
-}
-`
-
-var codeReview03BuggyTmpl = `package main
-
-import (
-	"sync"
-)
-
-// BUG: This code has race conditions
-// Run with: go test -race
-// Can you find and fix them?
-
-type Counter struct {
-	value int
-}
-
-// Increment adds 1 to the counter
-// BUG: Not safe for concurrent access
-func (c *Counter) Increment() {
-	c.value++
-}
-
-// Value returns the current counter value
-func (c *Counter) Value() int {
-	return c.value
-}
-
-// BUG: This map has race conditions
-var cache = make(map[string]string)
-
-func GetFromCache(key string) (string, bool) {
-	val, ok := cache[key]
-	return val, ok
-}
-
-func SetCache(key, value string) {
-	cache[key] = value
-}
-
-// BUG: This slice append has race conditions
-type Logger struct {
-	logs []string
-}
-
-func (l *Logger) Log(msg string) {
-	l.logs = append(l.logs, msg)
-}
-
-func (l *Logger) GetLogs() []string {
-	return l.logs
-}
-
-// Hint: You'll need sync.Mutex or sync.RWMutex
-var _ = sync.Mutex{}
-`
-
-var codeReview03TestTmpl = `package main
-
-import (
-	"sync"
-	"testing"
-)
-
-func TestCounterConcurrent(t *testing.T) {
-	c := &Counter{}
-	var wg sync.WaitGroup
-	
-	// 100 goroutines each incrementing 100 times
-	for i := 0; i < 100; i++ {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			for j := 0; j < 100; j++ {
-				c.Increment()
-			}
-		}()
-	}
-	
-	wg.Wait()
-	
-	if c.Value() != 10000 {
-		t.Errorf("Counter = %d, want 10000", c.Value())
-	}
-}
-
-func TestCacheConcurrent(t *testing.T) {
-	var wg sync.WaitGroup
-	
-	// Concurrent writes
-	for i := 0; i < 100; i++ {
-		wg.Add(1)
-		go func(n int) {
-			defer wg.Done()
-			key := string(rune('a' + n%26))
-			SetCache(key, "value")
-			GetFromCache(key)
-		}(i)
-	}
-	
-	wg.Wait()
-	// If we get here without panic, the test passes
-}
-
-func TestLoggerConcurrent(t *testing.T) {
-	l := &Logger{}
-	var wg sync.WaitGroup
-	
-	// 100 goroutines each logging 10 times
-	for i := 0; i < 100; i++ {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			for j := 0; j < 10; j++ {
-				l.Log("message")
-			}
-		}()
-	}
-	
-	wg.Wait()
-	
-	if len(l.GetLogs()) != 1000 {
-		t.Errorf("Logger has %d logs, want 1000", len(l.GetLogs()))
-	}
-}
-`
 
 // ============== Learn Generics Templates ==============
 
@@ -5304,64 +3666,6 @@ func TestStrategy(t *testing.T) {
 
 // ============== Go Microservice Templates ==============
 
-var microserviceMainTmpl = `package main
-
-import (
-	"context"
-	"log"
-	"net/http"
-	"os"
-	"os/signal"
-	"syscall"
-	"time"
-
-	"{{.ProjectName}}/internal/handler"
-	"{{.ProjectName}}/internal/health"
-	"{{.ProjectName}}/internal/middleware"
-)
-
-func main() {
-	mux := http.NewServeMux()
-	
-	// Health endpoints
-	mux.HandleFunc("/health", health.HealthHandler)
-	mux.HandleFunc("/ready", health.ReadyHandler)
-	
-	// API endpoints
-	mux.HandleFunc("/api/", handler.APIHandler)
-	
-	// Apply middleware
-	h := middleware.Logging(mux)
-	
-	srv := &http.Server{
-		Addr:         ":8080",
-		Handler:      h,
-		ReadTimeout:  5 * time.Second,
-		WriteTimeout: 10 * time.Second,
-	}
-	
-	// Graceful shutdown
-	go func() {
-		log.Println("Server starting on :8080")
-		if err := srv.ListenAndServe(); err != http.ErrServerClosed {
-			log.Fatalf("Server error: %v", err)
-		}
-	}()
-	
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-	<-quit
-	
-	log.Println("Shutting down...")
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
-	
-	if err := srv.Shutdown(ctx); err != nil {
-		log.Fatalf("Shutdown error: %v", err)
-	}
-	log.Println("Server stopped")
-}
-`
 
 var microserviceHandlerTmpl = `package handler
 
@@ -5468,74 +3772,6 @@ func main() {
 }
 `
 
-var websocketHubTmpl = `package hub
-
-import (
-	"log"
-	"net/http"
-
-	"github.com/gorilla/websocket"
-)
-
-var upgrader = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool { return true },
-}
-
-type Hub struct {
-	clients    map[*Client]bool
-	broadcast  chan []byte
-	register   chan *Client
-	unregister chan *Client
-}
-
-func NewHub() *Hub {
-	return &Hub{
-		clients:    make(map[*Client]bool),
-		broadcast:  make(chan []byte),
-		register:   make(chan *Client),
-		unregister: make(chan *Client),
-	}
-}
-
-func (h *Hub) Run() {
-	for {
-		select {
-		case client := <-h.register:
-			h.clients[client] = true
-		case client := <-h.unregister:
-			if _, ok := h.clients[client]; ok {
-				delete(h.clients, client)
-				close(client.send)
-			}
-		case message := <-h.broadcast:
-			for client := range h.clients {
-				select {
-				case client.send <- message:
-				default:
-					close(client.send)
-					delete(h.clients, client)
-				}
-			}
-		}
-	}
-}
-
-func ServeWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
-	conn, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256)}
-	hub.register <- client
-	go client.writePump()
-	go client.readPump()
-}
-
-func (h *Hub) Broadcast(msg []byte) {
-	h.broadcast <- msg
-}
-`
 
 var websocketClientTmpl = `package hub
 

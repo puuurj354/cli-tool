@@ -1,0 +1,50 @@
+package main
+
+import (
+	"sort"
+	"testing"
+)
+
+func TestConcurrentSum(t *testing.T) {
+	tests := []struct {
+		nums    []int
+		workers int
+		want    int
+	}{
+		{[]int{1, 2, 3, 4, 5}, 2, 15},
+		{[]int{10, 20, 30}, 3, 60},
+		{[]int{}, 1, 0},
+	}
+	for _, tt := range tests {
+		got := ConcurrentSum(tt.nums, tt.workers)
+		if got != tt.want {
+			t.Errorf("ConcurrentSum(%v, %d) = %d, want %d", tt.nums, tt.workers, got, tt.want)
+		}
+	}
+}
+
+func TestWorkerPool(t *testing.T) {
+	jobs := make(chan int, 5)
+	results := make(chan int, 5)
+	
+	go WorkerPool(jobs, results, 3)
+	
+	for i := 1; i <= 5; i++ {
+		jobs <- i
+	}
+	close(jobs)
+	
+	var got []int
+	for i := 0; i < 5; i++ {
+		got = append(got, <-results)
+	}
+	
+	sort.Ints(got)
+	want := []int{1, 4, 9, 16, 25}
+	
+	for i, v := range got {
+		if v != want[i] {
+			t.Errorf("WorkerPool result mismatch at %d: got %d, want %d", i, v, want[i])
+		}
+	}
+}

@@ -1,0 +1,52 @@
+package main
+
+import (
+	"sync"
+)
+
+// BUG: This code has race conditions
+// Run with: go test -race
+// Can you find and fix them?
+
+type Counter struct {
+	value int
+}
+
+// Increment adds 1 to the counter
+// BUG: Not safe for concurrent access
+func (c *Counter) Increment() {
+	c.value++
+}
+
+// Value returns the current counter value
+func (c *Counter) Value() int {
+	return c.value
+}
+
+// BUG: This map has race conditions
+var cache = make(map[string]string)
+
+func GetFromCache(key string) (string, bool) {
+	val, ok := cache[key]
+	return val, ok
+}
+
+func SetCache(key, value string) {
+	cache[key] = value
+}
+
+// BUG: This slice append has race conditions
+type Logger struct {
+	logs []string
+}
+
+func (l *Logger) Log(msg string) {
+	l.logs = append(l.logs, msg)
+}
+
+func (l *Logger) GetLogs() []string {
+	return l.logs
+}
+
+// Hint: You'll need sync.Mutex or sync.RWMutex
+var _ = sync.Mutex{}

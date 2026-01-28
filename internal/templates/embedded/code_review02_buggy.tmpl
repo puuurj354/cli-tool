@@ -1,0 +1,42 @@
+package main
+
+import "fmt"
+
+// BUG: This code has nil pointer issues
+// Can you find and fix them?
+
+type Person struct {
+	Name    string
+	Address *Address
+}
+
+type Address struct {
+	Street string
+	City   string
+}
+
+// GetCity returns the city of a person
+func GetCity(p *Person) string {
+	// Bug: what if p is nil? what if p.Address is nil?
+	return p.Address.City
+}
+
+// FormatAddress returns formatted address
+func FormatAddress(p *Person) string {
+	return fmt.Sprintf("%s, %s", p.Address.Street, p.Address.City)
+}
+
+type Config struct {
+	Database *DatabaseConfig
+}
+
+type DatabaseConfig struct {
+	Host string
+	Port int
+}
+
+// GetDatabaseHost returns the database host from config
+func GetDatabaseHost(cfg *Config) string {
+	// Bug: nil checks missing
+	return cfg.Database.Host
+}

@@ -1,0 +1,61 @@
+package main
+
+import "fmt"
+
+// This code has magic numbers - give them names!
+func calculateShipping(weight float64, distance float64, priority int) float64 {
+	base := weight * 0.5
+
+	if distance > 100 {
+		base *= 1.5
+	} else if distance > 50 {
+		base *= 1.25
+	}
+
+	switch priority {
+	case 1:
+		base *= 3.0
+	case 2:
+		base *= 2.0
+	case 3:
+		base *= 1.5
+	}
+
+	if base < 5.0 {
+		base = 5.0
+	}
+	if base > 500.0 {
+		base = 500.0
+	}
+
+	return base
+}
+
+func calculatePassword(length int) bool {
+	if length < 8 {
+		return false
+	}
+	if length > 128 {
+		return false
+	}
+	return true
+}
+
+func applyDiscount(price float64, code string) float64 {
+	switch code {
+	case "SAVE10":
+		return price * 0.9
+	case "SAVE20":
+		return price * 0.8
+	case "HALF":
+		return price * 0.5
+	default:
+		return price
+	}
+}
+
+func main() {
+	fmt.Printf("Shipping: $%.2f\n", calculateShipping(10, 75, 2))
+	fmt.Printf("Password valid: %v\n", calculatePassword(12))
+	fmt.Printf("After discount: $%.2f\n", applyDiscount(100, "SAVE20"))
+}

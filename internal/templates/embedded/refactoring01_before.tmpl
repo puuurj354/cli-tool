@@ -1,0 +1,55 @@
+package main
+
+import "fmt"
+
+// This function does too many things - refactor it!
+func processOrder(items []string, quantities []int, prices []float64, customerName string, isVIP bool) {
+	// Calculate total
+	total := 0.0
+	for i := 0; i < len(items); i++ {
+		total += float64(quantities[i]) * prices[i]
+	}
+
+	// Apply discount
+	if isVIP {
+		total = total * 0.9
+	}
+	if total > 100 {
+		total = total * 0.95
+	}
+
+	// Calculate tax
+	tax := total * 0.1
+	finalTotal := total + tax
+
+	// Print receipt
+	fmt.Println("====== RECEIPT ======")
+	fmt.Printf("Customer: %s\n", customerName)
+	if isVIP {
+		fmt.Println("Status: VIP")
+	}
+	fmt.Println("---------------------")
+	for i := 0; i < len(items); i++ {
+		fmt.Printf("%s x%d @ $%.2f = $%.2f\n", items[i], quantities[i], prices[i], float64(quantities[i])*prices[i])
+	}
+	fmt.Println("---------------------")
+	fmt.Printf("Subtotal: $%.2f\n", total)
+	fmt.Printf("Tax (10%%): $%.2f\n", tax)
+	fmt.Printf("Total: $%.2f\n", finalTotal)
+	fmt.Println("=====================")
+
+	// Save to database (simulated)
+	fmt.Println("[DB] Saving order...")
+	fmt.Printf("[DB] Customer: %s, Total: $%.2f\n", customerName, finalTotal)
+
+	// Send email (simulated)
+	fmt.Println("[EMAIL] Sending confirmation...")
+	fmt.Printf("[EMAIL] To: %s, Subject: Order Confirmation\n", customerName)
+}
+
+func main() {
+	items := []string{"Apple", "Banana", "Orange"}
+	quantities := []int{3, 2, 5}
+	prices := []float64{1.00, 0.50, 0.75}
+	processOrder(items, quantities, prices, "John Doe", true)
+}

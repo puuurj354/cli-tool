@@ -1,0 +1,68 @@
+package main
+
+import "testing"
+
+func TestGetCity(t *testing.T) {
+	// Test with valid person
+	p := &Person{
+		Name:    "Alice",
+		Address: &Address{City: "NYC", Street: "123 Main St"},
+	}
+	if got := GetCity(p); got != "NYC" {
+		t.Errorf("GetCity(valid) = %q, want %q", got, "NYC")
+	}
+
+	// Test with nil person - should not panic
+	defer func() {
+		if r := recover(); r != nil {
+			t.Error("GetCity(nil) panicked, should return empty string")
+		}
+	}()
+	if got := GetCity(nil); got != "" {
+		t.Errorf("GetCity(nil) = %q, want empty", got)
+	}
+
+	// Test with nil address - should not panic
+	p2 := &Person{Name: "Bob", Address: nil}
+	if got := GetCity(p2); got != "" {
+		t.Errorf("GetCity(nil address) = %q, want empty", got)
+	}
+}
+
+func TestFormatAddress(t *testing.T) {
+	p := &Person{
+		Name:    "Alice",
+		Address: &Address{Street: "123 Main St", City: "NYC"},
+	}
+	want := "123 Main St, NYC"
+	if got := FormatAddress(p); got != want {
+		t.Errorf("FormatAddress(valid) = %q, want %q", got, want)
+	}
+
+	// Should handle nil gracefully
+	defer func() {
+		if r := recover(); r != nil {
+			t.Error("FormatAddress(nil) panicked")
+		}
+	}()
+	FormatAddress(nil)
+	FormatAddress(&Person{Name: "Bob"})
+}
+
+func TestGetDatabaseHost(t *testing.T) {
+	cfg := &Config{
+		Database: &DatabaseConfig{Host: "localhost", Port: 5432},
+	}
+	if got := GetDatabaseHost(cfg); got != "localhost" {
+		t.Errorf("GetDatabaseHost(valid) = %q, want %q", got, "localhost")
+	}
+
+	// Should handle nil gracefully
+	defer func() {
+		if r := recover(); r != nil {
+			t.Error("GetDatabaseHost panicked with nil")
+		}
+	}()
+	GetDatabaseHost(nil)
+	GetDatabaseHost(&Config{})
+}

@@ -1,0 +1,43 @@
+package queue
+
+import "testing"
+
+func TestEnqueue(t *testing.T) {
+	q := New()
+	q.Enqueue(1)
+	q.Enqueue(2)
+	q.Enqueue(3)
+
+	if q.Size() != 3 {
+		t.Errorf("Size() = %d; want 3", q.Size())
+	}
+}
+
+func TestDequeue(t *testing.T) {
+	q := New()
+	q.Enqueue(1)
+	q.Enqueue(2)
+	q.Enqueue(3)
+
+	// FIFO: first in, first out
+	if got := q.Dequeue(); got != 1 {
+		t.Errorf("Dequeue() = %d; want 1", got)
+	}
+	if got := q.Dequeue(); got != 2 {
+		t.Errorf("Dequeue() = %d; want 2", got)
+	}
+}
+
+func TestFront(t *testing.T) {
+	q := New()
+	q.Enqueue(42)
+	q.Enqueue(100)
+
+	if got := q.Front(); got != 42 {
+		t.Errorf("Front() = %d; want 42", got)
+	}
+	// Front shouldn't remove the element
+	if q.Size() != 2 {
+		t.Errorf("Size() after Front() = %d; want 2", q.Size())
+	}
+}

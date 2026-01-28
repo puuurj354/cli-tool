@@ -1,0 +1,49 @@
+package main
+
+import (
+	"fmt"
+	"sync"
+	"time"
+)
+
+// TODO: Implement ConcurrentSum
+// It should calculate sum of array elements using goroutines
+// Divide the array into chunks and sum each chunk concurrently
+func ConcurrentSum(nums []int, workers int) int {
+	// YOUR CODE HERE
+	return 0
+}
+
+// TODO: Implement WorkerPool
+// Create 'n' workers that process jobs from the jobs channel
+// Each worker should square the number and send to results channel
+func WorkerPool(jobs <-chan int, results chan<- int, n int) {
+	// YOUR CODE HERE
+}
+
+func main() {
+	nums := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+	sum := ConcurrentSum(nums, 2)
+	fmt.Printf("ConcurrentSum = %d\n", sum)
+
+	// Worker pool example
+	jobs := make(chan int, 5)
+	results := make(chan int, 5)
+	
+	go WorkerPool(jobs, results, 3)
+	
+	for i := 1; i <= 5; i++ {
+		jobs <- i
+	}
+	close(jobs)
+	
+	time.Sleep(100 * time.Millisecond)
+	close(results)
+	
+	for r := range results {
+		fmt.Printf("Result: %d\n", r)
+	}
+}
+
+// Hint: You might need sync.WaitGroup
+var _ = sync.WaitGroup{}

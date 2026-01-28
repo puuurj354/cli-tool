@@ -1,0 +1,63 @@
+package linkedlist
+
+// Node represents a node in the linked list
+type Node struct {
+	Value int
+	Next  *Node
+}
+
+// LinkedList represents a singly linked list
+type LinkedList struct {
+	Head *Node
+	size int
+}
+
+// New creates a new empty linked list
+func New() *LinkedList {
+	return &LinkedList{}
+}
+
+// Append adds a new node at the end
+// TODO: Implement this
+func (l *LinkedList) Append(value int) {
+	// Your code here
+}
+
+// Prepend adds a new node at the beginning
+// TODO: Implement this
+func (l *LinkedList) Prepend(value int) {
+	// Your code here
+}
+
+// Delete removes the first node with the given value
+// Returns true if deleted, false if not found
+// TODO: Implement this
+func (l *LinkedList) Delete(value int) bool {
+	// Your code here
+	return false
+}
+
+// Find returns true if value exists in the list
+// TODO: Implement this
+func (l *LinkedList) Find(value int) bool {
+	// Your code here
+	return false
+}
+
+// Size returns the number of nodes
+// TODO: Implement this
+func (l *LinkedList) Size() int {
+	// Your code here
+	return 0
+}
+
+// ToSlice converts the linked list to a slice (for testing)
+func (l *LinkedList) ToSlice() []int {
+	var result []int
+	current := l.Head
+	for current != nil {
+		result = append(result, current.Value)
+		current = current.Next
+	}
+	return result
+}

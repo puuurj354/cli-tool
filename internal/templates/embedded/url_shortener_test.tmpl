@@ -1,0 +1,58 @@
+package main
+
+import (
+	"testing"
+)
+
+func TestGenerateCode(t *testing.T) {
+	code := GenerateCode()
+	if len(code) != 6 {
+		t.Errorf("GenerateCode() returned %q (len=%d), want len=6", code, len(code))
+	}
+
+	code2 := GenerateCode()
+	if code == code2 {
+		t.Error("GenerateCode() returned same code twice")
+	}
+}
+
+func TestURLStore(t *testing.T) {
+	store := NewURLStore()
+
+	// Test Shorten with valid URL
+	code, err := store.Shorten("https://example.com")
+	if err != nil {
+		t.Errorf("Shorten returned error: %v", err)
+	}
+	if len(code) != 6 {
+		t.Errorf("Shorten returned code %q, want 6 chars", code)
+	}
+
+	// Test Shorten with invalid URL
+	_, err = store.Shorten("not-a-url")
+	if err == nil {
+		t.Error("Shorten should reject invalid URLs")
+	}
+
+	// Test Get
+	url, found := store.Get(code)
+	if !found {
+		t.Error("Get should find the shortened URL")
+	}
+	if url != "https://example.com" {
+		t.Errorf("Get returned %q, want %q", url, "https://example.com")
+	}
+
+	// Test Get increments visits
+	store.Get(code)
+	_, visits, _ := store.Stats(code)
+	if visits != 2 {
+		t.Errorf("Stats returned visits=%d, want 2", visits)
+	}
+
+	// Test Get with unknown code
+	_, found = store.Get("unknown")
+	if found {
+		t.Error("Get should not find unknown code")
+	}
+}

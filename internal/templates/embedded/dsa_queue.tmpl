@@ -1,0 +1,47 @@
+package queue
+
+// Queue represents a FIFO data structure
+type Queue struct {
+	items []int
+}
+
+// New creates a new empty queue
+func New() *Queue {
+	return &Queue{items: []int{}}
+}
+
+// Enqueue adds an element to the back of the queue
+// TODO: Implement this
+func (q *Queue) Enqueue(item int) {
+	// Your code here
+}
+
+// Dequeue removes and returns the front element
+// Returns -1 if queue is empty
+// TODO: Implement this
+func (q *Queue) Dequeue() int {
+	// Your code here
+	return -1
+}
+
+// Front returns the front element without removing it
+// Returns -1 if queue is empty
+// TODO: Implement this
+func (q *Queue) Front() int {
+	// Your code here
+	return -1
+}
+
+// IsEmpty returns true if the queue has no elements
+// TODO: Implement this
+func (q *Queue) IsEmpty() bool {
+	// Your code here
+	return true
+}
+
+// Size returns the number of elements in the queue
+// TODO: Implement this
+func (q *Queue) Size() int {
+	// Your code here
+	return 0
+}

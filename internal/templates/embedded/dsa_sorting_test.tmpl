@@ -1,0 +1,49 @@
+package sorting
+
+import (
+	"reflect"
+	"testing"
+)
+
+func TestBubbleSort(t *testing.T) {
+	tests := []struct {
+		input []int
+		want  []int
+	}{
+		{[]int{5, 2, 8, 1, 9}, []int{1, 2, 5, 8, 9}},
+		{[]int{1, 2, 3}, []int{1, 2, 3}},
+		{[]int{3, 2, 1}, []int{1, 2, 3}},
+		{[]int{}, []int{}},
+	}
+
+	for _, tt := range tests {
+		got := BubbleSort(tt.input)
+		if !reflect.DeepEqual(got, tt.want) {
+			t.Errorf("BubbleSort(%v) = %v; want %v", tt.input, got, tt.want)
+		}
+	}
+}
+
+func TestInsertionSort(t *testing.T) {
+	got := InsertionSort([]int{5, 2, 8, 1, 9})
+	want := []int{1, 2, 5, 8, 9}
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("InsertionSort() = %v; want %v", got, want)
+	}
+}
+
+func TestMergeSort(t *testing.T) {
+	got := MergeSort([]int{5, 2, 8, 1, 9})
+	want := []int{1, 2, 5, 8, 9}
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("MergeSort() = %v; want %v", got, want)
+	}
+}
+
+func TestQuickSort(t *testing.T) {
+	got := QuickSort([]int{5, 2, 8, 1, 9})
+	want := []int{1, 2, 5, 8, 9}
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("QuickSort() = %v; want %v", got, want)
+	}
+}

@@ -1,0 +1,49 @@
+package table
+
+import "testing"
+
+func TestIsValidEmail(t *testing.T) {
+	tests := []struct {
+		name  string
+		email string
+		want  bool
+	}{
+		{"valid email", "user@example.com", true},
+		{"valid with subdomain", "user@mail.example.com", true},
+		{"missing @", "userexample.com", false},
+		{"missing domain", "user@", false},
+		{"empty string", "", false},
+		{"with plus", "user+tag@example.com", true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := IsValidEmail(tt.email)
+			if got != tt.want {
+				t.Errorf("IsValidEmail(%q) = %v; want %v", tt.email, got, tt.want)
+			}
+		})
+	}
+}
+
+func TestIsValidAge(t *testing.T) {
+	tests := []struct {
+		age  int
+		want bool
+	}{
+		{0, true},
+		{25, true},
+		{150, true},
+		{-1, false},
+		{151, false},
+	}
+
+	for _, tt := range tests {
+		t.Run("", func(t *testing.T) {
+			got := IsValidAge(tt.age)
+			if got != tt.want {
+				t.Errorf("IsValidAge(%d) = %v; want %v", tt.age, got, tt.want)
+			}
+		})
+	}
+}

@@ -1,0 +1,48 @@
+package main
+
+import (
+	"reflect"
+	"testing"
+)
+
+func TestGetLastN(t *testing.T) {
+	tests := []struct {
+		slice []int
+		n     int
+		want  []int
+	}{
+		{[]int{1, 2, 3, 4, 5}, 3, []int{3, 4, 5}},
+		{[]int{1, 2, 3}, 5, []int{1, 2, 3}},
+		{[]int{1, 2, 3}, 0, []int{}},
+		{[]int{}, 3, []int{}},
+		{[]int{1, 2, 3, 4, 5}, 1, []int{5}},
+	}
+
+	for _, tt := range tests {
+		got := GetLastN(tt.slice, tt.n)
+		if !reflect.DeepEqual(got, tt.want) {
+			t.Errorf("GetLastN(%v, %d) = %v, want %v", tt.slice, tt.n, got, tt.want)
+		}
+	}
+}
+
+func TestFindIndex(t *testing.T) {
+	slice := []int{10, 20, 30, 40, 50}
+
+	tests := []struct {
+		target int
+		want   int
+	}{
+		{10, 0},
+		{30, 2},
+		{50, 4},
+		{99, -1},
+	}
+
+	for _, tt := range tests {
+		got := FindIndex(slice, tt.target)
+		if got != tt.want {
+			t.Errorf("FindIndex(slice, %d) = %d, want %d", tt.target, got, tt.want)
+		}
+	}
+}

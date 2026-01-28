@@ -1,0 +1,49 @@
+package main
+
+import (
+	"fmt"
+	"time"
+)
+
+func main() {
+	ch1 := make(chan string)
+	ch2 := make(chan string)
+
+	go func() {
+		time.Sleep(50 * time.Millisecond)
+		ch1 <- "from channel 1"
+	}()
+
+	go func() {
+		time.Sleep(100 * time.Millisecond)
+		ch2 <- "from channel 2"
+	}()
+
+	// Select receives from whichever channel is ready first
+	for i := 0; i < 2; i++ {
+		select {
+		case msg1 := <-ch1:
+			fmt.Println("Received", msg1)
+		case msg2 := <-ch2:
+			fmt.Println("Received", msg2)
+		}
+	}
+
+	// Select with timeout
+	timeout := make(chan string)
+	select {
+	case msg := <-timeout:
+		fmt.Println(msg)
+	case <-time.After(10 * time.Millisecond):
+		fmt.Println("Timeout!")
+	}
+
+	// Non-blocking select with default
+	nonBlocking := make(chan string)
+	select {
+	case msg := <-nonBlocking:
+		fmt.Println(msg)
+	default:
+		fmt.Println("No message available")
+	}
+}
