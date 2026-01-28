@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaScript Basics - Learn Frontend</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .card {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #5568d3;
+        }
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        .output {
+            background: #f8f9fa;
+            padding: 10px;
+            border-left: 4px solid #667eea;
+            margin-top: 10px;
+        }
+        input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>⚡ JavaScript Basics</h1>
+        <p>Learn modern JavaScript (ES6+)</p>
+    </div>
+
+    <div class="card">
+        <h2>Variables & Data Types</h2>
+        <pre>
+// Variables
+const name = 'John';  // Cannot be reassigned
+let age = 25;         // Can be reassigned
+var old = 'avoid';    // Old style, avoid
+
+// Data Types
+const str = 'Hello';
+const num = 42;
+const bool = true;
+const arr = [1, 2, 3];
+const obj = { name: 'John', age: 25 };
+        </pre>
+        <button onclick="demoVariables()">Run Demo</button>
+        <div id="variables-output" class="output" style="display:none;"></div>
+    </div>
+
+    <div class="card">
+        <h2>Functions</h2>
+        <pre>
+// Regular function
+function greet(name) {
+    return `Hello, ${name}!`;
+}
+
+// Arrow function
+const greetArrow = (name) => `Hello, ${name}!`;
+
+// Arrow function with multiple lines
+const calculate = (a, b) => {
+    const sum = a + b;
+    return sum * 2;
+};
+        </pre>
+        <button onclick="demoFunctions()">Run Demo</button>
+        <div id="functions-output" class="output" style="display:none;"></div>
+    </div>
+
+    <div class="card">
+        <h2>Arrays & Methods</h2>
+        <pre>
+const numbers = [1, 2, 3, 4, 5];
+
+// Map - transform each element
+const doubled = numbers.map(n => n * 2);
+
+// Filter - keep elements that match condition
+const evens = numbers.filter(n => n % 2 === 0);
+
+// Reduce - combine all elements
+const sum = numbers.reduce((acc, n) => acc + n, 0);
+        </pre>
+        <button onclick="demoArrays()">Run Demo</button>
+        <div id="arrays-output" class="output" style="display:none;"></div>
+    </div>
+
+    <div class="card">
+        <h2>Objects & Destructuring</h2>
+        <pre>
+const person = {
+    name: 'Alice',
+    age: 30,
+    city: 'NYC'
+};
+
+// Destructuring
+const { name, age } = person;
+
+// Spread operator
+const updated = { ...person, age: 31 };
+        </pre>
+        <button onclick="demoObjects()">Run Demo</button>
+        <div id="objects-output" class="output" style="display:none;"></div>
+    </div>
+
+    <div class="card">
+        <h2>✏️ Interactive Exercise</h2>
+        <p>Create a function that filters and displays even numbers:</p>
+        <input type="text" id="numberInput" placeholder="Enter numbers (1,2,3,4,5)">
+        <button onclick="filterEvens()">Filter Evens</button>
+        <div id="exercise-output" class="output" style="display:none;"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -102,8 +102,8 @@ func GenerateWithOptions(config tui.ProjectConfig, opts Options) error {
 		fmt.Printf("   ✓ %s\n", filePath)
 	}
 
-	// Initialize go.mod inside project directory (skip for fullstack frontend)
-	if config.TemplateName != "fullstack" {
+	// Initialize go.mod inside project directory (skip for fullstack frontend and learn-frontend)
+	if config.TemplateName != "fullstack" && config.TemplateName != "learn-frontend" {
 		fmt.Println("📦 Initializing Go module...")
 		cmd := exec.Command("go", "mod", "init", data.ModuleName)
 		cmd.Dir = projectDir
@@ -174,7 +174,9 @@ func previewProject(config tui.ProjectConfig) error {
 		fmt.Printf("   📄 %s\n", f.Path)
 	}
 
-	fmt.Println("\n   📄 go.mod")
+	if config.TemplateName != "fullstack" && config.TemplateName != "learn-frontend" {
+		fmt.Println("\n   📄 go.mod")
+	}
 	if config.IncludeDocker {
 		fmt.Println("   🐳 Dockerfile")
 	}
@@ -301,6 +303,10 @@ func printNextSteps(config tui.ProjectConfig) {
 		fmt.Println("   go run ./cmd/api")
 	case "go-monorepo":
 		fmt.Println("   make api  # atau make worker")
+	case "learn-frontend":
+		fmt.Println("   cd 01-html-basics")
+		fmt.Println("   open index.html  # Open in your browser")
+		fmt.Println("   # Work through each folder in order!")
 	default:
 		fmt.Println("   go mod tidy")
 		fmt.Println("   go test ./...")

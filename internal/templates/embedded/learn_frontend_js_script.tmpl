@@ -1,0 +1,151 @@
+// Variables Demo
+function demoVariables() {
+    const output = document.getElementById('variables-output');
+    const name = 'JavaScript';
+    const year = 2026;
+    const isAwesome = true;
+    const languages = ['HTML', 'CSS', 'JavaScript'];
+    
+    output.innerHTML = `
+        <strong>Variables Demo:</strong><br>
+        Name: ${name}<br>
+        Year: ${year}<br>
+        Is Awesome: ${isAwesome}<br>
+        Languages: ${languages.join(', ')}
+    `;
+    output.style.display = 'block';
+}
+
+// Functions Demo
+function demoFunctions() {
+    const output = document.getElementById('functions-output');
+    
+    // Regular function
+    function greet(name) {
+        return `Hello, ${name}!`;
+    }
+    
+    // Arrow function
+    const greetArrow = (name) => `Hi, ${name}!`;
+    
+    // Function with calculation
+    const calculate = (a, b) => {
+        const sum = a + b;
+        return sum * 2;
+    };
+    
+    output.innerHTML = `
+        <strong>Functions Demo:</strong><br>
+        Regular: ${greet('Alice')}<br>
+        Arrow: ${greetArrow('Bob')}<br>
+        Calculate(5, 3): ${calculate(5, 3)}
+    `;
+    output.style.display = 'block';
+}
+
+// Arrays Demo
+function demoArrays() {
+    const output = document.getElementById('arrays-output');
+    const numbers = [1, 2, 3, 4, 5];
+    
+    const doubled = numbers.map(n => n * 2);
+    const evens = numbers.filter(n => n % 2 === 0);
+    const sum = numbers.reduce((acc, n) => acc + n, 0);
+    
+    output.innerHTML = `
+        <strong>Array Methods Demo:</strong><br>
+        Original: [${numbers}]<br>
+        Doubled (map): [${doubled}]<br>
+        Evens (filter): [${evens}]<br>
+        Sum (reduce): ${sum}
+    `;
+    output.style.display = 'block';
+}
+
+// Objects Demo
+function demoObjects() {
+    const output = document.getElementById('objects-output');
+    
+    const person = {
+        name: 'Alice',
+        age: 30,
+        city: 'NYC'
+    };
+    
+    // Destructuring
+    const { name, age, city } = person;
+    
+    // Spread operator
+    const updated = { ...person, age: 31, country: 'USA' };
+    
+    output.innerHTML = `
+        <strong>Objects Demo:</strong><br>
+        Original: ${JSON.stringify(person)}<br>
+        Destructured - Name: ${name}, Age: ${age}<br>
+        Updated (spread): ${JSON.stringify(updated)}
+    `;
+    output.style.display = 'block';
+}
+
+// Exercise: Filter even numbers
+function filterEvens() {
+    const output = document.getElementById('exercise-output');
+    const input = document.getElementById('numberInput').value;
+    
+    // Convert input string to array of numbers
+    const numbers = input.split(',').map(n => parseInt(n.trim())).filter(n => !isNaN(n));
+    
+    if (numbers.length === 0) {
+        output.innerHTML = '<strong style="color: red;">Please enter valid numbers separated by commas!</strong>';
+        output.style.display = 'block';
+        return;
+    }
+    
+    // Filter even numbers
+    const evens = numbers.filter(n => n % 2 === 0);
+    
+    output.innerHTML = `
+        <strong>Results:</strong><br>
+        Input: [${numbers}]<br>
+        Even Numbers: [${evens}]<br>
+        Count: ${evens.length}
+    `;
+    output.style.display = 'block';
+}
+
+// Extra: Array helper functions
+const arrayHelpers = {
+    // Get unique values
+    unique: (arr) => [...new Set(arr)],
+    
+    // Flatten nested array
+    flatten: (arr) => arr.flat(),
+    
+    // Group by condition
+    groupBy: (arr, fn) => {
+        return arr.reduce((result, item) => {
+            const key = fn(item);
+            (result[key] = result[key] || []).push(item);
+            return result;
+        }, {});
+    }
+};
+
+// Modern JavaScript features
+const modernFeatures = () => {
+    // Template literals
+    const name = 'JavaScript';
+    const greeting = `Hello, ${name}!`;
+    
+    // Optional chaining
+    const user = { profile: { name: 'John' } };
+    const userName = user?.profile?.name; // 'John'
+    
+    // Nullish coalescing
+    const value = null ?? 'default'; // 'default'
+    
+    console.log('Modern Features:', { greeting, userName, value });
+};
+
+console.log('JavaScript loaded! Open DevTools to see console logs.');
+console.log('Array Helpers available:', Object.keys(arrayHelpers));

@@ -189,6 +189,21 @@ var (
 	learnTestingReadmeTmpl             = loadEmbedded("learn_testing_readme.tmpl")
 	learnUnitCalcTmpl                  = loadEmbedded("learn_unit_calc.tmpl")
 	learnUnitTestTmpl                  = loadEmbedded("learn_unit_test.tmpl")
+	learnFrontendReadmeTmpl            = loadEmbedded("learn_frontend_readme.tmpl")
+	learnFrontendHTMLIndexTmpl         = loadEmbedded("learn_frontend_html_index.tmpl")
+	learnFrontendHTMLReadmeTmpl        = loadEmbedded("learn_frontend_html_readme.tmpl")
+	learnFrontendCSSIndexTmpl          = loadEmbedded("learn_frontend_css_index.tmpl")
+	learnFrontendCSSStyleTmpl          = loadEmbedded("learn_frontend_css_style.tmpl")
+	learnFrontendCSSReadmeTmpl         = loadEmbedded("learn_frontend_css_readme.tmpl")
+	learnFrontendJSIndexTmpl           = loadEmbedded("learn_frontend_js_index.tmpl")
+	learnFrontendJSScriptTmpl          = loadEmbedded("learn_frontend_js_script.tmpl")
+	learnFrontendJSReadmeTmpl          = loadEmbedded("learn_frontend_js_readme.tmpl")
+	learnFrontendDOMIndexTmpl          = loadEmbedded("learn_frontend_dom_index.tmpl")
+	learnFrontendDOMStyleTmpl          = loadEmbedded("learn_frontend_dom_style.tmpl")
+	learnFrontendDOMScriptTmpl         = loadEmbedded("learn_frontend_dom_script.tmpl")
+	learnFrontendFetchIndexTmpl        = loadEmbedded("learn_frontend_fetch_index.tmpl")
+	learnFrontendFetchStyleTmpl        = loadEmbedded("learn_frontend_fetch_style.tmpl")
+	learnFrontendFetchScriptTmpl       = loadEmbedded("learn_frontend_fetch_script.tmpl")
 	microserviceDockerfileTmpl         = loadEmbedded("microservice_dockerfile.tmpl")
 	microserviceHandlerTmpl            = loadEmbedded("microservice_handler.tmpl")
 	microserviceHealthTmpl             = loadEmbedded("microservice_health.tmpl")
@@ -836,6 +851,39 @@ func initBuiltInTemplates() {
 				{Path: ".gitignore", Content: gitignoreGoTmpl},
 			},
 		},
+		"learn-frontend": {
+			Name:        "learn-frontend",
+			Description: "Learn frontend development (HTML, CSS, JavaScript)",
+			Directories: []string{
+				"01-html-basics",
+				"02-css-fundamentals",
+				"03-javascript-basics",
+				"04-dom-manipulation",
+				"05-fetch-api",
+			},
+			Files: []FileTemplate{
+				{Path: "README.md", Content: learnFrontendReadmeTmpl},
+				// HTML Basics
+				{Path: "01-html-basics/index.html", Content: learnFrontendHTMLIndexTmpl},
+				{Path: "01-html-basics/README.md", Content: learnFrontendHTMLReadmeTmpl},
+				// CSS Fundamentals
+				{Path: "02-css-fundamentals/index.html", Content: learnFrontendCSSIndexTmpl},
+				{Path: "02-css-fundamentals/style.css", Content: learnFrontendCSSStyleTmpl},
+				{Path: "02-css-fundamentals/README.md", Content: learnFrontendCSSReadmeTmpl},
+				// JavaScript Basics
+				{Path: "03-javascript-basics/index.html", Content: learnFrontendJSIndexTmpl},
+				{Path: "03-javascript-basics/script.js", Content: learnFrontendJSScriptTmpl},
+				{Path: "03-javascript-basics/README.md", Content: learnFrontendJSReadmeTmpl},
+				// DOM Manipulation
+				{Path: "04-dom-manipulation/index.html", Content: learnFrontendDOMIndexTmpl},
+				{Path: "04-dom-manipulation/style.css", Content: learnFrontendDOMStyleTmpl},
+				{Path: "04-dom-manipulation/script.js", Content: learnFrontendDOMScriptTmpl},
+				// Fetch API
+				{Path: "05-fetch-api/index.html", Content: learnFrontendFetchIndexTmpl},
+				{Path: "05-fetch-api/style.css", Content: learnFrontendFetchStyleTmpl},
+				{Path: "05-fetch-api/script.js", Content: learnFrontendFetchScriptTmpl},
+			},
+		},
 	}
 }
 
@@ -853,6 +901,7 @@ func GetAllTemplates() []Template {
 	result := make([]Template, 0, len(builtInTemplates))
 	for _, t := range builtInTemplates {
 		result = append(result, t)
+		fmt.Println(len(result))
 	}
 	return result
 }

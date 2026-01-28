@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOM Manipulation - Learn Frontend</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 DOM Manipulation</h1>
+        <p>Learn to interact with and modify the page dynamically</p>
+
+        <div class="card">
+            <h2>1. Selecting Elements</h2>
+            <p id="demo-text">This is a paragraph</p>
+            <button onclick="changeText()">Change Text</button>
+            <button onclick="changeStyle()">Change Style</button>
+        </div>
+
+        <div class="card">
+            <h2>2. Event Listeners</h2>
+            <button id="click-btn">Click Me!</button>
+            <p id="click-count">Clicks: 0</p>
+            <input type="text" id="input-field" placeholder="Type something...">
+            <p id="input-display"></p>
+        </div>
+
+        <div class="card">
+            <h2>3. Creating Elements</h2>
+            <button onclick="addItem()">Add Item</button>
+            <button onclick="removeItem()">Remove Last</button>
+            <ul id="item-list"></ul>
+        </div>
+
+        <div class="card">
+            <h2>4. Toggle Classes</h2>
+            <div id="toggle-box" class="box">Toggle Me!</div>
+            <button onclick="toggleBox()">Toggle Active</button>
+        </div>
+
+        <div class="card highlight">
+            <h2>✏️ Exercise</h2>
+            <p><strong>Build a simple todo list:</strong></p>
+            <input type="text" id="todo-input" placeholder="Enter a task...">
+            <button onclick="addTodo()">Add Todo</button>
+            <ul id="todo-list"></ul>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

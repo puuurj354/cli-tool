@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fetch API - Learn Frontend</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>🌐 Fetch API & AJAX</h1>
+        <p>Learn to make HTTP requests and work with APIs</p>
+
+        <div class="card">
+            <h2>1. Basic GET Request</h2>
+            <button onclick="fetchUsers()">Fetch Users</button>
+            <div id="users-output" class="output"></div>
+        </div>
+
+        <div class="card">
+            <h2>2. Async/Await Pattern</h2>
+            <button onclick="fetchPosts()">Fetch Posts</button>
+            <div id="posts-output" class="output"></div>
+        </div>
+
+        <div class="card">
+            <h2>3. POST Request</h2>
+            <input type="text" id="post-title" placeholder="Post title">
+            <input type="text" id="post-body" placeholder="Post body">
+            <button onclick="createPost()">Create Post</button>
+            <div id="create-output" class="output"></div>
+        </div>
+
+        <div class="card">
+            <h2>4. Error Handling</h2>
+            <button onclick="fetchWithError()">Trigger Error</button>
+            <div id="error-output" class="output"></div>
+        </div>
+
+        <div class="card highlight">
+            <h2>✏️ Exercise: Random User Generator</h2>
+            <button onclick="fetchRandomUser()">Get Random User</button>
+            <div id="random-user" class="user-card"></div>
+        </div>
+
+        <div class="card">
+            <h2>📚 Code Examples</h2>
+            <pre><code>// Basic Fetch
+fetch('https://api.example.com/data')
+    .then(response => response.json())
+    .then(data => console.log(data))
+    .catch(error => console.error(error));
+
+// Async/Await
+async function getData() {
+    try {
+        const response = await fetch('url');
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+// POST Request
+fetch('url', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ key: 'value' })
+});</code></pre>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

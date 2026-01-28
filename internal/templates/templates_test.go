@@ -40,6 +40,7 @@ func TestGetTemplate(t *testing.T) {
 		{"get learn-error-handling", "learn-error-handling", false},
 		{"get learn-interfaces", "learn-interfaces", false},
 		{"get learn-design-patterns", "learn-design-patterns", false},
+		{"get learn-frontend", "learn-frontend", false},
 		// Skill templates
 		{"get challenge-30days", "challenge-30days", false},
 		{"get mini-project", "mini-project", false},
@@ -78,9 +79,9 @@ func TestGetTemplate(t *testing.T) {
 func TestGetAllTemplates(t *testing.T) {
 	templates := GetAllTemplates()
 
-	// Should have exactly 30 templates
-	if len(templates) != 30 {
-		t.Errorf("expected 30 templates, got %d", len(templates))
+	// Should have exactly 31 templates
+	if len(templates) != 31 {
+		t.Errorf("expected 31 templates, got %d", len(templates))
 	}
 
 	// All templates should have name, description, directories, and files

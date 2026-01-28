@@ -1,0 +1,130 @@
+# JavaScript Basics
+
+## What is JavaScript?
+
+JavaScript is a programming language that enables interactive web pages.
+
+## Key Concepts
+
+### 1. Variables
+
+```javascript
+const name = 'John';  // Cannot be reassigned
+let age = 25;         // Can be reassigned
+var old = 'avoid';    // Old style, avoid using
+```
+
+### 2. Data Types
+
+- **Primitives**: string, number, boolean, null, undefined, symbol
+- **Objects**: arrays, objects, functions
+
+### 3. Functions
+
+```javascript
+// Function declaration
+function greet(name) {
+    return `Hello, ${name}!`;
+}
+
+// Arrow function
+const greet = (name) => `Hello, ${name}!`;
+```
+
+### 4. Arrays
+
+```javascript
+const numbers = [1, 2, 3, 4, 5];
+
+// Map - transform
+numbers.map(n => n * 2); // [2, 4, 6, 8, 10]
+
+// Filter - select
+numbers.filter(n => n > 3); // [4, 5]
+
+// Reduce - combine
+numbers.reduce((sum, n) => sum + n, 0); // 15
+
+// Find
+numbers.find(n => n > 3); // 4
+```
+
+### 5. Objects
+
+```javascript
+const person = {
+    name: 'Alice',
+    age: 30,
+    greet() {
+        return `Hello, I'm ${this.name}`;
+    }
+};
+
+// Access properties
+person.name;
+person['age'];
+
+// Destructuring
+const { name, age } = person;
+
+// Spread operator
+const updated = { ...person, city: 'NYC' };
+```
+
+### 6. ES6+ Features
+
+```javascript
+// Template literals
+const greeting = `Hello, ${name}!`;
+
+// Destructuring
+const [first, second] = [1, 2];
+const { name, age } = person;
+
+// Spread operator
+const arr = [1, 2, 3];
+const newArr = [...arr, 4, 5];
+
+// Optional chaining
+const city = user?.address?.city;
+
+// Nullish coalescing
+const value = input ?? 'default';
+```
+
+## Common Patterns
+
+### Iterate over array
+```javascript
+arr.forEach(item => console.log(item));
+```
+
+### Transform array
+```javascript
+const doubled = arr.map(x => x * 2);
+```
+
+### Filter array
+```javascript
+const evens = arr.filter(x => x % 2 === 0);
+```
+
+### Check if exists
+```javascript
+const hasEven = arr.some(x => x % 2 === 0);
+const allEven = arr.every(x => x % 2 === 0);
+```
+
+## Exercises
+
+1. Create a function that returns the sum of an array
+2. Write a function to reverse a string
+3. Filter an array of objects by property value
+4. Create a counter with increment/decrement functions
+5. Build a simple calculator using functions
+
+## Resources
+
+- [MDN JavaScript Guide](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide)
+- [JavaScript.info](https://javascript.info/)
+- [Eloquent JavaScript](https://eloquentjavascript.net/)

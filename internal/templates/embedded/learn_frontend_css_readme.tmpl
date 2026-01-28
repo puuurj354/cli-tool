@@ -1,0 +1,112 @@
+# CSS Fundamentals
+
+## What is CSS?
+
+CSS (Cascading Style Sheets) is used to style and layout web pages.
+
+## Key Concepts
+
+### 1. Selectors
+
+```css
+/* Element selector */
+p { color: blue; }
+
+/* Class selector */
+.highlight { background: yellow; }
+
+/* ID selector */
+#header { font-size: 24px; }
+
+/* Attribute selector */
+[type="text"] { border: 1px solid #ccc; }
+```
+
+### 2. Box Model
+
+Every element has:
+- **Content** - The actual content
+- **Padding** - Space around content
+- **Border** - Border around padding
+- **Margin** - Space outside border
+
+### 3. Flexbox
+
+```css
+.container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+}
+```
+
+Great for: Navigation bars, card layouts, centering content
+
+### 4. Grid
+
+```css
+.grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+```
+
+Great for: Page layouts, image galleries, dashboards
+
+### 5. Responsive Design
+
+```css
+/* Mobile first approach */
+.container {
+    width: 100%;
+}
+
+/* Tablet */
+@media (min-width: 768px) {
+    .container {
+        width: 750px;
+    }
+}
+
+/* Desktop */
+@media (min-width: 1024px) {
+    .container {
+        width: 1000px;
+    }
+}
+```
+
+## Common Patterns
+
+### Center Element
+```css
+.center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+```
+
+### Responsive Grid
+```css
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+}
+```
+
+## Exercises
+
+1. Build a responsive navigation bar
+2. Create a card component with hover effects
+3. Design a photo gallery grid
+4. Build a footer with multiple columns
+
+## Resources
+
+- [CSS-Tricks Flexbox Guide](https://css-tricks.com/snippets/css/a-guide-to-flexbox/)
+- [CSS Grid Guide](https://css-tricks.com/snippets/css/complete-guide-grid/)
+- [MDN CSS Reference](https://developer.mozilla.org/en-US/docs/Web/CSS)

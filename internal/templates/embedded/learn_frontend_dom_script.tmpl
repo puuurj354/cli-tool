@@ -1,0 +1,125 @@
+// 1. Selecting Elements Examples
+function changeText() {
+    const element = document.getElementById('demo-text');
+    element.textContent = 'Text changed with JavaScript!';
+}
+
+function changeStyle() {
+    const element = document.getElementById('demo-text');
+    element.style.background = '#667eea';
+    element.style.color = 'white';
+    element.style.padding = '20px';
+}
+
+// 2. Event Listeners
+let clickCount = 0;
+
+document.getElementById('click-btn').addEventListener('click', function() {
+    clickCount++;
+    document.getElementById('click-count').textContent = `Clicks: ${clickCount}`;
+});
+
+document.getElementById('input-field').addEventListener('input', function(e) {
+    document.getElementById('input-display').textContent = `You typed: ${e.target.value}`;
+});
+
+// 3. Creating and Removing Elements
+let itemCounter = 1;
+
+function addItem() {
+    const list = document.getElementById('item-list');
+    const newItem = document.createElement('li');
+    newItem.textContent = `Item ${itemCounter}`;
+    
+    // Add remove button to each item
+    const removeBtn = document.createElement('button');
+    removeBtn.textContent = 'Remove';
+    removeBtn.onclick = function() {
+        list.removeChild(newItem);
+    };
+    
+    newItem.appendChild(removeBtn);
+    list.appendChild(newItem);
+    itemCounter++;
+}
+
+function removeItem() {
+    const list = document.getElementById('item-list');
+    if (list.lastChild) {
+        list.removeChild(list.lastChild);
+    }
+}
+
+// 4. Toggle Classes
+function toggleBox() {
+    const box = document.getElementById('toggle-box');
+    box.classList.toggle('active');
+}
+
+// Exercise: Todo List
+function addTodo() {
+    const input = document.getElementById('todo-input');
+    const todoText = input.value.trim();
+    
+    if (todoText === '') {
+        alert('Please enter a task!');
+        return;
+    }
+    
+    const list = document.getElementById('todo-list');
+    const todoItem = document.createElement('li');
+    
+    // Create checkbox
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.style.marginRight = '10px';
+    checkbox.addEventListener('change', function() {
+        if (this.checked) {
+            span.classList.add('done');
+        } else {
+            span.classList.remove('done');
+        }
+    });
+    
+    // Create text span
+    const span = document.createElement('span');
+    span.textContent = todoText;
+    
+    // Create remove button
+    const removeBtn = document.createElement('button');
+    removeBtn.textContent = 'Delete';
+    removeBtn.onclick = function() {
+        list.removeChild(todoItem);
+    };
+    
+    todoItem.appendChild(checkbox);
+    todoItem.appendChild(span);
+    todoItem.appendChild(removeBtn);
+    list.appendChild(todoItem);
+    
+    // Clear input
+    input.value = '';
+}
+
+// Allow Enter key to add todo
+document.getElementById('todo-input').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        addTodo();
+    }
+});
+
+// DOM Selection Methods Reference
+console.log('DOM Selection Methods:');
+console.log('getElementById("id") - Select by ID');
+console.log('getElementsByClassName("class") - Select by class (returns collection)');
+console.log('getElementsByTagName("tag") - Select by tag (returns collection)');
+console.log('querySelector(".class") - Select first match (CSS selector)');
+console.log('querySelectorAll(".class") - Select all matches (CSS selector)');
+
+// Common DOM Properties
+console.log('\nCommon DOM Properties:');
+console.log('element.textContent - Get/set text');
+console.log('element.innerHTML - Get/set HTML');
+console.log('element.style.property - Change CSS');
+console.log('element.classList - Manage classes');
+console.log('element.setAttribute() - Set attributes');
