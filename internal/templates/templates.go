@@ -238,6 +238,19 @@ var (
 	websocketHTMLTmpl                  = loadEmbedded("websocket_html.tmpl")
 	websocketHubTmpl                   = loadEmbedded("websocket_hub.tmpl")
 	websocketMainTmpl                  = loadEmbedded("websocket_main.tmpl")
+	// Debugging templates
+	debugReadmeTmpl        = loadEmbedded("debug_readme.tmpl")
+	debugPrintMainTmpl     = loadEmbedded("debug_print_main.tmpl")
+	debugPrintTestTmpl     = loadEmbedded("debug_print_test.tmpl")
+	debugLoggingMainTmpl   = loadEmbedded("debug_logging_main.tmpl")
+	debugLoggingTestTmpl   = loadEmbedded("debug_logging_test.tmpl")
+	debugProfilingMainTmpl = loadEmbedded("debug_profiling_main.tmpl")
+	debugProfilingTestTmpl = loadEmbedded("debug_profiling_test.tmpl")
+	debugTracingMainTmpl   = loadEmbedded("debug_tracing_main.tmpl")
+	debugTracingTestTmpl   = loadEmbedded("debug_tracing_test.tmpl")
+	debugMemoryMainTmpl    = loadEmbedded("debug_memory_main.tmpl")
+	debugMemoryTestTmpl    = loadEmbedded("debug_memory_test.tmpl")
+	debugDelveReadmeTmpl   = loadEmbedded("debug_delve_readme.tmpl")
 )
 
 // Generator functions
@@ -882,6 +895,33 @@ func initBuiltInTemplates() {
 				{Path: "05-fetch-api/index.html", Content: learnFrontendFetchIndexTmpl},
 				{Path: "05-fetch-api/style.css", Content: learnFrontendFetchStyleTmpl},
 				{Path: "05-fetch-api/script.js", Content: learnFrontendFetchScriptTmpl},
+			},
+		},
+		"learn-debugging": {
+			Name:        "learn-debugging",
+			Description: "Learn debugging techniques (print, logging, profiling, tracing)",
+			Directories: []string{
+				"01-print-debugging",
+				"02-structured-logging",
+				"03-profiling",
+				"04-tracing",
+				"05-memory-debugging",
+				"06-delve-debugger",
+			},
+			Files: []FileTemplate{
+				{Path: "README.md", Content: debugReadmeTmpl},
+				{Path: "01-print-debugging/main.go", Content: debugPrintMainTmpl},
+				{Path: "01-print-debugging/main_test.go", Content: debugPrintTestTmpl},
+				{Path: "02-structured-logging/main.go", Content: debugLoggingMainTmpl},
+				{Path: "02-structured-logging/main_test.go", Content: debugLoggingTestTmpl},
+				{Path: "03-profiling/main.go", Content: debugProfilingMainTmpl},
+				{Path: "03-profiling/main_test.go", Content: debugProfilingTestTmpl},
+				{Path: "04-tracing/main.go", Content: debugTracingMainTmpl},
+				{Path: "04-tracing/main_test.go", Content: debugTracingTestTmpl},
+				{Path: "05-memory-debugging/main.go", Content: debugMemoryMainTmpl},
+				{Path: "05-memory-debugging/main_test.go", Content: debugMemoryTestTmpl},
+				{Path: "06-delve-debugger/README.md", Content: debugDelveReadmeTmpl},
+				{Path: ".gitignore", Content: gitignoreGoTmpl},
 			},
 		},
 	}

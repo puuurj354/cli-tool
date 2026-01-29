@@ -1,0 +1,214 @@
+package main
+
+// =============================================================================
+// PRINT DEBUGGING TESTS
+// =============================================================================
+// Tests for print debugging functions demonstrating test-driven development
+// =============================================================================
+
+import (
+	"bytes"   // Buffer for capturing output
+	"os"      // Environment variable manipulation
+	"strings" // String assertion helpers
+	"testing" // Go testing framework
+)
+
+// =============================================================================
+// TEST HELPER FUNCTIONS
+// =============================================================================
+
+// captureOutput captures stdout during function execution
+// Parameters:
+//   - f: Function to execute while capturing output
+// Returns:
+//   - string: Captured stdout output
+func captureOutput(f func()) string {
+	// Save original stdout
+	old := os.Stdout // Store reference to original stdout
+
+	// Create a pipe to capture output
+	r, w, _ := os.Pipe() // Create read/write pipe
+	os.Stdout = w        // Redirect stdout to pipe
+
+	// Execute the function
+	f() // Run the provided function
+
+	// Restore stdout and read captured output
+	w.Close()       // Close write end of pipe
+	os.Stdout = old // Restore original stdout
+
+	var buf bytes.Buffer // Buffer to store captured output
+	buf.ReadFrom(r)      // Read from pipe into buffer
+	return buf.String()  // Return captured output as string
+}
+
+// =============================================================================
+// TEST CASES
+// =============================================================================
+
+// TestDebugEnabled verifies debug output when DEBUG=1 is set
+func TestDebugEnabled(t *testing.T) {
+	// Setup: Enable debug mode
+	os.Setenv("DEBUG", "1") // Set DEBUG environment variable
+	debugEnabled = true     // Update package variable
+
+	// Cleanup: Reset after test
+	defer func() {
+		os.Unsetenv("DEBUG") // Remove DEBUG env var
+		debugEnabled = false // Reset package variable
+	}()
+
+	// Test Debug function produces output
+	output := captureOutput(func() {
+		Debug("test message %d", 42) // Call Debug with formatted message
+	})
+
+	// Assert output contains expected content
+	if !strings.Contains(output, "[DEBUG") { // Check for debug prefix
+		t.Error("Expected debug output to contain [DEBUG prefix")
+	}
+	if !strings.Contains(output, "test message 42") { // Check for message
+		t.Error("Expected debug output to contain 'test message 42'")
+	}
+}
+
+// TestDebugDisabled verifies no output when DEBUG is not set
+func TestDebugDisabled(t *testing.T) {
+	// Setup: Disable debug mode
+	os.Unsetenv("DEBUG") // Ensure DEBUG is not set
+	debugEnabled = false // Disable debug
+
+	// Test Debug function produces no output
+	output := captureOutput(func() {
+		Debug("this should not appear") // Call Debug
+	})
+
+	// Assert no output was produced
+	if output != "" { // Should be empty
+		t.Errorf("Expected no output when debug disabled, got: %s", output)
+	}
+}
+
+// TestDebugVar verifies variable debugging output
+func TestDebugVar(t *testing.T) {
+	// Setup: Enable debug mode
+	debugEnabled = true // Enable debug for test
+
+	defer func() {
+		debugEnabled = false // Reset after test
+	}()
+
+	// Test DebugVar function
+	output := captureOutput(func() {
+		DebugVar("testVar", 123) // Debug an integer variable
+	})
+
+	// Assert output format
+	if !strings.Contains(output, "[DEBUG VAR]") { // Check prefix
+		t.Error("Expected output to contain [DEBUG VAR] prefix")
+	}
+	if !strings.Contains(output, "testVar") { // Check variable name
+		t.Error("Expected output to contain variable name")
+	}
+	if !strings.Contains(output, "123") { // Check value
+		t.Error("Expected output to contain variable value")
+	}
+}
+
+// TestDebugStruct verifies struct debugging output
+func TestDebugStruct(t *testing.T) {
+	// Setup: Enable debug mode
+	debugEnabled = true // Enable debug for test
+
+	defer func() {
+		debugEnabled = false // Reset after test
+	}()
+
+	// Create test struct
+	testUser := User{
+		ID:    1,
+		Name:  "Test User",
+		Email: "test@example.com",
+		Age:   25,
+	}
+
+	// Test DebugStruct function
+	output := captureOutput(func() {
+		DebugStruct("User", testUser) // Debug the struct
+	})
+
+	// Assert output contains struct info
+	if !strings.Contains(output, "[DEBUG STRUCT]") { // Check prefix
+		t.Error("Expected output to contain [DEBUG STRUCT] prefix")
+	}
+	if !strings.Contains(output, "Test User") { // Check field value
+		t.Error("Expected output to contain struct field value")
+	}
+}
+
+// TestProcessUser verifies user processing logic
+func TestProcessUser(t *testing.T) {
+	// Test table for various scenarios
+	tests := []struct {
+		name    string // Test case name
+		user    User   // Input user
+		wantErr bool   // Whether error is expected
+	}{
+		{
+			name:    "valid user",
+			user:    User{ID: 1, Name: "John", Email: "john@test.com", Age: 30},
+			wantErr: false,
+		},
+		{
+			name:    "empty name",
+			user:    User{ID: 2, Name: "", Email: "empty@test.com", Age: 25},
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests { // Iterate through test cases
+		t.Run(tt.name, func(t *testing.T) {
+			result, err := ProcessUser(tt.user) // Call function under test
+
+			if (err != nil) != tt.wantErr { // Check error expectation
+				t.Errorf("ProcessUser() error = %v, wantErr %v", err, tt.wantErr)
+			}
+
+			if !tt.wantErr && result == "" { // Check result for success case
+				t.Error("Expected non-empty result for valid user")
+			}
+		})
+	}
+}
+
+// TestCalculateOrderTotal verifies order total calculation
+func TestCalculateOrderTotal(t *testing.T) {
+	// Create test orders
+	orders := []Order{
+		{OrderID: "1", Amount: 100.00},
+		{OrderID: "2", Amount: 50.50},
+		{OrderID: "3", Amount: 25.25},
+	}
+
+	// Calculate total
+	total := CalculateOrderTotal(orders) // Call function under test
+
+	// Assert correct total (allowing for float precision)
+	expected := 175.75 // Expected total
+	if total != expected {
+		t.Errorf("CalculateOrderTotal() = %.2f, want %.2f", total, expected)
+	}
+}
+
+// TestCalculateOrderTotalEmpty verifies empty order handling
+func TestCalculateOrderTotalEmpty(t *testing.T) {
+	// Test with empty orders slice
+	orders := []Order{} // Empty slice
+
+	total := CalculateOrderTotal(orders) // Call function under test
+
+	// Assert zero total for empty orders
+	if total != 0 {
+		t.Errorf("CalculateOrderTotal() for empty = %.2f, want 0", total)
+	}
+}

@@ -1,0 +1,275 @@
+package main
+
+// =============================================================================
+// MEMORY DEBUGGING - Leak detection and heap analysis
+// =============================================================================
+// This file demonstrates memory debugging techniques including heap analysis,
+// allocation tracking, escape analysis, and memory leak detection patterns.
+// =============================================================================
+
+import (
+	"fmt"     // Formatted I/O
+	"runtime" // Runtime memory operations
+	"sync"    // Synchronization primitives
+	"time"    // Time measurements
+)
+
+// =============================================================================
+// MEMORY MONITORING
+// =============================================================================
+
+// MemorySnapshot captures memory state at a point in time
+type MemorySnapshot struct {
+	Time        time.Time // When snapshot was taken
+	Alloc       uint64    // Current heap allocation in bytes
+	TotalAlloc  uint64    // Cumulative bytes allocated
+	Sys         uint64    // Total memory from OS
+	HeapObjects uint64    // Number of live heap objects
+	NumGC       uint32    // Number of GC cycles completed
+}
+
+// TakeSnapshot captures current memory state
+// Returns:
+//   - MemorySnapshot: Current memory statistics
+func TakeSnapshot() MemorySnapshot {
+	var stats runtime.MemStats  // Memory stats struct
+	runtime.ReadMemStats(&stats) // Read current stats
+
+	return MemorySnapshot{
+		Time:        time.Now(),       // Record time
+		Alloc:       stats.Alloc,      // Current allocation
+		TotalAlloc:  stats.TotalAlloc, // Total allocated
+		Sys:         stats.Sys,        // System memory
+		HeapObjects: stats.HeapObjects, // Object count
+		NumGC:       stats.NumGC,      // GC cycles
+	}
+}
+
+// Compare calculates the difference between two snapshots
+// Parameters:
+//   - before: Earlier snapshot
+//   - after: Later snapshot
+// Returns:
+//   - MemoryDiff: Difference between snapshots
+func Compare(before, after MemorySnapshot) MemoryDiff {
+	return MemoryDiff{
+		Duration:      after.Time.Sub(before.Time),           // Time elapsed
+		AllocDiff:     int64(after.Alloc) - int64(before.Alloc), // Alloc change
+		ObjectDiff:    int64(after.HeapObjects) - int64(before.HeapObjects), // Object change
+		GCCycles:      after.NumGC - before.NumGC,            // GC cycles
+		TotalAllocDiff: after.TotalAlloc - before.TotalAlloc, // Total alloc
+	}
+}
+
+// MemoryDiff represents the difference between two snapshots
+type MemoryDiff struct {
+	Duration       time.Duration // Time between snapshots
+	AllocDiff      int64         // Change in current allocation
+	ObjectDiff     int64         // Change in object count
+	GCCycles       uint32        // GC cycles occurred
+	TotalAllocDiff uint64        // Total bytes allocated
+}
+
+// Print displays the memory difference in human-readable format
+func (d MemoryDiff) Print() {
+	fmt.Println("=== Memory Diff ===")
+	fmt.Printf("Duration:     %v\n", d.Duration)
+	fmt.Printf("Alloc diff:   %+d bytes\n", d.AllocDiff)
+	fmt.Printf("Objects diff: %+d\n", d.ObjectDiff)
+	fmt.Printf("GC cycles:    %d\n", d.GCCycles)
+	fmt.Printf("Total alloc:  %d bytes\n", d.TotalAllocDiff)
+}
+
+// =============================================================================
+// LEAK DETECTION PATTERNS
+// =============================================================================
+
+// LeakDetector monitors for potential memory leaks
+type LeakDetector struct {
+	snapshots []MemorySnapshot // History of snapshots
+	threshold float64          // Growth threshold (e.g., 1.5 = 50% growth)
+	mu        sync.Mutex       // Thread safety
+}
+
+// NewLeakDetector creates a leak detector with given threshold
+// Parameters:
+//   - threshold: Growth factor to trigger warning (e.g., 1.5 = 50%)
+// Returns:
+//   - *LeakDetector: Configured detector instance
+func NewLeakDetector(threshold float64) *LeakDetector {
+	return &LeakDetector{
+		snapshots: make([]MemorySnapshot, 0, 100), // Pre-allocate
+		threshold: threshold,                      // Set threshold
+	}
+}
+
+// Record takes a snapshot and checks for leaks
+// Returns:
+//   - bool: True if potential leak detected
+//   - string: Warning message if leak detected
+func (d *LeakDetector) Record() (bool, string) {
+	d.mu.Lock()         // Acquire lock
+	defer d.mu.Unlock() // Release on return
+
+	snapshot := TakeSnapshot() // Take current snapshot
+	d.snapshots = append(d.snapshots, snapshot) // Add to history
+
+	// Need at least 5 snapshots to detect trend
+	if len(d.snapshots) < 5 { // Not enough data
+		return false, ""
+	}
+
+	// Compare with oldest snapshot
+	first := d.snapshots[0]   // First snapshot
+	last := d.snapshots[len(d.snapshots)-1] // Current snapshot
+
+	// Calculate growth factor
+	if first.Alloc == 0 { // Avoid division by zero
+		return false, ""
+	}
+	growth := float64(last.Alloc) / float64(first.Alloc) // Growth factor
+
+	// Check if growth exceeds threshold
+	if growth > d.threshold { // Potential leak
+		msg := fmt.Sprintf(
+			"POTENTIAL LEAK: Memory grew %.1fx (from %d to %d bytes) over %d samples",
+			growth, first.Alloc, last.Alloc, len(d.snapshots),
+		)
+		return true, msg
+	}
+
+	return false, "" // No leak detected
+}
+
+// =============================================================================
+// COMMON LEAK PATTERNS (EXAMPLES)
+// =============================================================================
+
+// LeakingGoroutine demonstrates a goroutine leak
+// WARNING: This is intentionally buggy for educational purposes
+func LeakingGoroutine() {
+	ch := make(chan int) // Unbuffered channel
+
+	// This goroutine will leak because ch is never closed
+	go func() {
+		<-ch // Blocks forever waiting for value
+	}()
+
+	// NOTE: To fix, use context cancellation or close the channel
+}
+
+// LeakingSlice demonstrates a slice capacity leak
+// Parameters:
+//   - items: Slice that may waste memory
+// Returns:
+//   - []int: Properly sized slice
+func LeakingSlice(items []int) []int {
+	// BAD: Returns slice with potentially large underlying array
+	// return items[:10]
+
+	// GOOD: Copy to new slice with exact capacity
+	result := make([]int, len(items)) // Allocate exact size
+	copy(result, items)               // Copy elements
+	return result                     // Return clean slice
+}
+
+// =============================================================================
+// ESCAPE ANALYSIS HELPERS
+// =============================================================================
+
+// DoesNotEscape shows a value that stays on stack
+// Run with: go build -gcflags="-m" to see escape analysis
+func DoesNotEscape() int {
+	x := 42 // Allocated on stack
+	return x // Returned by value
+}
+
+// Escapes shows a value that escapes to heap
+// Run with: go build -gcflags="-m" to see escape analysis
+func Escapes() *int {
+	x := 42  // Will escape to heap
+	return &x // Returned by pointer forces heap allocation
+}
+
+// =============================================================================
+// MEMORY-EFFICIENT PATTERNS
+// =============================================================================
+
+// ObjectPool demonstrates object pooling for memory reuse
+var objectPool = sync.Pool{
+	New: func() interface{} {
+		return make([]byte, 1024) // Create 1KB buffer
+	},
+}
+
+// GetBuffer retrieves a buffer from the pool
+// Returns:
+//   - []byte: Buffer from pool (may be reused)
+func GetBuffer() []byte {
+	return objectPool.Get().([]byte) // Get from pool
+}
+
+// ReturnBuffer returns a buffer to the pool for reuse
+// Parameters:
+//   - buf: Buffer to return to pool
+func ReturnBuffer(buf []byte) {
+	// Clear sensitive data before returning
+	for i := range buf { // Zero out buffer
+		buf[i] = 0
+	}
+	objectPool.Put(buf) // Return to pool
+}
+
+// =============================================================================
+// MAIN ENTRY POINT
+// =============================================================================
+
+func main() {
+	fmt.Println("=== Memory Debugging Demo ===")
+	fmt.Println()
+
+	// Take initial snapshot
+	before := TakeSnapshot() // Capture starting state
+	fmt.Println("Initial memory state captured")
+
+	// Create leak detector
+	detector := NewLeakDetector(1.5) // 50% growth threshold
+
+	// Simulate some allocations
+	var data [][]byte          // Slice of slices
+	for i := 0; i < 10; i++ { // Allocate in loop
+		buf := make([]byte, 100000) // Allocate 100KB
+		data = append(data, buf)    // Retain reference
+
+		// Check for leaks
+		if leak, msg := detector.Record(); leak { // Check leak
+			fmt.Printf("WARNING: %s\n", msg)
+		}
+	}
+
+	// Take final snapshot
+	after := TakeSnapshot() // Capture ending state
+
+	// Compare and print results
+	fmt.Println()
+	diff := Compare(before, after) // Calculate difference
+	diff.Print()                   // Display results
+
+	// Force GC and show final state
+	fmt.Println("\nAfter GC:")
+	runtime.GC()           // Force garbage collection
+	_ = data               // Keep reference to prevent optimization
+	TakeSnapshot()         // Final snapshot
+
+	// Demonstrate object pool
+	fmt.Println("\n=== Object Pool Demo ===")
+	fmt.Println("Getting buffer from pool...")
+	buf := GetBuffer()     // Get from pool
+	fmt.Printf("Buffer size: %d bytes\n", len(buf))
+	ReturnBuffer(buf)      // Return to pool
+	fmt.Println("Buffer returned to pool")
+
+	fmt.Println("\n=== Escape Analysis Tips ===")
+	fmt.Println("Run: go build -gcflags='-m' to see escape analysis")
+	fmt.Println("Look for 'escapes to heap' messages")
+}

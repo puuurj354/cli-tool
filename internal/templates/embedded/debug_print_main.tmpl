@@ -1,0 +1,196 @@
+package main
+
+// =============================================================================
+// PRINT DEBUGGING - Quick value inspection techniques
+// =============================================================================
+// This file demonstrates various print-based debugging approaches including
+// fmt.Printf, custom debug formatters, and conditional debug output.
+// =============================================================================
+
+import (
+	"fmt"      // Standard library for formatted I/O
+	"os"       // Used for environment variable detection
+	"runtime"  // Access Go runtime information
+	"strings"  // String manipulation utilities
+	"time"     // Time formatting for timestamps
+)
+
+// =============================================================================
+// DEBUG CONFIGURATION
+// =============================================================================
+
+// debugEnabled controls whether debug messages are printed
+// Set DEBUG=1 environment variable to enable debug output
+var debugEnabled = os.Getenv("DEBUG") == "1" // Check if DEBUG env var is set
+
+// =============================================================================
+// DEBUG FUNCTIONS
+// =============================================================================
+
+// Debug prints a formatted debug message with timestamp and caller info
+// Parameters:
+//   - format: Printf-style format string
+//   - args: Arguments to format
+func Debug(format string, args ...interface{}) {
+	if !debugEnabled { // Early return if debug is disabled
+		return
+	}
+
+	// Get caller information (skip 1 level to get actual caller)
+	_, file, line, ok := runtime.Caller(1) // Retrieve caller file and line number
+	if !ok {                               // Handle case where caller info unavailable
+		file = "unknown"
+		line = 0
+	}
+
+	// Extract just the filename from full path for cleaner output
+	parts := strings.Split(file, "/") // Split path by separator
+	shortFile := parts[len(parts)-1]  // Take only the filename
+
+	// Format timestamp for debug message prefix
+	timestamp := time.Now().Format("15:04:05.000") // HH:MM:SS.mmm format
+
+	// Print formatted debug message with context
+	fmt.Printf("[DEBUG %s %s:%d] %s\n",
+		timestamp,                   // Current timestamp
+		shortFile,                   // Source filename
+		line,                        // Line number
+		fmt.Sprintf(format, args...), // Formatted user message
+	)
+}
+
+// DebugVar prints a variable with its name for quick inspection
+// Parameters:
+//   - name: The variable name as string
+//   - value: The variable value to inspect
+func DebugVar(name string, value interface{}) {
+	if !debugEnabled { // Early return if debug is disabled
+		return
+	}
+	fmt.Printf("[DEBUG VAR] %s = %#v (type: %T)\n",
+		name,  // Variable name
+		value, // Value with Go syntax representation
+		value, // Type information
+	)
+}
+
+// DebugStruct pretty-prints a struct with field names
+// Parameters:
+//   - name: The struct name for labeling
+//   - s: The struct to print
+func DebugStruct(name string, s interface{}) {
+	if !debugEnabled { // Early return if debug is disabled
+		return
+	}
+	fmt.Printf("[DEBUG STRUCT] %s:\n", name) // Print struct label
+	fmt.Printf("  %+v\n", s)                 // Print with field names
+}
+
+// =============================================================================
+// EXAMPLE DATA STRUCTURES
+// =============================================================================
+
+// User represents a sample user for debugging demonstration
+type User struct {
+	ID    int    // Unique user identifier
+	Name  string // User's display name
+	Email string // User's email address
+	Age   int    // User's age in years
+}
+
+// Order represents a sample order for debugging demonstration
+type Order struct {
+	OrderID   string  // Unique order identifier
+	UserID    int     // Associated user ID
+	Amount    float64 // Order total amount
+	Status    string  // Order status (pending/completed/cancelled)
+	CreatedAt time.Time // Order creation timestamp
+}
+
+// =============================================================================
+// PROCESSING FUNCTIONS WITH DEBUG OUTPUT
+// =============================================================================
+
+// ProcessUser processes a user with debug output at each step
+// Parameters:
+//   - u: The user to process
+// Returns:
+//   - string: Processing result message
+//   - error: Error if processing fails
+func ProcessUser(u User) (string, error) {
+	Debug("Starting to process user ID: %d", u.ID) // Entry point logging
+
+	// Validate user data
+	if u.Name == "" { // Check for empty name
+		Debug("Validation failed: empty name for user %d", u.ID)
+		return "", fmt.Errorf("user name cannot be empty")
+	}
+
+	DebugStruct("Processing user", u) // Debug the full user struct
+
+	// Simulate processing steps
+	Debug("Step 1: Validating email format") // Step marker
+	Debug("Step 2: Checking age restrictions") // Step marker
+	Debug("Step 3: Generating welcome message") // Step marker
+
+	result := fmt.Sprintf("Welcome, %s!", u.Name) // Generate result
+	Debug("Processing complete. Result: %s", result) // Completion log
+
+	return result, nil // Return success
+}
+
+// CalculateOrderTotal calculates order total with debugging
+// Parameters:
+//   - orders: Slice of orders to calculate
+// Returns:
+//   - float64: Total amount across all orders
+func CalculateOrderTotal(orders []Order) float64 {
+	Debug("Calculating total for %d orders", len(orders)) // Entry log
+
+	var total float64 = 0 // Initialize accumulator
+
+	for i, order := range orders { // Iterate through orders
+		DebugVar(fmt.Sprintf("order[%d].Amount", i), order.Amount) // Debug each amount
+		total += order.Amount // Accumulate total
+	}
+
+	Debug("Final total calculated: %.2f", total) // Result log
+	return total // Return calculated total
+}
+
+// =============================================================================
+// MAIN ENTRY POINT
+// =============================================================================
+
+func main() {
+	fmt.Println("=== Print Debugging Demo ===") // Header
+	fmt.Println("Set DEBUG=1 to enable debug output") // Instructions
+	fmt.Println() // Blank line
+
+	// Create sample user for demonstration
+	user := User{
+		ID:    1,
+		Name:  "John Doe",
+		Email: "john@example.com",
+		Age:   30,
+	}
+
+	// Process the user with debug output
+	result, err := ProcessUser(user) // Call processing function
+	if err != nil {                  // Handle any errors
+		fmt.Printf("Error: %v\n", err)
+		return
+	}
+	fmt.Printf("Result: %s\n", result) // Print result
+
+	// Create sample orders for demonstration
+	orders := []Order{
+		{OrderID: "ORD-001", UserID: 1, Amount: 100.50, Status: "completed"},
+		{OrderID: "ORD-002", UserID: 1, Amount: 250.75, Status: "pending"},
+		{OrderID: "ORD-003", UserID: 1, Amount: 75.25, Status: "completed"},
+	}
+
+	// Calculate total with debug output
+	total := CalculateOrderTotal(orders) // Call calculation function
+	fmt.Printf("\nTotal orders amount: $%.2f\n", total) // Print result
+}

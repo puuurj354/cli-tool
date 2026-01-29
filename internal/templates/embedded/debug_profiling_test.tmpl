@@ -1,0 +1,158 @@
+package main
+
+// =============================================================================
+// PROFILING TESTS
+// =============================================================================
+// Tests for profiling functions
+// =============================================================================
+
+import (
+	"os"      // File operations
+	"testing" // Go testing framework
+)
+
+// =============================================================================
+// CPU PROFILING TESTS
+// =============================================================================
+
+// TestStartCPUProfile verifies CPU profiling can be started and stopped
+func TestStartCPUProfile(t *testing.T) {
+	// Create temp file for profile
+	filename := "test_cpu.prof" // Temp profile file
+
+	// Start CPU profiling
+	f, err := StartCPUProfile(filename) // Start profiling
+	if err != nil {                     // Check for error
+		t.Fatalf("StartCPUProfile() error = %v", err)
+	}
+
+	// Do some work to profile
+	_ = CPUIntensiveWork(100) // Generate some CPU activity
+
+	// Stop profiling
+	StopCPUProfile(f) // Stop and close
+
+	// Verify profile file exists
+	if _, err := os.Stat(filename); os.IsNotExist(err) { // Check file exists
+		t.Error("Expected CPU profile file to be created")
+	}
+
+	// Cleanup
+	os.Remove(filename) // Remove temp file
+}
+
+// TestStartCPUProfileInvalidPath verifies error handling for bad paths
+func TestStartCPUProfileInvalidPath(t *testing.T) {
+	// Try to create profile in invalid directory
+	filename := "/nonexistent/dir/cpu.prof" // Invalid path
+
+	_, err := StartCPUProfile(filename) // Attempt to start
+	if err == nil {                     // Should fail
+		t.Error("Expected error for invalid path")
+	}
+}
+
+// =============================================================================
+// MEMORY PROFILING TESTS
+// =============================================================================
+
+// TestWriteHeapProfile verifies heap profile can be written
+func TestWriteHeapProfile(t *testing.T) {
+	// Create temp file for profile
+	filename := "test_heap.prof" // Temp profile file
+
+	// Allocate some memory to profile
+	_ = MemoryIntensiveWork(10) // Generate allocations
+
+	// Write heap profile
+	err := WriteHeapProfile(filename) // Write profile
+	if err != nil {                   // Check for error
+		t.Fatalf("WriteHeapProfile() error = %v", err)
+	}
+
+	// Verify profile file exists
+	if _, err := os.Stat(filename); os.IsNotExist(err) { // Check file exists
+		t.Error("Expected heap profile file to be created")
+	}
+
+	// Cleanup
+	os.Remove(filename) // Remove temp file
+}
+
+// TestWriteHeapProfileInvalidPath verifies error handling
+func TestWriteHeapProfileInvalidPath(t *testing.T) {
+	// Try to write to invalid directory
+	filename := "/nonexistent/dir/heap.prof" // Invalid path
+
+	err := WriteHeapProfile(filename) // Attempt to write
+	if err == nil {                   // Should fail
+		t.Error("Expected error for invalid path")
+	}
+}
+
+// =============================================================================
+// MEMORY STATS TESTS
+// =============================================================================
+
+// TestGetMemStats verifies memory stats retrieval
+func TestGetMemStats(t *testing.T) {
+	stats := GetMemStats() // Get current stats
+
+	// Verify stats have reasonable values
+	if stats.Sys == 0 { // System memory should be non-zero
+		t.Error("Expected non-zero Sys memory")
+	}
+}
+
+// =============================================================================
+// WORKLOAD TESTS
+// =============================================================================
+
+// TestCPUIntensiveWork verifies CPU work function
+func TestCPUIntensiveWork(t *testing.T) {
+	// Test with different iteration counts
+	tests := []struct {
+		iterations int  // Input iterations
+		wantNonZero bool // Expect non-zero result
+	}{
+		{0, false},      // Zero iterations
+		{100, true},     // Small iterations
+		{10000, true},   // Medium iterations
+	}
+
+	for _, tt := range tests { // Run test cases
+		result := CPUIntensiveWork(tt.iterations) // Call function
+
+		if tt.wantNonZero && result == 0 { // Check result
+			t.Errorf("CPUIntensiveWork(%d) = 0, want non-zero", tt.iterations)
+		}
+	}
+}
+
+// TestMemoryIntensiveWork verifies memory allocation function
+func TestMemoryIntensiveWork(t *testing.T) {
+	size := 10 // Test size
+
+	result := MemoryIntensiveWork(size) // Call function
+
+	// Verify correct outer slice size
+	if len(result) != size { // Check length
+		t.Errorf("MemoryIntensiveWork() len = %d, want %d", len(result), size)
+	}
+
+	// Verify inner slices are allocated
+	for i, inner := range result { // Check each inner slice
+		if len(inner) != 1000 { // Should be 1000 elements
+			t.Errorf("Inner slice %d len = %d, want 1000", i, len(inner))
+		}
+	}
+}
+
+// TestMemoryIntensiveWorkEmpty verifies empty allocation
+func TestMemoryIntensiveWorkEmpty(t *testing.T) {
+	result := MemoryIntensiveWork(0) // Empty size
+
+	if len(result) != 0 { // Should be empty
+		t.Errorf("MemoryIntensiveWork(0) len = %d, want 0", len(result))
+	}
+}

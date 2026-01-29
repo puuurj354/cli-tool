@@ -1,0 +1,213 @@
+package main
+
+// =============================================================================
+// TRACING TESTS
+// =============================================================================
+// Tests for distributed tracing functions
+// =============================================================================
+
+import (
+	"context" // Context for testing
+	"testing" // Go testing framework
+	"time"    // Duration assertions
+)
+
+// =============================================================================
+// ID GENERATION TESTS
+// =============================================================================
+
+// TestNewTraceID verifies trace ID generation
+func TestNewTraceID(t *testing.T) {
+	id := NewTraceID() // Generate trace ID
+
+	// Should be 32 hex characters (16 bytes * 2)
+	if len(id) != 32 { // Check length
+		t.Errorf("NewTraceID() length = %d, want 32", len(id))
+	}
+
+	// Should be unique
+	id2 := NewTraceID() // Generate another
+	if id == id2 {      // Should be different
+		t.Error("Expected unique trace IDs")
+	}
+}
+
+// TestNewSpanID verifies span ID generation
+func TestNewSpanID(t *testing.T) {
+	id := NewSpanID() // Generate span ID
+
+	// Should be 16 hex characters (8 bytes * 2)
+	if len(id) != 16 { // Check length
+		t.Errorf("NewSpanID() length = %d, want 16", len(id))
+	}
+
+	// Should be unique
+	id2 := NewSpanID() // Generate another
+	if id == id2 {     // Should be different
+		t.Error("Expected unique span IDs")
+	}
+}
+
+// =============================================================================
+// SPAN TESTS
+// =============================================================================
+
+// TestSpanEnd verifies span end behavior
+func TestSpanEnd(t *testing.T) {
+	span := &Span{
+		Name:      "test-span",
+		StartTime: time.Now(),
+	}
+
+	time.Sleep(10 * time.Millisecond) // Wait a bit
+	span.End()                         // End span
+
+	// Verify duration was calculated
+	if span.Duration == 0 { // Should have duration
+		t.Error("Expected non-zero duration after End()")
+	}
+
+	// Verify end time was set
+	if span.EndTime.IsZero() { // Should have end time
+		t.Error("Expected EndTime to be set after End()")
+	}
+}
+
+// TestSpanSetTag verifies tag setting
+func TestSpanSetTag(t *testing.T) {
+	span := &Span{
+		Name: "test-span",
+	}
+
+	// Set tags
+	span.SetTag("key1", "value1") // First tag
+	span.SetTag("key2", "value2") // Second tag
+
+	// Verify tags
+	if span.Tags["key1"] != "value1" { // Check first tag
+		t.Errorf("Tag key1 = %s, want value1", span.Tags["key1"])
+	}
+	if span.Tags["key2"] != "value2" { // Check second tag
+		t.Errorf("Tag key2 = %s, want value2", span.Tags["key2"])
+	}
+}
+
+// =============================================================================
+// TRACER FUNCTION TESTS
+// =============================================================================
+
+// TestStartSpan verifies span creation
+func TestStartSpan(t *testing.T) {
+	ctx := context.Background() // Empty context
+
+	// Start span
+	newCtx, span := StartSpan(ctx, "test-operation")
+
+	// Verify span properties
+	if span.Name != "test-operation" { // Check name
+		t.Errorf("Span name = %s, want test-operation", span.Name)
+	}
+	if span.TraceID == "" { // Should have trace ID
+		t.Error("Expected non-empty TraceID")
+	}
+	if span.SpanID == "" { // Should have span ID
+		t.Error("Expected non-empty SpanID")
+	}
+	if span.ParentID != "" { // Root span has no parent
+		t.Errorf("Root span ParentID = %s, want empty", span.ParentID)
+	}
+
+	// Verify context contains IDs
+	if GetTraceID(newCtx) != span.TraceID { // Check context trace
+		t.Error("Context should contain trace ID")
+	}
+	if GetSpanID(newCtx) != span.SpanID { // Check context span
+		t.Error("Context should contain span ID")
+	}
+}
+
+// TestStartSpanWithExistingTrace verifies trace propagation
+func TestStartSpanWithExistingTrace(t *testing.T) {
+	// Create context with existing trace
+	ctx := context.Background()
+	ctx = context.WithValue(ctx, traceIDKey, "existing-trace-id")
+	ctx = context.WithValue(ctx, spanIDKey, "parent-span-id")
+
+	// Start child span
+	_, span := StartSpan(ctx, "child-operation")
+
+	// Verify trace ID is preserved
+	if span.TraceID != "existing-trace-id" { // Should use existing
+		t.Errorf("TraceID = %s, want existing-trace-id", span.TraceID)
+	}
+
+	// Verify parent ID is set
+	if span.ParentID != "parent-span-id" { // Should have parent
+		t.Errorf("ParentID = %s, want parent-span-id", span.ParentID)
+	}
+}
+
+// TestGetTraceID verifies trace ID extraction
+func TestGetTraceID(t *testing.T) {
+	// Test with trace ID
+	ctx := context.WithValue(context.Background(), traceIDKey, "test-trace")
+	if id := GetTraceID(ctx); id != "test-trace" { // Check extraction
+		t.Errorf("GetTraceID() = %s, want test-trace", id)
+	}
+
+	// Test without trace ID
+	if id := GetTraceID(context.Background()); id != "" { // Should be empty
+		t.Errorf("GetTraceID() = %s, want empty", id)
+	}
+}
+
+// TestGetSpanID verifies span ID extraction
+func TestGetSpanID(t *testing.T) {
+	// Test with span ID
+	ctx := context.WithValue(context.Background(), spanIDKey, "test-span")
+	if id := GetSpanID(ctx); id != "test-span" { // Check extraction
+		t.Errorf("GetSpanID() = %s, want test-span", id)
+	}
+
+	// Test without span ID
+	if id := GetSpanID(context.Background()); id != "" { // Should be empty
+		t.Errorf("GetSpanID() = %s, want empty", id)
+	}
+}
+
+// =============================================================================
+// INTEGRATION TESTS
+// =============================================================================
+
+// TestOrderServiceTracing verifies end-to-end tracing
+func TestOrderServiceTracing(t *testing.T) {
+	ctx := context.Background()  // Create context
+	service := &OrderService{} // Create service
+
+	// Create order
+	orderID, err := service.CreateOrder(ctx, 123, 99.99)
+
+	// Verify no error
+	if err != nil { // Check for error
+		t.Errorf("CreateOrder() error = %v", err)
+	}
+
+	// Verify order ID returned
+	if orderID == "" { // Should have ID
+		t.Error("Expected non-empty order ID")
+	}
+}
+
+// TestOrderServiceValidationError verifies error tracing
+func TestOrderServiceValidationError(t *testing.T) {
+	ctx := context.Background()  // Create context
+	service := &OrderService{} // Create service
+
+	// Create order with invalid amount
+	_, err := service.CreateOrder(ctx, 123, -100) // Negative amount
+
+	// Should return validation error
+	if err == nil { // Should have error
+		t.Error("Expected validation error for negative amount")
+	}
+}

@@ -41,6 +41,8 @@ func TestGetTemplate(t *testing.T) {
 		{"get learn-interfaces", "learn-interfaces", false},
 		{"get learn-design-patterns", "learn-design-patterns", false},
 		{"get learn-frontend", "learn-frontend", false},
+		// Debugging templates
+		{"get learn-debugging", "learn-debugging", false},
 		// Skill templates
 		{"get challenge-30days", "challenge-30days", false},
 		{"get mini-project", "mini-project", false},
@@ -79,9 +81,9 @@ func TestGetTemplate(t *testing.T) {
 func TestGetAllTemplates(t *testing.T) {
 	templates := GetAllTemplates()
 
-	// Should have exactly 31 templates
-	if len(templates) != 31 {
-		t.Errorf("expected 31 templates, got %d", len(templates))
+	// Should have exactly 32 templates (includes learn-debugging)
+	if len(templates) != 32 {
+		t.Errorf("expected 32 templates, got %d", len(templates))
 	}
 
 	// All templates should have name, description, directories, and files
@@ -222,6 +224,7 @@ func TestSpecificTemplatesStructure(t *testing.T) {
 		{"learn-testing structure", "learn-testing", 4, 8, []string{"unit/calculator.go", "unit/calculator_test.go"}},
 		{"fullstack structure", "fullstack", 6, 17, []string{"backend/cmd/api/main.go", "frontend/package.json"}},
 		{"challenge-30days structure", "challenge-30days", 9, 11, []string{"README.md", "week1/day01_hello/main.go"}},
+		{"learn-debugging structure", "learn-debugging", 6, 13, []string{"README.md", "01-print-debugging/main.go"}},
 	}
 
 	for _, tt := range tests {

@@ -1,0 +1,231 @@
+package main
+
+// =============================================================================
+// MEMORY DEBUGGING TESTS
+// =============================================================================
+// Tests for memory debugging functions
+// =============================================================================
+
+import (
+	"runtime" // Runtime memory operations
+	"testing" // Go testing framework
+	"time"    // Time comparison
+)
+
+// =============================================================================
+// MEMORY SNAPSHOT TESTS
+// =============================================================================
+
+// TestTakeSnapshot verifies snapshot capture
+func TestTakeSnapshot(t *testing.T) {
+	snapshot := TakeSnapshot() // Take snapshot
+
+	// Verify time is recent
+	if time.Since(snapshot.Time) > time.Second { // Should be recent
+		t.Error("Snapshot time should be recent")
+	}
+
+	// Verify memory values are populated
+	if snapshot.Sys == 0 { // System memory should exist
+		t.Error("Expected non-zero Sys memory")
+	}
+}
+
+// TestCompare verifies snapshot comparison
+func TestCompare(t *testing.T) {
+	before := TakeSnapshot() // Initial snapshot
+
+	// Allocate some memory
+	data := make([]byte, 1000000) // 1MB allocation
+	_ = data                      // Keep reference
+
+	after := TakeSnapshot() // Final snapshot
+
+	diff := Compare(before, after) // Calculate diff
+
+	// Verify diff properties
+	if diff.Duration < 0 { // Duration should be positive
+		t.Error("Duration should be positive")
+	}
+	if diff.TotalAllocDiff == 0 { // Should have allocated
+		t.Error("Expected non-zero TotalAllocDiff after allocation")
+	}
+}
+
+// =============================================================================
+// LEAK DETECTOR TESTS
+// =============================================================================
+
+// TestNewLeakDetector verifies detector creation
+func TestNewLeakDetector(t *testing.T) {
+	detector := NewLeakDetector(1.5) // Create detector
+
+	if detector == nil { // Should be created
+		t.Error("Expected non-nil detector")
+	}
+	if detector.threshold != 1.5 { // Check threshold
+		t.Errorf("Threshold = %v, want 1.5", detector.threshold)
+	}
+}
+
+// TestLeakDetectorRecord verifies recording
+func TestLeakDetectorRecord(t *testing.T) {
+	detector := NewLeakDetector(2.0) // High threshold
+
+	// Record a few snapshots
+	for i := 0; i < 3; i++ { // Record multiple times
+		leak, _ := detector.Record() // Record snapshot
+		if leak { // Should not detect with few samples
+			t.Error("Should not detect leak with few samples")
+		}
+	}
+
+	// Verify snapshots were recorded
+	if len(detector.snapshots) != 3 { // Should have 3
+		t.Errorf("Snapshots = %d, want 3", len(detector.snapshots))
+	}
+}
+
+// TestLeakDetectorNoFalsePositive verifies no false detection
+func TestLeakDetectorNoFalsePositive(t *testing.T) {
+	detector := NewLeakDetector(10.0) // Very high threshold
+
+	// Record multiple snapshots without significant allocation
+	for i := 0; i < 10; i++ { // Record many times
+		leak, msg := detector.Record() // Check each time
+		if leak { // Should not trigger
+			t.Errorf("False positive leak detection: %s", msg)
+		}
+	}
+}
+
+// =============================================================================
+// MEMORY PATTERN TESTS
+// =============================================================================
+
+// TestLeakingSlice verifies slice copy behavior
+func TestLeakingSlice(t *testing.T) {
+	// Create large source slice
+	source := make([]int, 1000) // Large slice
+	for i := range source {     // Fill with data
+		source[i] = i
+	}
+
+	// Get safe copy
+	result := LeakingSlice(source) // Call function
+
+	// Verify length matches
+	if len(result) != len(source) { // Same length
+		t.Errorf("Result length = %d, want %d", len(result), len(source))
+	}
+
+	// Verify data was copied correctly
+	for i := range result { // Check each element
+		if result[i] != source[i] { // Should match
+			t.Errorf("result[%d] = %d, want %d", i, result[i], source[i])
+		}
+	}
+}
+
+// TestDoesNotEscape verifies value stays on stack
+func TestDoesNotEscape(t *testing.T) {
+	result := DoesNotEscape() // Call function
+
+	if result != 42 { // Verify return value
+		t.Errorf("DoesNotEscape() = %d, want 42", result)
+	}
+}
+
+// TestEscapes verifies value escapes to heap
+func TestEscapes(t *testing.T) {
+	result := Escapes() // Call function
+
+	if result == nil { // Should not be nil
+		t.Error("Escapes() returned nil")
+	}
+	if *result != 42 { // Verify value
+		t.Errorf("*Escapes() = %d, want 42", *result)
+	}
+}
+
+// =============================================================================
+// OBJECT POOL TESTS
+// =============================================================================
+
+// TestObjectPool verifies pool get/return
+func TestObjectPool(t *testing.T) {
+	// Get buffer from pool
+	buf := GetBuffer() // Get from pool
+
+	// Verify buffer properties
+	if len(buf) != 1024 { // Should be 1KB
+		t.Errorf("Buffer length = %d, want 1024", len(buf))
+	}
+
+	// Write some data
+	buf[0] = 'A'   // Write to buffer
+	buf[100] = 'B' // Write to another position
+
+	// Return buffer
+	ReturnBuffer(buf) // Return to pool
+
+	// Data should be cleared (for security)
+	// Get another buffer (may be same one)
+	buf2 := GetBuffer()       // Get from pool
+	if buf2[0] != 0 {         // Should be zeroed
+		t.Error("Returned buffer was not cleared")
+	}
+}
+
+// =============================================================================
+// MEMORY DIFF TESTS
+// =============================================================================
+
+// TestMemoryDiffPrint verifies diff printing (no panic)
+func TestMemoryDiffPrint(t *testing.T) {
+	diff := MemoryDiff{
+		Duration:       time.Second,
+		AllocDiff:      1000,
+		ObjectDiff:     10,
+		GCCycles:       2,
+		TotalAllocDiff: 5000,
+	}
+
+	// Should not panic
+	defer func() {
+		if r := recover(); r != nil { // Check for panic
+			t.Errorf("Print() panicked: %v", r)
+		}
+	}()
+
+	diff.Print() // Call print (output to stdout)
+}
+
+// =============================================================================
+// BENCHMARK TESTS
+// =============================================================================
+
+// BenchmarkTakeSnapshot measures snapshot performance
+func BenchmarkTakeSnapshot(b *testing.B) {
+	for i := 0; i < b.N; i++ { // Run benchmark
+		TakeSnapshot() // Take snapshot
+	}
+}
+
+// BenchmarkObjectPool measures pool performance vs direct alloc
+func BenchmarkObjectPool(b *testing.B) {
+	b.Run("Pool", func(b *testing.B) {
+		for i := 0; i < b.N; i++ { // Run with pool
+			buf := GetBuffer()  // Get from pool
+			ReturnBuffer(buf)   // Return to pool
+		}
+	})
+
+	b.Run("Direct", func(b *testing.B) {
+		for i := 0; i < b.N; i++ { // Run with direct alloc
+			buf := make([]byte, 1024) // Allocate directly
+			_ = buf                   // Use buffer
+			runtime.KeepAlive(buf)    // Prevent optimization
+		}
+	})
+}

@@ -1,0 +1,279 @@
+# Delve Debugger Guide
+
+## Installation
+
+```bash
+# Install Delve
+go install github.com/go-delve/delve/cmd/dlv@latest
+
+# Verify installation
+dlv version
+```
+
+## Quick Start
+
+### Debug a Program
+
+```bash
+# Debug main.go directly
+dlv debug main.go
+
+# Debug with arguments
+dlv debug main.go -- arg1 arg2
+
+# Debug a specific package
+dlv debug ./cmd/server
+```
+
+### Debug Tests
+
+```bash
+# Debug all tests
+dlv test
+
+# Debug specific test
+dlv test -- -test.run TestFunctionName
+
+# Debug tests in package
+dlv test ./internal/handler
+```
+
+### Attach to Running Process
+
+```bash
+# Find process ID
+pgrep myapp
+
+# Attach to process
+dlv attach <pid>
+```
+
+## Essential Commands
+
+### Navigation
+
+| Command | Short | Description |
+|---------|-------|-------------|
+| `break` | `b` | Set breakpoint |
+| `continue` | `c` | Continue execution |
+| `next` | `n` | Step over |
+| `step` | `s` | Step into |
+| `stepout` | `so` | Step out of function |
+| `restart` | `r` | Restart program |
+
+### Breakpoints
+
+```
+# Set breakpoint at line
+b main.go:42
+
+# Set breakpoint at function
+b main.main
+b handler.CreateUser
+
+# Conditional breakpoint
+b main.go:50 userID > 100
+
+# List breakpoints
+breakpoints
+
+# Clear breakpoint
+clear 1
+clearall
+```
+
+### Inspection
+
+```
+# Print variable
+print myVar
+p myVar
+
+# Print with type
+whatis myVar
+
+# Print struct fields
+print user.Name
+print *pointerVar
+
+# Print local variables
+locals
+
+# Print function arguments
+args
+
+# List source code
+list
+list main.go:40
+```
+
+### Goroutines
+
+```
+# List all goroutines
+goroutines
+
+# Switch to goroutine
+goroutine 5
+
+# Print goroutine stack
+goroutine 5 bt
+```
+
+### Stack Traces
+
+```
+# Print stack trace
+stack
+bt
+
+# Print full stack with locals
+stack -full
+
+# Move up/down stack
+up
+down
+frame 3
+```
+
+## Practical Examples
+
+### Example 1: Debug Nil Pointer
+
+```go
+// Buggy code
+func ProcessUser(user *User) {
+    fmt.Println(user.Name) // Panic if user is nil
+}
+```
+
+Debug steps:
+```
+dlv debug main.go
+b ProcessUser
+c
+print user
+# If nil, investigate caller
+bt
+frame 1
+locals
+```
+
+### Example 2: Debug Loop
+
+```
+b main.go:50
+cond 1 i == 100  # Stop when i reaches 100
+c
+print i
+print items[i]
+```
+
+### Example 3: Debug Race Condition
+
+```bash
+# Build with race detector
+dlv debug -r main.go
+
+# Or
+go build -race -o app .
+dlv exec ./app
+```
+
+## Configuration
+
+### Create `.dlv/config.yml`
+
+```yaml
+# Show source list on stop
+show_source: true
+
+# Max string length to display
+max-string-len: 200
+
+# Max array values to display
+max-array-values: 100
+```
+
+### VS Code Integration
+
+Add to `launch.json`:
+```json
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "program": "${workspaceFolder}/cmd/server"
+        }
+    ]
+}
+```
+
+## Tips & Tricks
+
+### 1. Remote Debugging
+
+```bash
+# On remote server
+dlv debug --headless --listen=:2345 --api-version=2
+
+# On local machine
+dlv connect remote-host:2345
+```
+
+### 2. Core Dump Analysis
+
+```bash
+# Generate core dump
+GOTRACEBACK=crash ./app
+
+# Analyze
+dlv core ./app core.12345
+```
+
+### 3. Useful Expressions
+
+```
+# Slice length
+print len(items)
+
+# Map access
+print myMap["key"]
+
+# Interface value
+print iface.(type)
+call reflect.TypeOf(iface)
+```
+
+### 4. Edit and Continue (Experimental)
+
+```
+# Rebuild and restart without losing breakpoints
+rebuild
+```
+
+## Common Issues
+
+### "could not launch process: fork/exec: permission denied"
+
+```bash
+# On Linux, enable ptrace
+echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
+```
+
+### "could not find statement at line"
+
+Code was optimized. Build without optimization:
+```bash
+go build -gcflags="all=-N -l" -o app .
+dlv exec ./app
+```
+
+## Resources
+
+- [Delve Documentation](https://github.com/go-delve/delve/tree/master/Documentation)
+- [Delve Command Reference](https://github.com/go-delve/delve/blob/master/Documentation/cli/README.md)

@@ -1,0 +1,180 @@
+package main
+
+// =============================================================================
+// STRUCTURED LOGGING TESTS
+// =============================================================================
+// Tests for structured logging functionality
+// =============================================================================
+
+import (
+	"bytes"    // Buffer for capturing output
+	"context"  // Context for testing
+	"log/slog" // Structured logger
+	"strings"  // String assertions
+	"testing"  // Go testing framework
+)
+
+// =============================================================================
+// TEST HELPER FUNCTIONS
+// =============================================================================
+
+// setupTestLogger creates a logger that writes to a buffer for testing
+// Returns:
+//   - *bytes.Buffer: Buffer containing log output
+func setupTestLogger() *bytes.Buffer {
+	buf := new(bytes.Buffer) // Create buffer for log output
+
+	// Create JSON handler writing to buffer
+	handler := slog.NewJSONHandler(buf, &slog.HandlerOptions{
+		Level: slog.LevelDebug, // Capture all levels
+	})
+
+	logger = slog.New(handler) // Set package logger
+	return buf                 // Return buffer for assertions
+}
+
+// =============================================================================
+// TEST CASES
+// =============================================================================
+
+// TestInitLogger verifies logger initialization
+func TestInitLogger(t *testing.T) {
+	// Test JSON format initialization
+	InitLogger(slog.LevelInfo, true) // JSON format
+
+	if logger == nil { // Verify logger was created
+		t.Error("Expected logger to be initialized")
+	}
+
+	// Test text format initialization
+	InitLogger(slog.LevelDebug, false) // Text format
+
+	if logger == nil { // Verify logger was created
+		t.Error("Expected logger to be initialized for text format")
+	}
+}
+
+// TestLogWithContext verifies contextual logging
+func TestLogWithContext(t *testing.T) {
+	// Setup: Create test logger
+	buf := setupTestLogger() // Get log buffer
+
+	// Create context with trace ID
+	ctx := context.WithValue(context.Background(), "traceID", "test-trace-123")
+
+	// Log with context
+	LogWithContext(ctx, "test message", "key", "value")
+
+	// Verify output
+	output := buf.String() // Get logged output
+
+	if !strings.Contains(output, "test message") { // Check message
+		t.Error("Expected output to contain 'test message'")
+	}
+	if !strings.Contains(output, "test-trace-123") { // Check trace ID
+		t.Error("Expected output to contain trace ID")
+	}
+}
+
+// TestLogWithContextNoTrace verifies logging without trace ID
+func TestLogWithContextNoTrace(t *testing.T) {
+	// Setup: Create test logger
+	buf := setupTestLogger() // Get log buffer
+
+	// Use context without trace ID
+	ctx := context.Background() // Empty context
+
+	// Log with context
+	LogWithContext(ctx, "no trace message")
+
+	// Verify output contains default trace value
+	output := buf.String() // Get logged output
+
+	if !strings.Contains(output, "no-trace") { // Check default trace
+		t.Error("Expected output to contain 'no-trace' default")
+	}
+}
+
+// TestUserServiceLogging verifies service logging behavior
+func TestUserServiceLogging(t *testing.T) {
+	// Setup: Create test logger
+	buf := setupTestLogger() // Get log buffer
+
+	// Create service
+	service := NewUserService() // Initialize service
+
+	// Create context
+	ctx := context.WithValue(context.Background(), "traceID", "svc-trace-456")
+
+	// Call service method
+	userID, err := service.CreateUser(ctx, "Test User", "test@example.com")
+
+	// Verify no error
+	if err != nil { // Check for unexpected error
+		t.Errorf("CreateUser() unexpected error: %v", err)
+	}
+
+	// Verify user ID returned
+	if userID == 0 { // Check for valid user ID
+		t.Error("Expected non-zero user ID")
+	}
+
+	// Verify logging occurred
+	output := buf.String() // Get logged output
+
+	if !strings.Contains(output, "creating user") { // Check start log
+		t.Error("Expected log to contain 'creating user'")
+	}
+	if !strings.Contains(output, "user created") { // Check completion log
+		t.Error("Expected log to contain 'user created'")
+	}
+}
+
+// TestGetUser verifies user retrieval logging
+func TestGetUser(t *testing.T) {
+	// Setup: Create test logger
+	buf := setupTestLogger() // Get log buffer
+
+	// Create service
+	service := NewUserService() // Initialize service
+
+	// Call GetUser
+	ctx := context.Background() // Create context
+	user, err := service.GetUser(ctx, 123) // Retrieve user
+
+	// Verify no error
+	if err != nil { // Check for unexpected error
+		t.Errorf("GetUser() unexpected error: %v", err)
+	}
+
+	// Verify user data returned
+	if user == nil { // Check for valid user
+		t.Error("Expected non-nil user data")
+	}
+
+	// Verify logging occurred
+	output := buf.String() // Get logged output
+
+	if !strings.Contains(output, "fetching user") { // Check log
+		t.Error("Expected log to contain 'fetching user'")
+	}
+}
+
+// TestGetTraceID verifies trace ID extraction
+func TestGetTraceID(t *testing.T) {
+	// Test with valid trace ID
+	ctx := context.WithValue(context.Background(), "traceID", "valid-trace")
+	result := getTraceID(ctx) // Extract trace ID
+
+	if result != "valid-trace" { // Verify correct extraction
+		t.Errorf("getTraceID() = %s, want valid-trace", result)
+	}
+
+	// Test with missing trace ID
+	ctx = context.Background() // Context without trace
+	result = getTraceID(ctx)   // Extract trace ID
+
+	if result != "unknown" { // Verify default value
+		t.Errorf("getTraceID() = %s, want unknown", result)
+	}
+}

@@ -1,0 +1,221 @@
+package main
+
+// =============================================================================
+// STRUCTURED LOGGING - Production-grade logging with log/slog
+// =============================================================================
+// This file demonstrates structured logging using Go 1.21+ log/slog package
+// for JSON output, log levels, and contextual attributes.
+// =============================================================================
+
+import (
+	"context"  // Context for request tracing
+	"log/slog" // Go 1.21+ structured logger
+	"os"       // Stdout and environment access
+	"time"     // Time measurements
+)
+
+// =============================================================================
+// LOGGER CONFIGURATION
+// =============================================================================
+
+// logger is the package-level structured logger instance
+var logger *slog.Logger // Global logger reference
+
+// InitLogger initializes the structured logger with desired configuration
+// Parameters:
+//   - level: The minimum log level (Debug, Info, Warn, Error)
+//   - json: If true, output JSON format; if false, output text format
+func InitLogger(level slog.Level, json bool) {
+	var handler slog.Handler // Handler interface variable
+
+	// Configure handler options with log level
+	opts := &slog.HandlerOptions{
+		Level:     level, // Set minimum log level
+		AddSource: true,  // Include source file and line number
+	}
+
+	// Create appropriate handler based on format preference
+	if json { // JSON format for structured log aggregation
+		handler = slog.NewJSONHandler(os.Stdout, opts) // JSON output
+	} else { // Text format for human-readable output
+		handler = slog.NewTextHandler(os.Stdout, opts) // Text output
+	}
+
+	logger = slog.New(handler) // Create logger with handler
+	slog.SetDefault(logger)    // Set as default package logger
+}
+
+// =============================================================================
+// CONTEXTUAL LOGGING HELPERS
+// =============================================================================
+
+// LogWithContext adds request context to log entries
+// Parameters:
+//   - ctx: Request context containing trace info
+//   - msg: Log message
+//   - args: Additional key-value pairs to log
+func LogWithContext(ctx context.Context, msg string, args ...any) {
+	// Extract trace ID from context if present
+	traceID := ctx.Value("traceID") // Get trace ID from context
+	if traceID == nil {             // Use default if not set
+		traceID = "no-trace"
+	}
+
+	// Create args slice with trace ID prepended
+	allArgs := append([]any{"traceID", traceID}, args...) // Combine args
+
+	logger.Info(msg, allArgs...) // Log with all attributes
+}
+
+// LogError logs an error with structured context
+// Parameters:
+//   - err: The error to log
+//   - msg: Descriptive message about the error
+//   - args: Additional context key-value pairs
+func LogError(err error, msg string, args ...any) {
+	// Prepend error to args
+	allArgs := append([]any{"error", err.Error()}, args...) // Add error first
+
+	logger.Error(msg, allArgs...) // Log at error level
+}
+
+// =============================================================================
+// EXAMPLE SERVICE WITH LOGGING
+// =============================================================================
+
+// UserService handles user operations with structured logging
+type UserService struct {
+	logger *slog.Logger // Service-specific logger
+}
+
+// NewUserService creates a new UserService with a child logger
+// Returns:
+//   - *UserService: Configured user service instance
+func NewUserService() *UserService {
+	// Create child logger with service context
+	serviceLogger := logger.With( // Add persistent attributes
+		slog.String("service", "user-service"), // Service identifier
+		slog.String("version", "1.0.0"),        // Service version
+	)
+
+	return &UserService{logger: serviceLogger} // Return configured service
+}
+
+// CreateUser creates a new user with detailed logging
+// Parameters:
+//   - ctx: Request context
+//   - name: User name to create
+//   - email: User email address
+// Returns:
+//   - int: Created user ID
+//   - error: Error if creation fails
+func (s *UserService) CreateUser(ctx context.Context, name, email string) (int, error) {
+	// Log operation start with request details
+	s.logger.Info("creating user",
+		slog.String("name", name),   // User name attribute
+		slog.String("email", email), // Email attribute
+	)
+
+	start := time.Now() // Record start time for duration
+
+	// Simulate user creation (replace with actual DB operation)
+	userID := 12345 // Simulated user ID
+
+	// Log successful completion with duration
+	s.logger.Info("user created",
+		slog.Int("userID", userID),                          // Created user ID
+		slog.Duration("duration", time.Since(start)),        // Operation duration
+		slog.String("traceID", getTraceID(ctx)),             // Request trace
+	)
+
+	return userID, nil // Return created user ID
+}
+
+// GetUser retrieves a user with logging
+// Parameters:
+//   - ctx: Request context
+//   - userID: ID of user to retrieve
+// Returns:
+//   - map[string]interface{}: User data
+//   - error: Error if retrieval fails
+func (s *UserService) GetUser(ctx context.Context, userID int) (map[string]interface{}, error) {
+	// Log retrieval attempt
+	s.logger.Debug("fetching user",
+		slog.Int("userID", userID), // User ID being fetched
+	)
+
+	// Simulate retrieval (replace with actual DB query)
+	user := map[string]interface{}{
+		"id":    userID,
+		"name":  "John Doe",
+		"email": "john@example.com",
+	}
+
+	// Log successful retrieval
+	s.logger.Debug("user fetched",
+		slog.Int("userID", userID), // Fetched user ID
+	)
+
+	return user, nil // Return user data
+}
+
+// =============================================================================
+// HELPER FUNCTIONS
+// =============================================================================
+
+// getTraceID extracts trace ID from context safely
+// Parameters:
+//   - ctx: Context that may contain trace ID
+// Returns:
+//   - string: Trace ID or default value
+func getTraceID(ctx context.Context) string {
+	if id := ctx.Value("traceID"); id != nil { // Check if trace ID exists
+		if str, ok := id.(string); ok { // Type assert to string
+			return str // Return trace ID
+		}
+	}
+	return "unknown" // Default value
+}
+
+// =============================================================================
+// MAIN ENTRY POINT
+// =============================================================================
+
+func main() {
+	// Initialize logger with Info level and JSON format
+	InitLogger(slog.LevelDebug, true) // Debug level, JSON output
+
+	// Log application startup
+	logger.Info("application started",
+		slog.String("environment", "development"), // Environment info
+		slog.String("version", "1.0.0"),           // App version
+	)
+
+	// Create context with trace ID (simulating request context)
+	ctx := context.WithValue(context.Background(), "traceID", "abc-123-xyz")
+
+	// Create and use service
+	userService := NewUserService() // Initialize service
+
+	// Demonstrate creating a user
+	userID, err := userService.CreateUser(ctx, "Jane Doe", "jane@example.com")
+	if err != nil { // Handle any errors
+		LogError(err, "failed to create user")
+		return
+	}
+
+	logger.Info("user creation complete",
+		slog.Int("userID", userID), // Log created user ID
+	)
+
+	// Demonstrate retrieving a user
+	_, err = userService.GetUser(ctx, userID)
+	if err != nil { // Handle any errors
+		LogError(err, "failed to get user",
+			slog.Int("userID", userID), // Context for debugging
+		)
+	}
+
+	// Log application shutdown
+	logger.Info("application shutting down") // Shutdown message
+}

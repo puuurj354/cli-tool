@@ -1,0 +1,216 @@
+package main
+
+// =============================================================================
+// CPU/MEMORY PROFILING - Performance analysis with pprof
+// =============================================================================
+// This file demonstrates CPU and memory profiling using runtime/pprof
+// and net/http/pprof for identifying performance bottlenecks.
+// =============================================================================
+
+import (
+	"fmt"            // Formatted I/O
+	"net/http"       // HTTP server for pprof endpoint
+	_ "net/http/pprof" // Register pprof handlers (blank import)
+	"os"             // File operations
+	"runtime"        // Runtime memory stats
+	"runtime/pprof"  // CPU/memory profiling
+	"time"           // Time measurements
+)
+
+// =============================================================================
+// CPU PROFILING FUNCTIONS
+// =============================================================================
+
+// StartCPUProfile begins CPU profiling to a file
+// Parameters:
+//   - filename: Path to save the CPU profile
+// Returns:
+//   - *os.File: Profile file handle (must be closed to stop profiling)
+//   - error: Error if profiling cannot start
+func StartCPUProfile(filename string) (*os.File, error) {
+	f, err := os.Create(filename) // Create profile output file
+	if err != nil {               // Handle file creation error
+		return nil, fmt.Errorf("could not create CPU profile: %w", err)
+	}
+
+	if err := pprof.StartCPUProfile(f); err != nil { // Start CPU profiling
+		f.Close()                                     // Cleanup file on error
+		return nil, fmt.Errorf("could not start CPU profile: %w", err)
+	}
+
+	return f, nil // Return file handle for later cleanup
+}
+
+// StopCPUProfile stops CPU profiling and closes the file
+// Parameters:
+//   - f: Profile file handle from StartCPUProfile
+func StopCPUProfile(f *os.File) {
+	pprof.StopCPUProfile() // Stop CPU profiling
+	f.Close()              // Close the profile file
+}
+
+// =============================================================================
+// MEMORY PROFILING FUNCTIONS
+// =============================================================================
+
+// WriteHeapProfile writes current heap profile to a file
+// Parameters:
+//   - filename: Path to save the heap profile
+// Returns:
+//   - error: Error if profile cannot be written
+func WriteHeapProfile(filename string) error {
+	f, err := os.Create(filename) // Create profile output file
+	if err != nil {               // Handle file creation error
+		return fmt.Errorf("could not create heap profile: %w", err)
+	}
+	defer f.Close() // Ensure file is closed
+
+	runtime.GC() // Run GC to get accurate heap profile
+
+	if err := pprof.WriteHeapProfile(f); err != nil { // Write heap profile
+		return fmt.Errorf("could not write heap profile: %w", err)
+	}
+
+	return nil // Success
+}
+
+// GetMemStats returns current memory statistics
+// Returns:
+//   - runtime.MemStats: Current memory statistics
+func GetMemStats() runtime.MemStats {
+	var stats runtime.MemStats  // Memory statistics struct
+	runtime.ReadMemStats(&stats) // Read current stats
+	return stats                 // Return statistics
+}
+
+// PrintMemStats prints memory statistics in human-readable format
+func PrintMemStats() {
+	stats := GetMemStats() // Get current stats
+
+	fmt.Println("=== Memory Statistics ===")
+	fmt.Printf("Alloc:       %d MB (current heap allocation)\n", stats.Alloc/1024/1024)
+	fmt.Printf("TotalAlloc:  %d MB (cumulative allocation)\n", stats.TotalAlloc/1024/1024)
+	fmt.Printf("Sys:         %d MB (total memory from OS)\n", stats.Sys/1024/1024)
+	fmt.Printf("NumGC:       %d (number of GC cycles)\n", stats.NumGC)
+	fmt.Printf("HeapObjects: %d (live heap objects)\n", stats.HeapObjects)
+}
+
+// =============================================================================
+// HTTP PPROF SERVER
+// =============================================================================
+
+// StartPProfServer starts an HTTP server for pprof endpoints
+// Parameters:
+//   - addr: Address to listen on (e.g., ":6060")
+func StartPProfServer(addr string) {
+	fmt.Printf("Starting pprof server on %s\n", addr)
+	fmt.Println("Available endpoints:")
+	fmt.Println("  /debug/pprof/           - Index of profiles")
+	fmt.Println("  /debug/pprof/heap       - Heap profile")
+	fmt.Println("  /debug/pprof/goroutine  - Goroutine profile")
+	fmt.Println("  /debug/pprof/profile    - CPU profile (30s)")
+
+	// Start HTTP server in background goroutine
+	go func() {
+		if err := http.ListenAndServe(addr, nil); err != nil { // Start server
+			fmt.Printf("pprof server error: %v\n", err)
+		}
+	}()
+}
+
+// =============================================================================
+// EXAMPLE CPU-INTENSIVE FUNCTION
+// =============================================================================
+
+// CPUIntensiveWork simulates CPU-bound work for profiling
+// Parameters:
+//   - iterations: Number of iterations to perform
+// Returns:
+//   - int: Computed result
+func CPUIntensiveWork(iterations int) int {
+	result := 0 // Accumulator
+
+	for i := 0; i < iterations; i++ { // Main loop
+		for j := 0; j < 100; j++ { // Nested loop for CPU work
+			result += i * j // Some computation
+		}
+	}
+
+	return result // Return result
+}
+
+// =============================================================================
+// EXAMPLE MEMORY-INTENSIVE FUNCTION
+// =============================================================================
+
+// MemoryIntensiveWork allocates memory for profiling demonstration
+// Parameters:
+//   - size: Number of elements to allocate
+// Returns:
+//   - [][]int: Allocated slices (for profiling, not actual use)
+func MemoryIntensiveWork(size int) [][]int {
+	result := make([][]int, size) // Allocate outer slice
+
+	for i := range result { // Iterate and allocate inner slices
+		result[i] = make([]int, 1000) // Each inner slice is 1000 ints
+		for j := range result[i] {    // Fill with data
+			result[i][j] = i * j
+		}
+	}
+
+	return result // Return allocated data
+}
+
+// =============================================================================
+// MAIN ENTRY POINT
+// =============================================================================
+
+func main() {
+	fmt.Println("=== CPU/Memory Profiling Demo ===")
+	fmt.Println()
+
+	// Start HTTP pprof server for live profiling
+	StartPProfServer(":6060") // Accessible at http://localhost:6060/debug/pprof/
+
+	// Print initial memory stats
+	fmt.Println("Initial memory state:")
+	PrintMemStats()
+	fmt.Println()
+
+	// CPU profiling example
+	fmt.Println("Starting CPU profiling...")
+	cpuFile, err := StartCPUProfile("cpu.prof") // Start CPU profile
+	if err != nil {
+		fmt.Printf("Failed to start CPU profile: %v\n", err)
+	} else {
+		// Do CPU-intensive work
+		start := time.Now()                // Record start time
+		result := CPUIntensiveWork(100000) // Run CPU work
+		fmt.Printf("CPU work result: %d (took %v)\n", result, time.Since(start))
+
+		StopCPUProfile(cpuFile) // Stop CPU profiling
+		fmt.Println("CPU profile saved to cpu.prof")
+	}
+	fmt.Println()
+
+	// Memory profiling example
+	fmt.Println("Doing memory-intensive work...")
+	_ = MemoryIntensiveWork(1000) // Allocate memory
+
+	fmt.Println("After allocation:")
+	PrintMemStats()
+	fmt.Println()
+
+	// Write heap profile
+	if err := WriteHeapProfile("heap.prof"); err != nil { // Save heap profile
+		fmt.Printf("Failed to write heap profile: %v\n", err)
+	} else {
+		fmt.Println("Heap profile saved to heap.prof")
+	}
+
+	fmt.Println()
+	fmt.Println("=== Profile Analysis Commands ===")
+	fmt.Println("CPU:  go tool pprof cpu.prof")
+	fmt.Println("Heap: go tool pprof heap.prof")
+	fmt.Println("Web:  go tool pprof -http=:8080 cpu.prof")
+}

@@ -1,0 +1,42 @@
+// Package main - Debug Readme Template
+// This README provides an overview of Go debugging techniques
+
+# Go Debugging Techniques
+
+Learn various debugging strategies and tools for Go development.
+
+## 📁 Directory Structure
+
+| Directory | Topic |
+|-----------|-------|
+| `01-print-debugging/` | Printf and custom formatters |
+| `02-structured-logging/` | log/slog structured logging |
+| `03-profiling/` | CPU/memory profiling with pprof |
+| `04-tracing/` | Distributed tracing patterns |
+| `05-memory-debugging/` | Heap analysis & leak detection |
+| `06-delve-debugger/` | Interactive debugging with Delve |
+
+## 🚀 Quick Start
+
+```bash
+# Run any example
+cd 01-print-debugging && go run main.go
+
+# Run tests
+go test ./... -v
+```
+
+## 🔧 Tools Required
+
+- Go 1.21+ (for log/slog)
+- Delve debugger: `go install github.com/go-delve/delve/cmd/dlv@latest`
+- Graphviz (for pprof visualization): `sudo apt install graphviz`
+
+## 📚 Learning Path
+
+1. Start with **print debugging** for quick value inspection
+2. Graduate to **structured logging** for production debugging
+3. Use **profiling** for performance issues
+4. Apply **tracing** for distributed systems
+5. Master **memory debugging** for leak detection
+6. Learn **Delve** for step-by-step debugging
