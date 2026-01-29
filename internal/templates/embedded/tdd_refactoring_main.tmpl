@@ -1,0 +1,182 @@
+package main
+
+// =============================================================================
+// REFACTORING WITH TESTS
+// =============================================================================
+// Demonstrates how TDD enables safe refactoring:
+// - Tests act as a safety net
+// - Refactor in small steps
+// - Run tests after each change
+// =============================================================================
+
+import (
+	"strings" // String manipulation
+)
+
+// =============================================================================
+// BEFORE REFACTORING - Messy Code
+// =============================================================================
+
+// ProcessOrderBad is poorly structured code (BEFORE refactoring)
+// This shows what code might look like before TDD refactoring
+// func ProcessOrderBad(items []string, discount int) (float64, error) {
+//     total := 0.0
+//     for i := 0; i < len(items); i++ {
+//         if items[i] == "apple" { total += 1.50 }
+//         if items[i] == "banana" { total += 0.75 }
+//         if items[i] == "orange" { total += 2.00 }
+//     }
+//     if discount > 0 { total = total - (total * float64(discount) / 100) }
+//     if total < 0 { total = 0 }
+//     return total, nil
+// }
+
+// =============================================================================
+// AFTER REFACTORING - Clean Code (with tests!)
+// =============================================================================
+
+// OrderProcessor handles order calculations
+// Refactored to be testable and maintainable
+type OrderProcessor struct {
+	prices map[string]float64 // Product prices
+}
+
+// NewOrderProcessor creates order processor with default prices
+// Returns:
+//   - *OrderProcessor: Configured processor
+func NewOrderProcessor() *OrderProcessor {
+	return &OrderProcessor{
+		prices: map[string]float64{
+			"apple":  1.50, // Each apple costs $1.50
+			"banana": 0.75, // Each banana costs $0.75
+			"orange": 2.00, // Each orange costs $2.00
+		},
+	}
+}
+
+// CalculateTotal computes total price for items
+// Parameters:
+//   - items: List of item names
+// Returns:
+//   - float64: Total price
+func (p *OrderProcessor) CalculateTotal(items []string) float64 {
+	var total float64 // Accumulator for total
+
+	for _, item := range items { // Iterate items idiomatically
+		price := p.getPrice(item) // Delegate price lookup
+		total += price            // Add to total
+	}
+
+	return total
+}
+
+// getPrice returns price for an item (extracted method)
+// Parameters:
+//   - item: Item name
+// Returns:
+//   - float64: Price (0 if unknown)
+func (p *OrderProcessor) getPrice(item string) float64 {
+	item = strings.ToLower(item) // Normalize case
+
+	if price, ok := p.prices[item]; ok { // Check if item exists
+		return price
+	}
+	return 0 // Unknown items are free
+}
+
+// ApplyDiscount applies percentage discount
+// Parameters:
+//   - total: Original total
+//   - percent: Discount percentage (0-100)
+// Returns:
+//   - float64: Discounted total (never negative)
+func (p *OrderProcessor) ApplyDiscount(total float64, percent int) float64 {
+	if percent <= 0 { // No discount
+		return total
+	}
+	if percent > 100 { // Cap at 100%
+		percent = 100
+	}
+
+	discountAmount := total * float64(percent) / 100 // Calculate discount
+	result := total - discountAmount                  // Apply discount
+
+	if result < 0 { // Ensure non-negative
+		return 0
+	}
+	return result
+}
+
+// ProcessOrder is the clean refactored version
+// Parameters:
+//   - items: List of items to purchase
+//   - discountPercent: Discount percentage to apply
+// Returns:
+//   - float64: Final price after discount
+func (p *OrderProcessor) ProcessOrder(items []string, discountPercent int) float64 {
+	total := p.CalculateTotal(items)             // Step 1: Calculate total
+	finalPrice := p.ApplyDiscount(total, discountPercent) // Step 2: Apply discount
+	return finalPrice
+}
+
+// =============================================================================
+// STRING CLEANER - Another refactoring example
+// =============================================================================
+
+// StringCleaner provides string cleaning operations
+type StringCleaner struct{}
+
+// Clean removes extra whitespace and normalizes string
+// Parameters:
+//   - s: Input string
+// Returns:
+//   - string: Cleaned string
+// Refactoring steps:
+//   1. Extract TrimSpace
+//   2. Extract normalizeWhitespace
+//   3. Extract toLowercase (optional)
+func (sc *StringCleaner) Clean(s string) string {
+	s = strings.TrimSpace(s)         // Remove leading/trailing whitespace
+	s = sc.normalizeWhitespace(s)    // Collapse multiple spaces
+	return s
+}
+
+// normalizeWhitespace collapses multiple spaces into single space
+func (sc *StringCleaner) normalizeWhitespace(s string) string {
+	var result strings.Builder // Efficient string building
+	prevSpace := false         // Track previous character
+
+	for _, r := range s { // Iterate runes
+		if r == ' ' || r == '\t' || r == '\n' { // Whitespace?
+			if !prevSpace { // Only add if not consecutive
+				result.WriteRune(' ')
+				prevSpace = true
+			}
+		} else {
+			result.WriteRune(r) // Keep non-whitespace
+			prevSpace = false
+		}
+	}
+
+	return result.String()
+}
+
+// CleanAndLower cleans and lowercases
+func (sc *StringCleaner) CleanAndLower(s string) string {
+	return strings.ToLower(sc.Clean(s)) // Compose operations
+}
+
+// =============================================================================
+// MAIN
+// =============================================================================
+
+func main() {
+	println("=== Refactoring with Tests Demo ===")
+	println()
+	println("This module shows how tests enable safe refactoring:")
+	println("  1. Write tests for existing behavior")
+	println("  2. Refactor in small steps")
+	println("  3. Run tests after each change")
+	println()
+	println("Run tests: go test -v")
+}

@@ -251,6 +251,17 @@ var (
 	debugMemoryMainTmpl    = loadEmbedded("debug_memory_main.tmpl")
 	debugMemoryTestTmpl    = loadEmbedded("debug_memory_test.tmpl")
 	debugDelveReadmeTmpl   = loadEmbedded("debug_delve_readme.tmpl")
+	// TDD templates
+	tddReadmeTmpl          = loadEmbedded("tdd_readme.tmpl")
+	tddRedGreenMainTmpl    = loadEmbedded("tdd_red_green_main.tmpl")
+	tddRedGreenTestTmpl    = loadEmbedded("tdd_red_green_test.tmpl")
+	tddMockingMainTmpl     = loadEmbedded("tdd_mocking_main.tmpl")
+	tddMockingTestTmpl     = loadEmbedded("tdd_mocking_test.tmpl")
+	tddRefactoringMainTmpl = loadEmbedded("tdd_refactoring_main.tmpl")
+	tddRefactoringTestTmpl = loadEmbedded("tdd_refactoring_test.tmpl")
+	tddBDDMainTmpl         = loadEmbedded("tdd_bdd_main.tmpl")
+	tddBDDTestTmpl         = loadEmbedded("tdd_bdd_test.tmpl")
+	tddExercisesReadmeTmpl = loadEmbedded("tdd_exercises_readme.tmpl")
 )
 
 // Generator functions
@@ -921,6 +932,30 @@ func initBuiltInTemplates() {
 				{Path: "05-memory-debugging/main.go", Content: debugMemoryMainTmpl},
 				{Path: "05-memory-debugging/main_test.go", Content: debugMemoryTestTmpl},
 				{Path: "06-delve-debugger/README.md", Content: debugDelveReadmeTmpl},
+				{Path: ".gitignore", Content: gitignoreGoTmpl},
+			},
+		},
+		"learn-tdd": {
+			Name:        "learn-tdd",
+			Description: "Learn Test-Driven Development (Red-Green-Refactor)",
+			Directories: []string{
+				"01-red-green-refactor",
+				"02-mocking",
+				"03-refactoring",
+				"04-bdd-style",
+				"05-exercises",
+			},
+			Files: []FileTemplate{
+				{Path: "README.md", Content: tddReadmeTmpl},
+				{Path: "01-red-green-refactor/main.go", Content: tddRedGreenMainTmpl},
+				{Path: "01-red-green-refactor/main_test.go", Content: tddRedGreenTestTmpl},
+				{Path: "02-mocking/main.go", Content: tddMockingMainTmpl},
+				{Path: "02-mocking/main_test.go", Content: tddMockingTestTmpl},
+				{Path: "03-refactoring/main.go", Content: tddRefactoringMainTmpl},
+				{Path: "03-refactoring/main_test.go", Content: tddRefactoringTestTmpl},
+				{Path: "04-bdd-style/main.go", Content: tddBDDMainTmpl},
+				{Path: "04-bdd-style/main_test.go", Content: tddBDDTestTmpl},
+				{Path: "05-exercises/README.md", Content: tddExercisesReadmeTmpl},
 				{Path: ".gitignore", Content: gitignoreGoTmpl},
 			},
 		},

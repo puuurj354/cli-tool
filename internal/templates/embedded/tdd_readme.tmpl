@@ -1,0 +1,42 @@
+# Test-Driven Development (TDD) in Go
+
+Learn the TDD workflow: **Red → Green → Refactor**
+
+## 📁 Directory Structure
+
+| Directory | Topic |
+|-----------|-------|
+| `01-red-green-refactor/` | Core TDD cycle with calculator |
+| `02-mocking/` | Interfaces and test doubles |
+| `03-refactoring/` | Safe refactoring with tests |
+| `04-bdd-style/` | Given/When/Then pattern |
+| `05-exercises/` | Practice problems |
+
+## 🔴🟢🔵 The TDD Cycle
+
+```
+1. RED    → Write a failing test
+2. GREEN  → Write minimal code to pass
+3. REFACTOR → Improve code without breaking tests
+```
+
+## 🚀 Quick Start
+
+```bash
+# Run all tests
+go test ./... -v
+
+# Run with coverage
+go test ./... -cover
+
+# Run specific module
+cd 01-red-green-refactor && go test -v
+```
+
+## 📚 Learning Path
+
+1. **Red-Green-Refactor** - Master the core cycle
+2. **Mocking** - Test code with external dependencies
+3. **Refactoring** - Safely improve code structure
+4. **BDD-style** - Write readable test scenarios
+5. **Exercises** - Practice with real problems

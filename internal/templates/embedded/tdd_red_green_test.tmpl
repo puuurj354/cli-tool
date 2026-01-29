@@ -1,0 +1,245 @@
+package main
+
+// =============================================================================
+// RED-GREEN-REFACTOR TESTS
+// =============================================================================
+// Each test was written BEFORE the implementation (TDD style)
+// =============================================================================
+
+import (
+	"errors"  // For error comparison
+	"testing" // Go testing framework
+)
+
+// =============================================================================
+// CALCULATOR TESTS
+// =============================================================================
+
+// TestCalculatorAdd tests the Add method
+// TDD: This test was written FIRST, before Add was implemented
+func TestCalculatorAdd(t *testing.T) {
+	calc := NewCalculator() // Create calculator instance
+
+	// Table-driven tests for multiple cases
+	tests := []struct {
+		name     string // Test case name
+		a, b     int    // Input values
+		expected int    // Expected result
+	}{
+		{"positive numbers", 2, 3, 5},
+		{"negative numbers", -2, -3, -5},
+		{"mixed numbers", -2, 5, 3},
+		{"zero", 0, 5, 5},
+		{"both zero", 0, 0, 0},
+	}
+
+	for _, tt := range tests { // Run each test case
+		t.Run(tt.name, func(t *testing.T) {
+			result := calc.Add(tt.a, tt.b) // Call method under test
+
+			if result != tt.expected { // Assert result
+				t.Errorf("Add(%d, %d) = %d, want %d", tt.a, tt.b, result, tt.expected)
+			}
+		})
+	}
+}
+
+// TestCalculatorSubtract tests the Subtract method
+func TestCalculatorSubtract(t *testing.T) {
+	calc := NewCalculator() // Create calculator
+
+	tests := []struct {
+		name     string
+		a, b     int
+		expected int
+	}{
+		{"positive result", 5, 3, 2},
+		{"negative result", 3, 5, -2},
+		{"zero result", 5, 5, 0},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := calc.Subtract(tt.a, tt.b)
+
+			if result != tt.expected {
+				t.Errorf("Subtract(%d, %d) = %d, want %d", tt.a, tt.b, result, tt.expected)
+			}
+		})
+	}
+}
+
+// TestCalculatorMultiply tests the Multiply method
+func TestCalculatorMultiply(t *testing.T) {
+	calc := NewCalculator()
+
+	tests := []struct {
+		name     string
+		a, b     int
+		expected int
+	}{
+		{"positive numbers", 3, 4, 12},
+		{"by zero", 5, 0, 0},
+		{"negative", -3, 4, -12},
+		{"both negative", -3, -4, 12},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := calc.Multiply(tt.a, tt.b)
+
+			if result != tt.expected {
+				t.Errorf("Multiply(%d, %d) = %d, want %d", tt.a, tt.b, result, tt.expected)
+			}
+		})
+	}
+}
+
+// TestCalculatorDivide tests the Divide method
+func TestCalculatorDivide(t *testing.T) {
+	calc := NewCalculator()
+
+	t.Run("successful division", func(t *testing.T) {
+		result, err := calc.Divide(10, 2) // Divide 10 by 2
+
+		if err != nil { // Should not error
+			t.Errorf("unexpected error: %v", err)
+		}
+		if result != 5 { // Should be 5
+			t.Errorf("Divide(10, 2) = %d, want 5", result)
+		}
+	})
+
+	t.Run("division by zero", func(t *testing.T) {
+		_, err := calc.Divide(10, 0) // Attempt divide by zero
+
+		if err == nil { // Should error
+			t.Error("expected error for division by zero")
+		}
+		if !errors.Is(err, ErrDivisionByZero) { // Should be specific error
+			t.Errorf("got error %v, want ErrDivisionByZero", err)
+		}
+	})
+}
+
+// =============================================================================
+// STRING REVERSER TESTS
+// =============================================================================
+
+// TestStringReverse tests the Reverse method
+func TestStringReverse(t *testing.T) {
+	sr := &StringReverser{}
+
+	tests := []struct {
+		name     string
+		input    string
+		expected string
+	}{
+		{"simple word", "hello", "olleh"},
+		{"empty string", "", ""},
+		{"single char", "a", "a"},
+		{"palindrome", "radar", "radar"},
+		{"with spaces", "hello world", "dlrow olleh"},
+		{"unicode", "日本語", "語本日"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := sr.Reverse(tt.input)
+
+			if result != tt.expected {
+				t.Errorf("Reverse(%q) = %q, want %q", tt.input, result, tt.expected)
+			}
+		})
+	}
+}
+
+// TestIsPalindrome tests the IsPalindrome method
+func TestIsPalindrome(t *testing.T) {
+	sr := &StringReverser{}
+
+	tests := []struct {
+		name     string
+		input    string
+		expected bool
+	}{
+		{"is palindrome", "radar", true},
+		{"not palindrome", "hello", false},
+		{"empty is palindrome", "", true},
+		{"single char", "a", true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := sr.IsPalindrome(tt.input)
+
+			if result != tt.expected {
+				t.Errorf("IsPalindrome(%q) = %v, want %v", tt.input, result, tt.expected)
+			}
+		})
+	}
+}
+
+// =============================================================================
+// FIZZBUZZ TESTS
+// =============================================================================
+
+// TestFizzBuzz tests the FizzBuzz function
+// This is a classic TDD kata - perfect for practicing the cycle
+func TestFizzBuzz(t *testing.T) {
+	tests := []struct {
+		n        int    // Input number
+		expected string // Expected output
+	}{
+		{1, "1"},           // Regular number
+		{2, "2"},           // Regular number
+		{3, "Fizz"},        // Divisible by 3
+		{4, "4"},           // Regular number
+		{5, "Buzz"},        // Divisible by 5
+		{6, "Fizz"},        // Divisible by 3
+		{9, "Fizz"},        // Divisible by 3
+		{10, "Buzz"},       // Divisible by 5
+		{15, "FizzBuzz"},   // Divisible by both
+		{30, "FizzBuzz"},   // Divisible by both
+		{45, "FizzBuzz"},   // Divisible by both
+	}
+
+	for _, tt := range tests {
+		t.Run(intToString(tt.n), func(t *testing.T) {
+			result := FizzBuzz(tt.n)
+
+			if result != tt.expected {
+				t.Errorf("FizzBuzz(%d) = %q, want %q", tt.n, result, tt.expected)
+			}
+		})
+	}
+}
+
+// =============================================================================
+// BENCHMARK TESTS
+// =============================================================================
+
+// BenchmarkCalculatorAdd benchmarks the Add method
+func BenchmarkCalculatorAdd(b *testing.B) {
+	calc := NewCalculator()
+
+	for i := 0; i < b.N; i++ {
+		calc.Add(100, 200)
+	}
+}
+
+// BenchmarkStringReverse benchmarks the Reverse method
+func BenchmarkStringReverse(b *testing.B) {
+	sr := &StringReverser{}
+
+	for i := 0; i < b.N; i++ {
+		sr.Reverse("hello world")
+	}
+}
+
+// BenchmarkFizzBuzz benchmarks the FizzBuzz function
+func BenchmarkFizzBuzz(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		FizzBuzz(i % 100)
+	}
+}

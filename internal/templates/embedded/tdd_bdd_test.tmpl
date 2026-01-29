@@ -1,0 +1,289 @@
+package main
+
+// =============================================================================
+// BDD-STYLE TESTS (Given/When/Then)
+// =============================================================================
+// Tests written in Behavior-Driven Development style
+// =============================================================================
+
+import "testing" // Go testing framework
+
+// =============================================================================
+// ACCOUNT SERVICE TESTS - BDD Style
+// =============================================================================
+
+// Test naming convention: Test_<Unit>_<Scenario>
+
+func Test_AccountService_WhenCreatingAccountWithValidData_ShouldSucceed(t *testing.T) {
+	// Given: A new account service
+	service := NewAccountService()
+
+	// When: Creating an account with valid data
+	account, err := service.CreateAccount("ACC001", "John Doe", 100.00)
+
+	// Then: Account should be created successfully
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
+	if account.ID != "ACC001" {
+		t.Errorf("ID = %s, want ACC001", account.ID)
+	}
+	if account.Owner != "John Doe" {
+		t.Errorf("Owner = %s, want John Doe", account.Owner)
+	}
+	if account.Balance != 100.00 {
+		t.Errorf("Balance = %.2f, want 100.00", account.Balance)
+	}
+}
+
+func Test_AccountService_WhenCreatingAccountWithEmptyID_ShouldFail(t *testing.T) {
+	// Given: A new account service
+	service := NewAccountService()
+
+	// When: Creating an account with empty ID
+	_, err := service.CreateAccount("", "John Doe", 100.00)
+
+	// Then: Should return error
+	if err != ErrEmptyAccountID {
+		t.Errorf("error = %v, want ErrEmptyAccountID", err)
+	}
+}
+
+func Test_AccountService_WhenCreatingDuplicateAccount_ShouldFail(t *testing.T) {
+	// Given: An account already exists
+	service := NewAccountService()
+	service.CreateAccount("ACC001", "John Doe", 100.00)
+
+	// When: Creating account with same ID
+	_, err := service.CreateAccount("ACC001", "Jane Doe", 200.00)
+
+	// Then: Should return error
+	if err != ErrAccountExists {
+		t.Errorf("error = %v, want ErrAccountExists", err)
+	}
+}
+
+func Test_AccountService_WhenDepositingMoney_ShouldIncreaseBalance(t *testing.T) {
+	// Given: An account with $100 balance
+	service := NewAccountService()
+	service.CreateAccount("ACC001", "John Doe", 100.00)
+
+	// When: Depositing $50
+	newBalance, err := service.Deposit("ACC001", 50.00)
+
+	// Then: Balance should be $150
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if newBalance != 150.00 {
+		t.Errorf("newBalance = %.2f, want 150.00", newBalance)
+	}
+}
+
+func Test_AccountService_WhenWithdrawingWithSufficientFunds_ShouldSucceed(t *testing.T) {
+	// Given: An account with $100 balance
+	service := NewAccountService()
+	service.CreateAccount("ACC001", "John Doe", 100.00)
+
+	// When: Withdrawing $30
+	newBalance, err := service.Withdraw("ACC001", 30.00)
+
+	// Then: Balance should be $70
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if newBalance != 70.00 {
+		t.Errorf("newBalance = %.2f, want 70.00", newBalance)
+	}
+}
+
+func Test_AccountService_WhenWithdrawingWithInsufficientFunds_ShouldFail(t *testing.T) {
+	// Given: An account with $50 balance
+	service := NewAccountService()
+	service.CreateAccount("ACC001", "John Doe", 50.00)
+
+	// When: Withdrawing $100
+	_, err := service.Withdraw("ACC001", 100.00)
+
+	// Then: Should return insufficient funds error
+	if err != ErrInsufficientFunds {
+		t.Errorf("error = %v, want ErrInsufficientFunds", err)
+	}
+
+	// And: Balance should remain unchanged
+	balance, _ := service.GetBalance("ACC001")
+	if balance != 50.00 {
+		t.Errorf("balance = %.2f, want 50.00 (unchanged)", balance)
+	}
+}
+
+func Test_AccountService_WhenTransferringBetweenAccounts_ShouldMoveMoney(t *testing.T) {
+	// Given: Two accounts with $100 and $50
+	service := NewAccountService()
+	service.CreateAccount("ACC001", "John", 100.00)
+	service.CreateAccount("ACC002", "Jane", 50.00)
+
+	// When: Transferring $30 from ACC001 to ACC002
+	err := service.Transfer("ACC001", "ACC002", 30.00)
+
+	// Then: Transfer should succeed
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	// And: ACC001 should have $70
+	balance1, _ := service.GetBalance("ACC001")
+	if balance1 != 70.00 {
+		t.Errorf("ACC001 balance = %.2f, want 70.00", balance1)
+	}
+
+	// And: ACC002 should have $80
+	balance2, _ := service.GetBalance("ACC002")
+	if balance2 != 80.00 {
+		t.Errorf("ACC002 balance = %.2f, want 80.00", balance2)
+	}
+}
+
+func Test_AccountService_WhenTransferringToSameAccount_ShouldFail(t *testing.T) {
+	// Given: An account
+	service := NewAccountService()
+	service.CreateAccount("ACC001", "John", 100.00)
+
+	// When: Transferring to same account
+	err := service.Transfer("ACC001", "ACC001", 50.00)
+
+	// Then: Should return error
+	if err != ErrSameAccount {
+		t.Errorf("error = %v, want ErrSameAccount", err)
+	}
+}
+
+// =============================================================================
+// SHOPPING CART TESTS - BDD Style
+// =============================================================================
+
+func Test_ShoppingCart_WhenNewCart_ShouldBeEmpty(t *testing.T) {
+	// Given/When: A new shopping cart
+	cart := NewShoppingCart()
+
+	// Then: Cart should be empty
+	if !cart.IsEmpty() {
+		t.Error("new cart should be empty")
+	}
+	if cart.ItemCount() != 0 {
+		t.Errorf("ItemCount = %d, want 0", cart.ItemCount())
+	}
+	if cart.GetTotal() != 0 {
+		t.Errorf("Total = %.2f, want 0", cart.GetTotal())
+	}
+}
+
+func Test_ShoppingCart_WhenAddingItem_ShouldIncreaseCount(t *testing.T) {
+	// Given: An empty cart
+	cart := NewShoppingCart()
+
+	// When: Adding an item
+	err := cart.AddItem("PROD001", "Widget", 9.99, 2)
+
+	// Then: Cart should have 1 item type
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if cart.ItemCount() != 1 {
+		t.Errorf("ItemCount = %d, want 1", cart.ItemCount())
+	}
+	if cart.IsEmpty() {
+		t.Error("cart should not be empty")
+	}
+}
+
+func Test_ShoppingCart_WhenAddingSameProduct_ShouldIncrementQuantity(t *testing.T) {
+	// Given: A cart with 2 widgets
+	cart := NewShoppingCart()
+	cart.AddItem("PROD001", "Widget", 9.99, 2)
+
+	// When: Adding 3 more of the same widget
+	cart.AddItem("PROD001", "Widget", 9.99, 3)
+
+	// Then: Should have 1 item type with quantity 5
+	if cart.ItemCount() != 1 {
+		t.Errorf("ItemCount = %d, want 1", cart.ItemCount())
+	}
+	// Total should be 5 * 9.99 = 49.95
+	expected := 49.95
+	if cart.GetTotal() != expected {
+		t.Errorf("Total = %.2f, want %.2f", cart.GetTotal(), expected)
+	}
+}
+
+func Test_ShoppingCart_WhenCalculatingTotal_ShouldSumAllItems(t *testing.T) {
+	// Given: A cart with multiple items
+	cart := NewShoppingCart()
+	cart.AddItem("PROD001", "Widget", 10.00, 2)  // $20
+	cart.AddItem("PROD002", "Gadget", 25.00, 1)  // $25
+
+	// When: Getting total
+	total := cart.GetTotal()
+
+	// Then: Total should be $45
+	if total != 45.00 {
+		t.Errorf("Total = %.2f, want 45.00", total)
+	}
+}
+
+func Test_ShoppingCart_WhenRemovingItem_ShouldDecreaseCount(t *testing.T) {
+	// Given: A cart with 2 items
+	cart := NewShoppingCart()
+	cart.AddItem("PROD001", "Widget", 10.00, 1)
+	cart.AddItem("PROD002", "Gadget", 25.00, 1)
+
+	// When: Removing one item
+	cart.RemoveItem("PROD001")
+
+	// Then: Should have 1 item
+	if cart.ItemCount() != 1 {
+		t.Errorf("ItemCount = %d, want 1", cart.ItemCount())
+	}
+	if cart.GetTotal() != 25.00 {
+		t.Errorf("Total = %.2f, want 25.00", cart.GetTotal())
+	}
+}
+
+func Test_ShoppingCart_WhenClearing_ShouldBeEmpty(t *testing.T) {
+	// Given: A cart with items
+	cart := NewShoppingCart()
+	cart.AddItem("PROD001", "Widget", 10.00, 5)
+	cart.AddItem("PROD002", "Gadget", 25.00, 3)
+
+	// When: Clearing the cart
+	cart.Clear()
+
+	// Then: Cart should be empty
+	if !cart.IsEmpty() {
+		t.Error("cart should be empty after clear")
+	}
+	if cart.GetTotal() != 0 {
+		t.Errorf("Total = %.2f, want 0 after clear", cart.GetTotal())
+	}
+}
+
+func Test_ShoppingCart_WhenAddingWithInvalidQuantity_ShouldFail(t *testing.T) {
+	// Given: A cart
+	cart := NewShoppingCart()
+
+	// When: Adding item with zero quantity
+	err := cart.AddItem("PROD001", "Widget", 10.00, 0)
+
+	// Then: Should return error
+	if err == nil {
+		t.Error("expected error for zero quantity")
+	}
+
+	// When: Adding item with negative quantity
+	err = cart.AddItem("PROD001", "Widget", 10.00, -1)
+
+	// Then: Should return error
+	if err == nil {
+		t.Error("expected error for negative quantity")
+	}
+}

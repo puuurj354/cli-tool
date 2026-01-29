@@ -1,0 +1,275 @@
+package main
+
+// =============================================================================
+// MOCKING TESTS
+// =============================================================================
+// Demonstrates how to create and use test doubles (mocks, stubs, fakes)
+// =============================================================================
+
+import (
+	"errors"  // Error handling
+	"testing" // Go testing framework
+	"time"    // Time for fixed timestamps
+)
+
+// =============================================================================
+// MOCK IMPLEMENTATIONS
+// =============================================================================
+
+// MockUserRepository is a test double for UserRepository
+type MockUserRepository struct {
+	users     map[int]*User         // In-memory storage
+	saveError error                 // Error to return on Save
+	getError  error                 // Error to return on GetByID
+	saveCalled bool                 // Track if Save was called
+	getCalled  bool                 // Track if GetByID was called
+	nextID     int                  // Auto-increment ID
+}
+
+// NewMockUserRepository creates a mock repository
+func NewMockUserRepository() *MockUserRepository {
+	return &MockUserRepository{
+		users:  make(map[int]*User),
+		nextID: 1,
+	}
+}
+
+// GetByID implements UserRepository.GetByID
+func (m *MockUserRepository) GetByID(id int) (*User, error) {
+	m.getCalled = true // Track call
+	if m.getError != nil {
+		return nil, m.getError
+	}
+	user, ok := m.users[id]
+	if !ok {
+		return nil, ErrNotFound
+	}
+	return user, nil
+}
+
+// Save implements UserRepository.Save
+func (m *MockUserRepository) Save(user *User) error {
+	m.saveCalled = true // Track call
+	if m.saveError != nil {
+		return m.saveError
+	}
+	if user.ID == 0 {
+		user.ID = m.nextID
+		m.nextID++
+	}
+	m.users[user.ID] = user
+	return nil
+}
+
+// Delete implements UserRepository.Delete
+func (m *MockUserRepository) Delete(id int) error {
+	delete(m.users, id)
+	return nil
+}
+
+// SetSaveError configures the mock to return an error on Save
+func (m *MockUserRepository) SetSaveError(err error) {
+	m.saveError = err
+}
+
+// SetGetError configures the mock to return an error on GetByID
+func (m *MockUserRepository) SetGetError(err error) {
+	m.getError = err
+}
+
+// =============================================================================
+// MOCK EMAIL SERVICE
+// =============================================================================
+
+// MockEmailService is a test double for EmailService
+type MockEmailService struct {
+	sentEmails []SentEmail // Track sent emails
+	sendError  error       // Error to return on Send
+}
+
+// SentEmail records a sent email for verification
+type SentEmail struct {
+	To      string
+	Subject string
+	Body    string
+}
+
+// Send implements EmailService.Send
+func (m *MockEmailService) Send(to, subject, body string) error {
+	if m.sendError != nil {
+		return m.sendError
+	}
+	m.sentEmails = append(m.sentEmails, SentEmail{
+		To:      to,
+		Subject: subject,
+		Body:    body,
+	})
+	return nil
+}
+
+// SetSendError configures the mock to return an error
+func (m *MockEmailService) SetSendError(err error) {
+	m.sendError = err
+}
+
+// LastEmail returns the last sent email for assertions
+func (m *MockEmailService) LastEmail() *SentEmail {
+	if len(m.sentEmails) == 0 {
+		return nil
+	}
+	return &m.sentEmails[len(m.sentEmails)-1]
+}
+
+// =============================================================================
+// MOCK TIME PROVIDER
+// =============================================================================
+
+// MockTimeProvider returns a fixed time for deterministic tests
+type MockTimeProvider struct {
+	fixedTime time.Time
+}
+
+// Now returns the fixed time
+func (m *MockTimeProvider) Now() time.Time {
+	return m.fixedTime
+}
+
+// =============================================================================
+// TESTS WITH MOCKS
+// =============================================================================
+
+// TestCreateUser_Success tests successful user creation
+func TestCreateUser_Success(t *testing.T) {
+	// Arrange: Set up mocks
+	repo := NewMockUserRepository()
+	email := &MockEmailService{}
+	fixedTime := time.Date(2024, 1, 1, 12, 0, 0, 0, time.UTC)
+	timeProvider := &MockTimeProvider{fixedTime: fixedTime}
+
+	service := NewUserService(repo, email, timeProvider)
+
+	// Act: Create user
+	user, err := service.CreateUser("John Doe", "john@example.com")
+
+	// Assert: Verify results
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if user.Name != "John Doe" {
+		t.Errorf("Name = %s, want John Doe", user.Name)
+	}
+	if user.Email != "john@example.com" {
+		t.Errorf("Email = %s, want john@example.com", user.Email)
+	}
+	if user.CreatedAt != fixedTime {
+		t.Errorf("CreatedAt = %v, want %v", user.CreatedAt, fixedTime)
+	}
+
+	// Verify mock interactions
+	if !repo.saveCalled {
+		t.Error("expected Save to be called on repository")
+	}
+	if email.LastEmail() == nil {
+		t.Error("expected welcome email to be sent")
+	}
+	if email.LastEmail().To != "john@example.com" {
+		t.Errorf("email sent to %s, want john@example.com", email.LastEmail().To)
+	}
+}
+
+// TestCreateUser_EmptyName tests validation error
+func TestCreateUser_EmptyName(t *testing.T) {
+	// Arrange
+	repo := NewMockUserRepository()
+	email := &MockEmailService{}
+	timeProvider := &MockTimeProvider{fixedTime: time.Now()}
+
+	service := NewUserService(repo, email, timeProvider)
+
+	// Act
+	user, err := service.CreateUser("", "john@example.com")
+
+	// Assert
+	if err != ErrEmptyName {
+		t.Errorf("error = %v, want ErrEmptyName", err)
+	}
+	if user != nil {
+		t.Error("expected nil user on error")
+	}
+	if repo.saveCalled {
+		t.Error("Save should not be called on validation error")
+	}
+}
+
+// TestCreateUser_RepositoryError tests repository failure handling
+func TestCreateUser_RepositoryError(t *testing.T) {
+	// Arrange
+	repo := NewMockUserRepository()
+	repo.SetSaveError(errors.New("database connection failed"))
+	email := &MockEmailService{}
+	timeProvider := &MockTimeProvider{fixedTime: time.Now()}
+
+	service := NewUserService(repo, email, timeProvider)
+
+	// Act
+	_, err := service.CreateUser("John", "john@example.com")
+
+	// Assert
+	if err == nil {
+		t.Error("expected error from repository failure")
+	}
+}
+
+// TestGetUser_Success tests successful user retrieval
+func TestGetUser_Success(t *testing.T) {
+	// Arrange
+	repo := NewMockUserRepository()
+	repo.users[1] = &User{ID: 1, Name: "Jane", Email: "jane@example.com"}
+	email := &MockEmailService{}
+	timeProvider := &MockTimeProvider{fixedTime: time.Now()}
+
+	service := NewUserService(repo, email, timeProvider)
+
+	// Act
+	user, err := service.GetUser(1)
+
+	// Assert
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if user.Name != "Jane" {
+		t.Errorf("Name = %s, want Jane", user.Name)
+	}
+}
+
+// TestGetUser_InvalidID tests ID validation
+func TestGetUser_InvalidID(t *testing.T) {
+	// Arrange
+	service := NewUserService(nil, nil, nil)
+
+	// Act
+	_, err := service.GetUser(-1)
+
+	// Assert
+	if err != ErrInvalidID {
+		t.Errorf("error = %v, want ErrInvalidID", err)
+	}
+}
+
+// TestGetUser_NotFound tests user not found scenario
+func TestGetUser_NotFound(t *testing.T) {
+	// Arrange
+	repo := NewMockUserRepository()
+	email := &MockEmailService{}
+	timeProvider := &MockTimeProvider{fixedTime: time.Now()}
+
+	service := NewUserService(repo, email, timeProvider)
+
+	// Act
+	_, err := service.GetUser(999)
+
+	// Assert
+	if err != ErrNotFound {
+		t.Errorf("error = %v, want ErrNotFound", err)
+	}
+}

@@ -1,0 +1,268 @@
+package main
+
+// =============================================================================
+// BDD-STYLE TESTING (Given/When/Then)
+// =============================================================================
+// Behavior-Driven Development style tests focus on:
+// - Readable test names describing behavior
+// - Given/When/Then structure
+// - Business-focused scenarios
+// =============================================================================
+
+import (
+	"errors" // Error handling
+	"fmt"    // Formatting
+)
+
+// =============================================================================
+// ACCOUNT - Banking example for BDD
+// =============================================================================
+
+// Account represents a bank account
+type Account struct {
+	ID      string  // Account identifier
+	Owner   string  // Account owner name
+	Balance float64 // Current balance
+}
+
+// AccountService provides account operations
+type AccountService struct {
+	accounts map[string]*Account // In-memory storage
+}
+
+// NewAccountService creates a new service
+func NewAccountService() *AccountService {
+	return &AccountService{
+		accounts: make(map[string]*Account),
+	}
+}
+
+// CreateAccount creates a new account
+// Parameters:
+//   - id: Account ID
+//   - owner: Owner name
+//   - initialBalance: Starting balance
+// Returns:
+//   - *Account: Created account
+//   - error: Error if validation fails
+func (s *AccountService) CreateAccount(id, owner string, initialBalance float64) (*Account, error) {
+	if id == "" { // Validate ID
+		return nil, ErrEmptyAccountID
+	}
+	if owner == "" { // Validate owner
+		return nil, ErrEmptyOwner
+	}
+	if initialBalance < 0 { // Validate balance
+		return nil, ErrNegativeBalance
+	}
+	if _, exists := s.accounts[id]; exists { // Check duplicate
+		return nil, ErrAccountExists
+	}
+
+	account := &Account{
+		ID:      id,
+		Owner:   owner,
+		Balance: initialBalance,
+	}
+	s.accounts[id] = account
+
+	return account, nil
+}
+
+// Deposit adds money to an account
+// Parameters:
+//   - accountID: Target account
+//   - amount: Amount to deposit
+// Returns:
+//   - float64: New balance
+//   - error: Error if account not found or invalid amount
+func (s *AccountService) Deposit(accountID string, amount float64) (float64, error) {
+	account, err := s.getAccount(accountID) // Find account
+	if err != nil {
+		return 0, err
+	}
+
+	if amount <= 0 { // Validate amount
+		return 0, ErrInvalidAmount
+	}
+
+	account.Balance += amount // Add to balance
+	return account.Balance, nil
+}
+
+// Withdraw removes money from an account
+// Parameters:
+//   - accountID: Target account
+//   - amount: Amount to withdraw
+// Returns:
+//   - float64: New balance
+//   - error: Error if insufficient funds
+func (s *AccountService) Withdraw(accountID string, amount float64) (float64, error) {
+	account, err := s.getAccount(accountID)
+	if err != nil {
+		return 0, err
+	}
+
+	if amount <= 0 {
+		return 0, ErrInvalidAmount
+	}
+	if amount > account.Balance { // Check sufficient funds
+		return 0, ErrInsufficientFunds
+	}
+
+	account.Balance -= amount
+	return account.Balance, nil
+}
+
+// Transfer moves money between accounts
+// Parameters:
+//   - fromID: Source account
+//   - toID: Destination account
+//   - amount: Amount to transfer
+// Returns:
+//   - error: Error if transfer fails
+func (s *AccountService) Transfer(fromID, toID string, amount float64) error {
+	if fromID == toID { // Can't transfer to self
+		return ErrSameAccount
+	}
+
+	// Withdraw from source
+	if _, err := s.Withdraw(fromID, amount); err != nil {
+		return fmt.Errorf("withdraw: %w", err)
+	}
+
+	// Deposit to destination
+	if _, err := s.Deposit(toID, amount); err != nil {
+		// Rollback: return money to source
+		s.Deposit(fromID, amount)
+		return fmt.Errorf("deposit: %w", err)
+	}
+
+	return nil
+}
+
+// GetBalance returns account balance
+func (s *AccountService) GetBalance(accountID string) (float64, error) {
+	account, err := s.getAccount(accountID)
+	if err != nil {
+		return 0, err
+	}
+	return account.Balance, nil
+}
+
+// getAccount is a helper to find an account
+func (s *AccountService) getAccount(id string) (*Account, error) {
+	account, exists := s.accounts[id]
+	if !exists {
+		return nil, ErrAccountNotFound
+	}
+	return account, nil
+}
+
+// =============================================================================
+// ERRORS
+// =============================================================================
+
+var (
+	ErrEmptyAccountID    = errors.New("account ID cannot be empty")
+	ErrEmptyOwner        = errors.New("owner name cannot be empty")
+	ErrNegativeBalance   = errors.New("initial balance cannot be negative")
+	ErrAccountExists     = errors.New("account already exists")
+	ErrAccountNotFound   = errors.New("account not found")
+	ErrInvalidAmount     = errors.New("amount must be positive")
+	ErrInsufficientFunds = errors.New("insufficient funds")
+	ErrSameAccount       = errors.New("cannot transfer to same account")
+)
+
+// =============================================================================
+// SHOPPING CART - Another BDD example
+// =============================================================================
+
+// CartItem represents an item in cart
+type CartItem struct {
+	ProductID string  // Product identifier
+	Name      string  // Product name
+	Price     float64 // Unit price
+	Quantity  int     // Number of items
+}
+
+// ShoppingCart manages cart items
+type ShoppingCart struct {
+	items map[string]*CartItem // Items by product ID
+}
+
+// NewShoppingCart creates empty cart
+func NewShoppingCart() *ShoppingCart {
+	return &ShoppingCart{
+		items: make(map[string]*CartItem),
+	}
+}
+
+// AddItem adds product to cart
+func (c *ShoppingCart) AddItem(productID, name string, price float64, quantity int) error {
+	if productID == "" {
+		return errors.New("product ID required")
+	}
+	if quantity <= 0 {
+		return errors.New("quantity must be positive")
+	}
+	if price < 0 {
+		return errors.New("price cannot be negative")
+	}
+
+	if existing, ok := c.items[productID]; ok {
+		existing.Quantity += quantity // Add to existing
+	} else {
+		c.items[productID] = &CartItem{
+			ProductID: productID,
+			Name:      name,
+			Price:     price,
+			Quantity:  quantity,
+		}
+	}
+	return nil
+}
+
+// RemoveItem removes product from cart
+func (c *ShoppingCart) RemoveItem(productID string) {
+	delete(c.items, productID)
+}
+
+// GetTotal returns cart total
+func (c *ShoppingCart) GetTotal() float64 {
+	var total float64
+	for _, item := range c.items {
+		total += item.Price * float64(item.Quantity)
+	}
+	return total
+}
+
+// ItemCount returns number of unique items
+func (c *ShoppingCart) ItemCount() int {
+	return len(c.items)
+}
+
+// IsEmpty checks if cart is empty
+func (c *ShoppingCart) IsEmpty() bool {
+	return len(c.items) == 0
+}
+
+// Clear empties the cart
+func (c *ShoppingCart) Clear() {
+	c.items = make(map[string]*CartItem)
+}
+
+// =============================================================================
+// MAIN
+// =============================================================================
+
+func main() {
+	println("=== BDD-Style Testing Demo ===")
+	println()
+	println("BDD focuses on behavior, not implementation:")
+	println("  Given: Initial context/state")
+	println("  When:  Action is performed")
+	println("  Then:  Expected outcome")
+	println()
+	println("Run tests: go test -v")
+}

@@ -1,0 +1,181 @@
+package main
+
+// =============================================================================
+// REFACTORING TESTS
+// =============================================================================
+// Tests that enable safe refactoring - written before code changes
+// =============================================================================
+
+import "testing" // Go testing framework
+
+// =============================================================================
+// ORDER PROCESSOR TESTS
+// =============================================================================
+
+// TestCalculateTotal tests total calculation
+func TestCalculateTotal(t *testing.T) {
+	processor := NewOrderProcessor()
+
+	tests := []struct {
+		name     string
+		items    []string
+		expected float64
+	}{
+		{"single apple", []string{"apple"}, 1.50},
+		{"single banana", []string{"banana"}, 0.75},
+		{"single orange", []string{"orange"}, 2.00},
+		{"multiple items", []string{"apple", "banana", "orange"}, 4.25},
+		{"duplicate items", []string{"apple", "apple"}, 3.00},
+		{"empty order", []string{}, 0.00},
+		{"unknown item", []string{"mango"}, 0.00},
+		{"mixed known unknown", []string{"apple", "mango"}, 1.50},
+		{"case insensitive", []string{"APPLE", "Apple"}, 3.00},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := processor.CalculateTotal(tt.items)
+
+			if result != tt.expected {
+				t.Errorf("CalculateTotal(%v) = %.2f, want %.2f", tt.items, result, tt.expected)
+			}
+		})
+	}
+}
+
+// TestApplyDiscount tests discount calculations
+func TestApplyDiscount(t *testing.T) {
+	processor := NewOrderProcessor()
+
+	tests := []struct {
+		name     string
+		total    float64
+		percent  int
+		expected float64
+	}{
+		{"10% discount", 100.00, 10, 90.00},
+		{"50% discount", 100.00, 50, 50.00},
+		{"100% discount", 100.00, 100, 0.00},
+		{"0% discount", 100.00, 0, 100.00},
+		{"negative discount ignored", 100.00, -10, 100.00},
+		{"over 100% capped", 100.00, 150, 0.00},
+		{"zero total", 0.00, 50, 0.00},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := processor.ApplyDiscount(tt.total, tt.percent)
+
+			if result != tt.expected {
+				t.Errorf("ApplyDiscount(%.2f, %d) = %.2f, want %.2f", 
+					tt.total, tt.percent, result, tt.expected)
+			}
+		})
+	}
+}
+
+// TestProcessOrder tests full order processing
+func TestProcessOrder(t *testing.T) {
+	processor := NewOrderProcessor()
+
+	tests := []struct {
+		name     string
+		items    []string
+		discount int
+		expected float64
+	}{
+		{"order with 10% off", []string{"apple", "banana"}, 10, 2.025},
+		{"order with no discount", []string{"orange"}, 0, 2.00},
+		{"empty order", []string{}, 50, 0.00},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := processor.ProcessOrder(tt.items, tt.discount)
+
+			if result != tt.expected {
+				t.Errorf("ProcessOrder(%v, %d) = %.3f, want %.3f", 
+					tt.items, tt.discount, result, tt.expected)
+			}
+		})
+	}
+}
+
+// =============================================================================
+// STRING CLEANER TESTS
+// =============================================================================
+
+// TestClean tests string cleaning
+func TestClean(t *testing.T) {
+	cleaner := &StringCleaner{}
+
+	tests := []struct {
+		name     string
+		input    string
+		expected string
+	}{
+		{"trim spaces", "  hello  ", "hello"},
+		{"collapse spaces", "hello   world", "hello world"},
+		{"tabs to space", "hello\tworld", "hello world"},
+		{"newlines to space", "hello\nworld", "hello world"},
+		{"mixed whitespace", "  hello \t\n world  ", "hello world"},
+		{"already clean", "hello world", "hello world"},
+		{"empty string", "", ""},
+		{"only spaces", "   ", ""},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := cleaner.Clean(tt.input)
+
+			if result != tt.expected {
+				t.Errorf("Clean(%q) = %q, want %q", tt.input, result, tt.expected)
+			}
+		})
+	}
+}
+
+// TestCleanAndLower tests clean + lowercase
+func TestCleanAndLower(t *testing.T) {
+	cleaner := &StringCleaner{}
+
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{"  HELLO  WORLD  ", "hello world"},
+		{"MiXeD CaSe", "mixed case"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.input, func(t *testing.T) {
+			result := cleaner.CleanAndLower(tt.input)
+
+			if result != tt.expected {
+				t.Errorf("CleanAndLower(%q) = %q, want %q", tt.input, result, tt.expected)
+			}
+		})
+	}
+}
+
+// =============================================================================
+// BENCHMARK TESTS
+// =============================================================================
+
+func BenchmarkProcessOrder(b *testing.B) {
+	processor := NewOrderProcessor()
+	items := []string{"apple", "banana", "orange", "apple", "orange"}
+
+	for i := 0; i < b.N; i++ {
+		processor.ProcessOrder(items, 10)
+	}
+}
+
+func BenchmarkStringClean(b *testing.B) {
+	cleaner := &StringCleaner{}
+	input := "   hello   world   from   go   "
+
+	for i := 0; i < b.N; i++ {
+		cleaner.Clean(input)
+	}
+}

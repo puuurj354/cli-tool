@@ -1,0 +1,198 @@
+package main
+
+// =============================================================================
+// MOCKING AND TEST DOUBLES
+// =============================================================================
+// This demonstrates how to use interfaces for mocking in TDD:
+// - Dependency Injection
+// - Test Doubles (Mocks, Stubs, Fakes)
+// - Interface-based testing
+// =============================================================================
+
+import (
+	"errors" // Error handling
+	"fmt"    // Formatting
+	"time"   // Time for timestamps
+)
+
+// =============================================================================
+// INTERFACES FOR MOCKING
+// =============================================================================
+
+// UserRepository defines the interface for user data access
+// By defining an interface, we can mock this in tests
+type UserRepository interface {
+	GetByID(id int) (*User, error)         // Fetch user by ID
+	Save(user *User) error                  // Save user to storage
+	Delete(id int) error                    // Delete user by ID
+}
+
+// EmailService defines the interface for sending emails
+// This allows us to mock email sending in tests
+type EmailService interface {
+	Send(to, subject, body string) error // Send an email
+}
+
+// TimeProvider defines interface for getting current time
+// Mocking time is essential for deterministic tests
+type TimeProvider interface {
+	Now() time.Time // Get current time
+}
+
+// =============================================================================
+// DATA STRUCTURES
+// =============================================================================
+
+// User represents a user in the system
+type User struct {
+	ID        int       // Unique identifier
+	Name      string    // User's name
+	Email     string    // User's email
+	CreatedAt time.Time // When user was created
+	UpdatedAt time.Time // When user was last updated
+}
+
+// =============================================================================
+// SERVICE IMPLEMENTATION
+// =============================================================================
+
+// UserService provides business logic for users
+// Dependencies are injected via constructor (Dependency Injection)
+type UserService struct {
+	repo    UserRepository // Injected repository
+	email   EmailService   // Injected email service
+	time    TimeProvider   // Injected time provider
+}
+
+// NewUserService creates a UserService with injected dependencies
+// Parameters:
+//   - repo: Repository for user data access
+//   - email: Service for sending emails
+//   - timeProvider: Provider for current time
+// Returns:
+//   - *UserService: Configured service instance
+func NewUserService(repo UserRepository, email EmailService, timeProvider TimeProvider) *UserService {
+	return &UserService{
+		repo:  repo,
+		email: email,
+		time:  timeProvider,
+	}
+}
+
+// GetUser retrieves a user by ID
+// Parameters:
+//   - id: User ID to retrieve
+// Returns:
+//   - *User: Found user or nil
+//   - error: Error if not found or repository error
+func (s *UserService) GetUser(id int) (*User, error) {
+	if id <= 0 { // Validate ID
+		return nil, ErrInvalidID
+	}
+	return s.repo.GetByID(id) // Delegate to repository
+}
+
+// CreateUser creates a new user and sends welcome email
+// Parameters:
+//   - name: User's name
+//   - email: User's email
+// Returns:
+//   - *User: Created user
+//   - error: Error if creation or email fails
+func (s *UserService) CreateUser(name, email string) (*User, error) {
+	if name == "" { // Validate name
+		return nil, ErrEmptyName
+	}
+	if email == "" { // Validate email
+		return nil, ErrEmptyEmail
+	}
+
+	now := s.time.Now() // Get current time from provider
+
+	user := &User{
+		Name:      name,
+		Email:     email,
+		CreatedAt: now,
+		UpdatedAt: now,
+	}
+
+	if err := s.repo.Save(user); err != nil { // Save to repository
+		return nil, fmt.Errorf("save user: %w", err)
+	}
+
+	// Send welcome email
+	subject := "Welcome to our service!"
+	body := fmt.Sprintf("Hello %s, welcome!", name)
+	if err := s.email.Send(email, subject, body); err != nil {
+		// Log but don't fail - email is not critical
+		fmt.Printf("warning: failed to send welcome email: %v\n", err)
+	}
+
+	return user, nil // Return created user
+}
+
+// DeleteUser removes a user by ID
+// Parameters:
+//   - id: User ID to delete
+// Returns:
+//   - error: Error if deletion fails
+func (s *UserService) DeleteUser(id int) error {
+	if id <= 0 { // Validate ID
+		return ErrInvalidID
+	}
+
+	// Check user exists
+	user, err := s.repo.GetByID(id)
+	if err != nil {
+		return fmt.Errorf("get user: %w", err)
+	}
+
+	// Delete from repository
+	if err := s.repo.Delete(id); err != nil {
+		return fmt.Errorf("delete user: %w", err)
+	}
+
+	// Send goodbye email
+	s.email.Send(user.Email, "Goodbye", "We're sorry to see you go!")
+
+	return nil
+}
+
+// =============================================================================
+// ERRORS
+// =============================================================================
+
+var (
+	ErrInvalidID  = errors.New("invalid user ID")    // ID validation error
+	ErrEmptyName  = errors.New("name cannot be empty") // Name validation error
+	ErrEmptyEmail = errors.New("email cannot be empty") // Email validation error
+	ErrNotFound   = errors.New("user not found")       // User not found error
+)
+
+// =============================================================================
+// PRODUCTION IMPLEMENTATIONS
+// =============================================================================
+
+// RealTimeProvider provides actual current time
+type RealTimeProvider struct{}
+
+// Now returns the actual current time
+func (r *RealTimeProvider) Now() time.Time {
+	return time.Now()
+}
+
+// =============================================================================
+// MAIN
+// =============================================================================
+
+func main() {
+	println("=== Mocking and Test Doubles Demo ===")
+	println()
+	println("This module demonstrates:")
+	println("  - Dependency Injection")
+	println("  - Interface-based mocking")
+	println("  - Test doubles (mocks, stubs)")
+	println()
+	println("Run tests to see mocking in action:")
+	println("  go test -v")
+}

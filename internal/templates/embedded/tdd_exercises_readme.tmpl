@@ -1,0 +1,97 @@
+# TDD Practice Exercises
+
+Practice Test-Driven Development with these exercises.
+
+## 🎯 Exercise 1: Stack Implementation
+
+Implement a Stack data structure using TDD.
+
+**Requirements:**
+- `Push(value)` - Add item to top
+- `Pop()` - Remove and return top item
+- `Peek()` - Return top item without removing
+- `IsEmpty()` - Check if stack is empty
+- `Size()` - Return number of items
+
+**Test first:**
+```go
+func TestStack_Push(t *testing.T) {
+    stack := NewStack()
+    stack.Push(1)
+    if stack.Size() != 1 {
+        t.Error("expected size 1")
+    }
+}
+```
+
+---
+
+## 🎯 Exercise 2: Email Validator
+
+Implement an email validator using TDD.
+
+**Requirements:**
+- Must contain `@`
+- Must have domain after `@`
+- Must not have spaces
+- Return specific errors for each case
+
+---
+
+## 🎯 Exercise 3: Password Strength Checker
+
+Create a password strength checker.
+
+**Requirements:**
+- `Weak`: Less than 8 characters
+- `Medium`: 8+ chars, has letters and numbers
+- `Strong`: 8+ chars, uppercase, lowercase, numbers, special chars
+
+---
+
+## 🎯 Exercise 4: Temperature Converter
+
+Build a temperature converter.
+
+**Requirements:**
+- `CelsiusToFahrenheit(c)`
+- `FahrenheitToCelsius(f)`
+- `CelsiusToKelvin(c)`
+- Handle absolute zero validation
+
+---
+
+## 🎯 Exercise 5: Word Counter
+
+Implement a word counter.
+
+**Requirements:**
+- Count total words in text
+- Count unique words
+- Find most frequent word
+- Handle edge cases (empty, punctuation)
+
+---
+
+## 📝 TDD Workflow Reminder
+
+1. 🔴 **RED**: Write a failing test
+2. 🟢 **GREEN**: Write minimal code to pass
+3. 🔵 **REFACTOR**: Improve code, keep tests green
+4. ♻️ **REPEAT**
+
+---
+
+## 🏃 Running Exercises
+
+```bash
+# Create your solution file
+touch exercise_stack.go
+touch exercise_stack_test.go
+
+# Run tests
+go test -v
+
+# Run with coverage
+go test -cover
+```

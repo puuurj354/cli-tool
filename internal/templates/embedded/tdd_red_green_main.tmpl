@@ -1,0 +1,191 @@
+package main
+
+// =============================================================================
+// RED-GREEN-REFACTOR - The Core TDD Cycle
+// =============================================================================
+// This demonstrates the fundamental TDD workflow:
+// 1. RED:    Write a failing test first
+// 2. GREEN:  Write minimal code to make it pass
+// 3. REFACTOR: Improve code while tests stay green
+// =============================================================================
+
+import "errors" // Standard error package for error handling
+
+// =============================================================================
+// CALCULATOR - Example for TDD demonstration
+// =============================================================================
+
+// Calculator provides basic arithmetic operations
+// Each method was developed using TDD workflow
+type Calculator struct{} // Empty struct, methods need no state
+
+// NewCalculator creates a new Calculator instance
+// Returns:
+//   - *Calculator: New calculator ready for operations
+func NewCalculator() *Calculator {
+	return &Calculator{} // Return pointer to new instance
+}
+
+// Add returns the sum of two numbers
+// Parameters:
+//   - a: First number to add
+//   - b: Second number to add
+// Returns:
+//   - int: Sum of a and b
+// TDD Story:
+//   RED:   Wrote test TestAdd expecting Add(2,3) = 5
+//   GREEN: Implemented return a + b
+//   REFACTOR: No refactoring needed for simple operation
+func (c *Calculator) Add(a, b int) int {
+	return a + b // Simple addition
+}
+
+// Subtract returns the difference of two numbers
+// Parameters:
+//   - a: Number to subtract from
+//   - b: Number to subtract
+// Returns:
+//   - int: Difference (a - b)
+func (c *Calculator) Subtract(a, b int) int {
+	return a - b // Simple subtraction
+}
+
+// Multiply returns the product of two numbers
+// Parameters:
+//   - a: First factor
+//   - b: Second factor
+// Returns:
+//   - int: Product of a and b
+func (c *Calculator) Multiply(a, b int) int {
+	return a * b // Simple multiplication
+}
+
+// Divide returns the quotient of two numbers
+// Parameters:
+//   - a: Dividend (number being divided)
+//   - b: Divisor (number to divide by)
+// Returns:
+//   - int: Quotient of a / b
+//   - error: Error if dividing by zero
+// TDD Story:
+//   RED:   Wrote test expecting error when b=0
+//   GREEN: Added zero check before division
+//   REFACTOR: Used named error for clarity
+func (c *Calculator) Divide(a, b int) (int, error) {
+	if b == 0 { // Guard clause for division by zero
+		return 0, ErrDivisionByZero // Return sentinel error
+	}
+	return a / b, nil // Return quotient with no error
+}
+
+// ErrDivisionByZero is returned when attempting to divide by zero
+var ErrDivisionByZero = errors.New("division by zero") // Sentinel error
+
+// =============================================================================
+// STRING REVERSER - Another TDD example
+// =============================================================================
+
+// StringReverser provides string manipulation operations
+type StringReverser struct{} // Empty struct for methods
+
+// Reverse returns the input string reversed
+// Parameters:
+//   - s: String to reverse
+// Returns:
+//   - string: Reversed string
+// TDD Story:
+//   RED:   Test expects Reverse("hello") = "olleh"
+//   GREEN: Implemented with rune conversion for Unicode safety
+//   REFACTOR: Extracted to use []rune for proper Unicode handling
+func (sr *StringReverser) Reverse(s string) string {
+	runes := []rune(s) // Convert to runes for Unicode safety
+	n := len(runes)    // Get length once
+
+	for i := 0; i < n/2; i++ { // Loop to middle only
+		// Swap characters from ends moving inward
+		runes[i], runes[n-1-i] = runes[n-1-i], runes[i]
+	}
+
+	return string(runes) // Convert back to string
+}
+
+// IsPalindrome checks if a string reads the same forwards and backwards
+// Parameters:
+//   - s: String to check
+// Returns:
+//   - bool: True if palindrome, false otherwise
+func (sr *StringReverser) IsPalindrome(s string) bool {
+	reversed := sr.Reverse(s) // Get reversed version
+	return s == reversed      // Compare original with reversed
+}
+
+// =============================================================================
+// FIZZBUZZ - Classic TDD kata
+// =============================================================================
+
+// FizzBuzz returns the FizzBuzz value for a number
+// Parameters:
+//   - n: Number to evaluate
+// Returns:
+//   - string: "Fizz" if divisible by 3, "Buzz" if by 5,
+//             "FizzBuzz" if both, otherwise the number as string
+// TDD Story:
+//   RED:   Test FizzBuzz(1) = "1"
+//   GREEN: Return strconv.Itoa(n)
+//   RED:   Test FizzBuzz(3) = "Fizz"
+//   GREEN: Add divisible by 3 check
+//   RED:   Test FizzBuzz(5) = "Buzz"
+//   GREEN: Add divisible by 5 check
+//   RED:   Test FizzBuzz(15) = "FizzBuzz"
+//   GREEN: Add combined check first
+//   REFACTOR: Reorder conditions for clarity
+func FizzBuzz(n int) string {
+	switch { // Switch for cleaner conditionals
+	case n%15 == 0: // Check divisible by both first
+		return "FizzBuzz"
+	case n%3 == 0: // Check divisible by 3
+		return "Fizz"
+	case n%5 == 0: // Check divisible by 5
+		return "Buzz"
+	default: // Not divisible by 3 or 5
+		return intToString(n) // Convert number to string
+	}
+}
+
+// intToString converts int to string without importing strconv
+func intToString(n int) string {
+	if n == 0 { // Handle zero case
+		return "0"
+	}
+
+	negative := n < 0 // Track sign
+	if negative {     // Make positive for processing
+		n = -n
+	}
+
+	var digits []byte // Slice to build result
+	for n > 0 {       // Extract digits right to left
+		digits = append([]byte{byte('0' + n%10)}, digits...) // Prepend digit
+		n /= 10 // Remove rightmost digit
+	}
+
+	if negative { // Add minus sign if needed
+		digits = append([]byte{'-'}, digits...)
+	}
+
+	return string(digits) // Convert bytes to string
+}
+
+// =============================================================================
+// MAIN - Demo entry point
+// =============================================================================
+
+func main() {
+	println("=== TDD Red-Green-Refactor Demo ===")
+	println()
+	println("Run the tests to see TDD in action:")
+	println("  go test -v")
+	println()
+	println("The tests demonstrate how each function was")
+	println("developed using the Red-Green-Refactor cycle.")
+}

@@ -43,6 +43,8 @@ func TestGetTemplate(t *testing.T) {
 		{"get learn-frontend", "learn-frontend", false},
 		// Debugging templates
 		{"get learn-debugging", "learn-debugging", false},
+		// TDD templates
+		{"get learn-tdd", "learn-tdd", false},
 		// Skill templates
 		{"get challenge-30days", "challenge-30days", false},
 		{"get mini-project", "mini-project", false},
@@ -81,9 +83,9 @@ func TestGetTemplate(t *testing.T) {
 func TestGetAllTemplates(t *testing.T) {
 	templates := GetAllTemplates()
 
-	// Should have exactly 32 templates (includes learn-debugging)
-	if len(templates) != 32 {
-		t.Errorf("expected 32 templates, got %d", len(templates))
+	// Should have exactly 33 templates (includes learn-debugging and learn-tdd)
+	if len(templates) != 33 {
+		t.Errorf("expected 33 templates, got %d", len(templates))
 	}
 
 	// All templates should have name, description, directories, and files
@@ -225,6 +227,7 @@ func TestSpecificTemplatesStructure(t *testing.T) {
 		{"fullstack structure", "fullstack", 6, 17, []string{"backend/cmd/api/main.go", "frontend/package.json"}},
 		{"challenge-30days structure", "challenge-30days", 9, 11, []string{"README.md", "week1/day01_hello/main.go"}},
 		{"learn-debugging structure", "learn-debugging", 6, 13, []string{"README.md", "01-print-debugging/main.go"}},
+		{"learn-tdd structure", "learn-tdd", 5, 11, []string{"README.md", "01-red-green-refactor/main.go"}},
 	}
 
 	for _, tt := range tests {
