@@ -1,0 +1,96 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: {{.ProjectName}} - Serverless Application
+
+# =============================================================================
+# GLOBALS
+# =============================================================================
+Globals:
+  Function:
+    Timeout: 30
+    MemorySize: 128
+    Runtime: provided.al2023
+    Architectures:
+      - arm64
+    Environment:
+      Variables:
+        LOG_LEVEL: info
+
+# =============================================================================
+# PARAMETERS
+# =============================================================================
+Parameters:
+  Stage:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - staging
+      - prod
+    Description: Deployment stage
+
+# =============================================================================
+# RESOURCES
+# =============================================================================
+Resources:
+  # API Gateway
+  Api:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: !Ref Stage
+      Cors:
+        AllowOrigin: "'*'"
+        AllowMethods: "'GET,POST,PUT,DELETE,OPTIONS'"
+        AllowHeaders: "'Content-Type,Authorization'"
+
+  # Main Lambda Function
+  Function:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: go1.x
+    Properties:
+      FunctionName: !Sub ${AWS::StackName}-function
+      CodeUri: .
+      Handler: bootstrap
+      Events:
+        GetRoot:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /
+            Method: GET
+        PostRoot:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /
+            Method: POST
+        GetItem:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Api
+            Path: /items/{id}
+            Method: GET
+
+  # CloudWatch Log Group
+  FunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${Function}
+      RetentionInDays: 14
+
+# =============================================================================
+# OUTPUTS
+# =============================================================================
+Outputs:
+  ApiEndpoint:
+    Description: API Gateway endpoint URL
+    Value: !Sub https://${Api}.execute-api.${AWS::Region}.amazonaws.com/${Stage}/
+  
+  FunctionArn:
+    Description: Lambda function ARN
+    Value: !GetAtt Function.Arn
+  
+  FunctionName:
+    Description: Lambda function name
+    Value: !Ref Function

@@ -1,0 +1,123 @@
+package {{.ProjectName}}
+
+// =============================================================================
+// ERROR TYPES
+// =============================================================================
+// Custom error types for better error handling
+// =============================================================================
+
+import (
+	"errors" // Error utilities
+	"fmt"    // Formatting
+)
+
+// =============================================================================
+// SENTINEL ERRORS
+// =============================================================================
+
+var (
+	// ErrNotFound is returned when a resource is not found
+	ErrNotFound = errors.New("not found")
+
+	// ErrInvalidInput is returned for invalid input
+	ErrInvalidInput = errors.New("invalid input")
+
+	// ErrTimeout is returned when an operation times out
+	ErrTimeout = errors.New("operation timed out")
+
+	// ErrCanceled is returned when an operation is canceled
+	ErrCanceled = errors.New("operation canceled")
+)
+
+// =============================================================================
+// WRAPPED ERROR
+// =============================================================================
+
+// Error represents a library error with context
+type Error struct {
+	Op      string // Operation that failed
+	Kind    error  // Category of error (sentinel)
+	Err     error  // Underlying error
+	Context string // Additional context
+}
+
+// Error implements error interface
+func (e *Error) Error() string {
+	if e.Context != "" {
+		return fmt.Sprintf("%s: %s: %s (%s)", e.Op, e.Kind, e.Err, e.Context)
+	}
+	if e.Err != nil {
+		return fmt.Sprintf("%s: %s: %s", e.Op, e.Kind, e.Err)
+	}
+	return fmt.Sprintf("%s: %s", e.Op, e.Kind)
+}
+
+// Unwrap returns the underlying error
+func (e *Error) Unwrap() error {
+	return e.Err
+}
+
+// Is reports whether target matches this error
+func (e *Error) Is(target error) bool {
+	return errors.Is(e.Kind, target)
+}
+
+// =============================================================================
+// ERROR CONSTRUCTORS
+// =============================================================================
+
+// NewError creates a new Error
+// Parameters:
+//   - op: Operation name
+//   - kind: Error category
+//   - err: Underlying error (optional)
+// Returns:
+//   - *Error: New error
+func NewError(op string, kind, err error) *Error {
+	return &Error{
+		Op:   op,
+		Kind: kind,
+		Err:  err,
+	}
+}
+
+// WithContext adds context to an error
+// Parameters:
+//   - ctx: Context string
+// Returns:
+//   - *Error: Error with context
+func (e *Error) WithContext(ctx string) *Error {
+	e.Context = ctx
+	return e
+}
+
+// =============================================================================
+// ERROR HELPERS
+// =============================================================================
+
+// IsNotFound checks if error is ErrNotFound
+// Parameters:
+//   - err: Error to check
+// Returns:
+//   - bool: True if not found error
+func IsNotFound(err error) bool {
+	return errors.Is(err, ErrNotFound)
+}
+
+// IsInvalidInput checks if error is ErrInvalidInput
+// Parameters:
+//   - err: Error to check
+// Returns:
+//   - bool: True if invalid input error
+func IsInvalidInput(err error) bool {
+	return errors.Is(err, ErrInvalidInput)
+}
+
+// IsTimeout checks if error is ErrTimeout
+// Parameters:
+//   - err: Error to check
+// Returns:
+//   - bool: True if timeout error
+func IsTimeout(err error) bool {
+	return errors.Is(err, ErrTimeout)
+}

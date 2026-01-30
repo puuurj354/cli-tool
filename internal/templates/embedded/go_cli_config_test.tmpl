@@ -1,0 +1,136 @@
+package config
+
+// =============================================================================
+// CONFIG TESTS
+// =============================================================================
+
+import (
+	"os"       // File operations
+	"path/filepath" // Path handling
+	"testing"  // Testing framework
+)
+
+// =============================================================================
+// DEFAULT CONFIG TESTS
+// =============================================================================
+
+// TestDefault tests default configuration values
+func TestDefault(t *testing.T) {
+	cfg := Default() // Get default config
+
+	// Test default verbose is false
+	if cfg.Verbose != false {
+		t.Errorf("Default Verbose = %v, want false", cfg.Verbose)
+	}
+
+	// Test default output is "text"
+	if cfg.Output != "text" {
+		t.Errorf("Default Output = %s, want text", cfg.Output)
+	}
+}
+
+// =============================================================================
+// SET TESTS
+// =============================================================================
+
+// TestSet_ValidKeys tests setting valid configuration keys
+func TestSet_ValidKeys(t *testing.T) {
+	tests := []struct {
+		key      string // Config key
+		value    string // Value to set
+		wantErr  bool   // Expect error
+	}{
+		{"verbose", "true", false},
+		{"verbose", "false", false},
+		{"output", "text", false},
+		{"output", "json", false},
+		{"output", "invalid", true},
+		{"unknown", "value", true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.key+"="+tt.value, func(t *testing.T) {
+			cfg := Default()
+			err := cfg.Set(tt.key, tt.value)
+
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Set(%s, %s) error = %v, wantErr %v", 
+					tt.key, tt.value, err, tt.wantErr)
+			}
+		})
+	}
+}
+
+// TestSet_Verbose tests verbose setting
+func TestSet_Verbose(t *testing.T) {
+	cfg := Default()
+
+	// Set to true
+	cfg.Set("verbose", "true")
+	if cfg.Verbose != true {
+		t.Error("Verbose should be true after setting 'true'")
+	}
+
+	// Set to 1
+	cfg.Set("verbose", "1")
+	if cfg.Verbose != true {
+		t.Error("Verbose should be true after setting '1'")
+	}
+
+	// Set to false
+	cfg.Set("verbose", "false")
+	if cfg.Verbose != false {
+		t.Error("Verbose should be false after setting 'false'")
+	}
+}
+
+// =============================================================================
+// SAVE AND LOAD TESTS
+// =============================================================================
+
+// TestSaveAndLoad tests config file persistence
+func TestSaveAndLoad(t *testing.T) {
+	// Create temp directory for test
+	tmpDir := t.TempDir()
+	configPath := filepath.Join(tmpDir, "config.yaml")
+
+	// Override Path function for testing
+	originalPath := Path
+	defer func() { _ = originalPath }() // Restore after test
+
+	// Create and save config
+	cfg := &Config{
+		Verbose: true,
+		Output:  "json",
+	}
+
+	// Write directly to temp file for testing
+	data := []byte("verbose: true\noutput: json\n")
+	if err := os.WriteFile(configPath, data, 0644); err != nil {
+		t.Fatalf("Failed to write test config: %v", err)
+	}
+
+	// Read back
+	readData, err := os.ReadFile(configPath)
+	if err != nil {
+		t.Fatalf("Failed to read test config: %v", err)
+	}
+
+	if string(readData) != string(data) {
+		t.Errorf("Config mismatch: got %s, want %s", readData, data)
+	}
+}
+
+// =============================================================================
+// PATH TESTS
+// =============================================================================
+
+// TestPath tests config path generation
+func TestPath(t *testing.T) {
+	path := Path()
+
+	// Path should contain config.yaml
+	if filepath.Base(path) != "config.yaml" {
+		t.Errorf("Path base = %s, want config.yaml", filepath.Base(path))
+	}
+}

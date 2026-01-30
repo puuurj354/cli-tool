@@ -1,0 +1,101 @@
+package keys
+
+// =============================================================================
+// KEY BINDINGS
+// =============================================================================
+// Keybinding definitions for the TUI
+// =============================================================================
+
+import (
+	"github.com/charmbracelet/bubbles/key" // Key binding library
+)
+
+// =============================================================================
+// KEY MAP
+// =============================================================================
+
+// KeyMap holds all key bindings
+type KeyMap struct {
+	Up     key.Binding // Move up
+	Down   key.Binding // Move down
+	Left   key.Binding // Move left
+	Right  key.Binding // Move right
+	Enter  key.Binding // Select/confirm
+	Back   key.Binding // Go back
+	Quit   key.Binding // Quit application
+	Help   key.Binding // Toggle help
+	Filter key.Binding // Toggle filter
+	Tab    key.Binding // Next tab/section
+}
+
+// DefaultKeyMap returns the default key bindings
+// Returns:
+//   - KeyMap: Default key bindings
+func DefaultKeyMap() KeyMap {
+	return KeyMap{
+		Up: key.NewBinding(
+			key.WithKeys("up", "k"),
+			key.WithHelp("↑/k", "up"),
+		),
+		Down: key.NewBinding(
+			key.WithKeys("down", "j"),
+			key.WithHelp("↓/j", "down"),
+		),
+		Left: key.NewBinding(
+			key.WithKeys("left", "h"),
+			key.WithHelp("←/h", "left"),
+		),
+		Right: key.NewBinding(
+			key.WithKeys("right", "l"),
+			key.WithHelp("→/l", "right"),
+		),
+		Enter: key.NewBinding(
+			key.WithKeys("enter"),
+			key.WithHelp("enter", "select"),
+		),
+		Back: key.NewBinding(
+			key.WithKeys("esc", "backspace"),
+			key.WithHelp("esc", "back"),
+		),
+		Quit: key.NewBinding(
+			key.WithKeys("q", "ctrl+c"),
+			key.WithHelp("q", "quit"),
+		),
+		Help: key.NewBinding(
+			key.WithKeys("?"),
+			key.WithHelp("?", "help"),
+		),
+		Filter: key.NewBinding(
+			key.WithKeys("/"),
+			key.WithHelp("/", "filter"),
+		),
+		Tab: key.NewBinding(
+			key.WithKeys("tab"),
+			key.WithHelp("tab", "next"),
+		),
+	}
+}
+
+// =============================================================================
+// SHORT HELP
+// =============================================================================
+
+// ShortHelp returns bindings for short help view
+// Implements key.Map interface
+func (k KeyMap) ShortHelp() []key.Binding {
+	return []key.Binding{k.Up, k.Down, k.Enter, k.Quit}
+}
+
+// =============================================================================
+// FULL HELP
+// =============================================================================
+
+// FullHelp returns bindings for full help view
+// Implements key.Map interface
+func (k KeyMap) FullHelp() [][]key.Binding {
+	return [][]key.Binding{
+		{k.Up, k.Down, k.Left, k.Right},  // Navigation
+		{k.Enter, k.Back, k.Tab},         // Actions
+		{k.Filter, k.Help, k.Quit},       // Other
+	}
+}

@@ -1,0 +1,154 @@
+package service
+
+// =============================================================================
+// SERVICE TESTS
+// =============================================================================
+
+import (
+	"context"  // Context
+	"errors"   // Error comparison
+	"testing"  // Testing framework
+)
+
+// =============================================================================
+// MOCK REPOSITORY
+// =============================================================================
+
+// mockRepository is a test double for repository
+type mockRepository struct {
+	items     map[string]interface{} // In-memory storage
+	findErr   error                  // Error to return on Find
+	createErr error                  // Error to return on Create
+}
+
+func newMockRepository() *mockRepository {
+	return &mockRepository{
+		items: make(map[string]interface{}),
+	}
+}
+
+func (m *mockRepository) Find(ctx context.Context, id string) (interface{}, error) {
+	if m.findErr != nil {
+		return nil, m.findErr
+	}
+	item, ok := m.items[id]
+	if !ok {
+		return nil, errors.New("not found")
+	}
+	return item, nil
+}
+
+func (m *mockRepository) Create(ctx context.Context, item interface{}) error {
+	if m.createErr != nil {
+		return m.createErr
+	}
+	// Simplified: just store
+	m.items["new"] = item
+	return nil
+}
+
+func (m *mockRepository) Update(ctx context.Context, id string, item interface{}) error {
+	m.items[id] = item
+	return nil
+}
+
+func (m *mockRepository) Delete(ctx context.Context, id string) error {
+	delete(m.items, id)
+	return nil
+}
+
+// =============================================================================
+// SERVICE TESTS
+// =============================================================================
+
+// TestServiceCreate tests Create method
+func TestServiceCreate(t *testing.T) {
+	tests := []struct {
+		name      string
+		input     interface{}
+		repoErr   error
+		wantErr   bool
+	}{
+		{
+			name:    "successful create",
+			input:   map[string]string{"name": "test"},
+			wantErr: false,
+		},
+		{
+			name:    "repository error",
+			input:   map[string]string{"name": "test"},
+			repoErr: errors.New("db error"),
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			repo := newMockRepository()
+			repo.createErr = tt.repoErr
+
+			svc := NewService(repo)
+			err := svc.Create(context.Background(), tt.input)
+
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Create() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+// TestServiceFind tests Find method
+func TestServiceFind(t *testing.T) {
+	tests := []struct {
+		name      string
+		id        string
+		exists    bool
+		wantErr   bool
+	}{
+		{
+			name:    "existing item",
+			id:      "1",
+			exists:  true,
+			wantErr: false,
+		},
+		{
+			name:    "non-existing item",
+			id:      "999",
+			exists:  false,
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			repo := newMockRepository()
+			if tt.exists {
+				repo.items[tt.id] = map[string]string{"id": tt.id}
+			}
+
+			svc := NewService(repo)
+			_, err := svc.Find(context.Background(), tt.id)
+
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Find() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+// =============================================================================
+// BENCHMARK TESTS
+// =============================================================================
+
+// BenchmarkServiceCreate benchmarks the Create method
+func BenchmarkServiceCreate(b *testing.B) {
+	repo := newMockRepository()
+	svc := NewService(repo)
+	ctx := context.Background()
+	input := map[string]string{"name": "benchmark"}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		svc.Create(ctx, input)
+	}
+}

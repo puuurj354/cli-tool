@@ -1,0 +1,129 @@
+package middleware
+
+// =============================================================================
+// GRAPHQL MIDDLEWARE
+// =============================================================================
+// Request middleware for GraphQL server
+// =============================================================================
+
+import (
+	"context"   // Context
+	"log/slog"  // Logging
+	"net/http"  // HTTP
+	"time"      // Timing
+
+	"github.com/99designs/gqlgen/graphql"
+)
+
+// =============================================================================
+// CONTEXT KEYS
+// =============================================================================
+
+type contextKey string
+
+const (
+	RequestIDKey  contextKey = "requestID"
+	UserKey       contextKey = "user"
+	DataloaderKey contextKey = "dataloader"
+)
+
+// =============================================================================
+// LOGGING MIDDLEWARE
+// =============================================================================
+
+// LoggingMiddleware logs GraphQL requests
+// Parameters:
+//   - logger: Logger instance
+// Returns:
+//   - func(http.Handler) http.Handler: Middleware
+func LoggingMiddleware(logger *slog.Logger) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			start := time.Now()
+
+			// Call next handler
+			next.ServeHTTP(w, r)
+
+			// Log request
+			logger.Info("graphql request",
+				slog.String("method", r.Method),
+				slog.String("path", r.URL.Path),
+				slog.Duration("duration", time.Since(start)),
+			)
+		})
+	}
+}
+
+// =============================================================================
+// REQUEST ID MIDDLEWARE
+// =============================================================================
+
+// RequestIDMiddleware adds a request ID to context
+// Returns:
+//   - func(http.Handler) http.Handler: Middleware
+func RequestIDMiddleware() func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			// Get or generate request ID
+			requestID := r.Header.Get("X-Request-ID")
+			if requestID == "" {
+				requestID = generateRequestID()
+			}
+
+			// Add to context
+			ctx := context.WithValue(r.Context(), RequestIDKey, requestID)
+
+			// Add to response header
+			w.Header().Set("X-Request-ID", requestID)
+
+			next.ServeHTTP(w, r.WithContext(ctx))
+		})
+	}
+}
+
+// generateRequestID generates a unique request ID
+func generateRequestID() string {
+	return time.Now().Format("20060102150405.000000")
+}
+
+// =============================================================================
+// COMPLEXITY LIMIT
+// =============================================================================
+
+// ComplexityLimit returns a complexity limit handler
+// Parameters:
+//   - limit: Maximum complexity
+// Returns:
+//   - graphql.HandlerExtension: Complexity extension
+func ComplexityLimit(limit int) graphql.HandlerExtension {
+	return &complexityLimit{limit: limit}
+}
+
+type complexityLimit struct {
+	limit int
+}
+
+func (c *complexityLimit) ExtensionName() string {
+	return "ComplexityLimit"
+}
+
+func (c *complexityLimit) Validate(schema graphql.ExecutableSchema) error {
+	return nil
+}
+
+// =============================================================================
+// CONTEXT HELPERS
+// =============================================================================
+
+// GetRequestID gets request ID from context
+func GetRequestID(ctx context.Context) string {
+	if id, ok := ctx.Value(RequestIDKey).(string); ok {
+		return id
+	}
+	return ""
+}
+
+// GetUser gets user from context
+func GetUser(ctx context.Context) interface{} {
+	return ctx.Value(UserKey)
+}

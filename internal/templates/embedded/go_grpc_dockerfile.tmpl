@@ -1,0 +1,53 @@
+# Build stage
+FROM golang:1.22-alpine AS builder
+
+# Install protoc and dependencies
+RUN apk add --no-cache git protobuf protobuf-dev
+
+# Install Go protoc plugins
+RUN go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+RUN go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+
+WORKDIR /app
+
+# Copy go mod files
+COPY go.mod go.sum ./
+RUN go mod download
+
+# Copy source
+COPY . .
+
+# Generate proto (if needed)
+# RUN protoc --go_out=. --go-grpc_out=. api/proto/*.proto
+
+# Build
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-w -s" -o /app/server ./cmd/server
+
+# =============================================================================
+# Final stage
+# =============================================================================
+FROM alpine:3.19
+
+RUN apk --no-cache add ca-certificates tzdata
+
+# Create non-root user
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
+WORKDIR /app
+
+# Copy binary
+COPY --from=builder /app/server .
+
+RUN chown -R appuser:appgroup /app
+USER appuser
+
+# gRPC port
+ENV GRPC_PORT=50051
+EXPOSE 50051
+
+# Health check port (if using HTTP health)
+ENV HEALTH_PORT=8080
+EXPOSE 8080
+
+# Run server
+CMD ["./server"]

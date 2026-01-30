@@ -1,0 +1,146 @@
+package styles
+
+// =============================================================================
+// TUI STYLES
+// =============================================================================
+// Lipgloss styles for consistent UI appearance
+// =============================================================================
+
+import (
+	"github.com/charmbracelet/lipgloss" // Styling library
+)
+
+// =============================================================================
+// COLOR PALETTE
+// =============================================================================
+
+var (
+	// Primary colors
+	Primary   = lipgloss.Color("#7C3AED") // Purple
+	Secondary = lipgloss.Color("#10B981") // Green
+	Accent    = lipgloss.Color("#F59E0B") // Amber
+	
+	// Neutral colors
+	Foreground = lipgloss.Color("#E5E7EB") // Light gray
+	Background = lipgloss.Color("#1F2937") // Dark gray
+	Muted      = lipgloss.Color("#6B7280") // Gray
+	
+	// Status colors
+	Success = lipgloss.Color("#10B981") // Green
+	Warning = lipgloss.Color("#F59E0B") // Amber
+	Error   = lipgloss.Color("#EF4444") // Red
+	Info    = lipgloss.Color("#3B82F6") // Blue
+)
+
+// =============================================================================
+// BASE STYLES
+// =============================================================================
+
+var (
+	// BaseStyle is the default container style
+	BaseStyle = lipgloss.NewStyle().
+		Padding(1, 2).
+		BorderStyle(lipgloss.RoundedBorder()).
+		BorderForeground(Primary)
+
+	// TitleStyle for headers
+	TitleStyle = lipgloss.NewStyle().
+		Bold(true).
+		Foreground(Primary).
+		MarginBottom(1)
+
+	// SubtitleStyle for secondary headers
+	SubtitleStyle = lipgloss.NewStyle().
+		Foreground(Muted).
+		Italic(true)
+
+	// TextStyle for normal text
+	TextStyle = lipgloss.NewStyle().
+		Foreground(Foreground)
+
+	// MutedStyle for less important text
+	MutedStyle = lipgloss.NewStyle().
+		Foreground(Muted)
+)
+
+// =============================================================================
+// INTERACTIVE STYLES
+// =============================================================================
+
+var (
+	// FocusedStyle for focused elements
+	FocusedStyle = lipgloss.NewStyle().
+		Foreground(Primary).
+		Bold(true)
+
+	// BlurredStyle for unfocused elements
+	BlurredStyle = lipgloss.NewStyle().
+		Foreground(Muted)
+
+	// SelectedStyle for selected items
+	SelectedStyle = lipgloss.NewStyle().
+		Foreground(Secondary).
+		Bold(true).
+		SetString("> ")
+
+	// UnselectedStyle for unselected items
+	UnselectedStyle = lipgloss.NewStyle().
+		Foreground(Foreground).
+		SetString("  ")
+)
+
+// =============================================================================
+// STATUS STYLES
+// =============================================================================
+
+var (
+	// SuccessStyle for success messages
+	SuccessStyle = lipgloss.NewStyle().
+		Foreground(Success).
+		SetString("✓ ")
+
+	// ErrorStyle for error messages
+	ErrorStyle = lipgloss.NewStyle().
+		Foreground(Error).
+		SetString("✗ ")
+
+	// WarningStyle for warning messages
+	WarningStyle = lipgloss.NewStyle().
+		Foreground(Warning).
+		SetString("⚠ ")
+
+	// InfoStyle for info messages
+	InfoStyle = lipgloss.NewStyle().
+		Foreground(Info).
+		SetString("ℹ ")
+)
+
+// =============================================================================
+// HELP STYLES
+// =============================================================================
+
+var (
+	// HelpKeyStyle for help key bindings
+	HelpKeyStyle = lipgloss.NewStyle().
+		Foreground(Primary).
+		Bold(true)
+
+	// HelpDescStyle for help descriptions
+	HelpDescStyle = lipgloss.NewStyle().
+		Foreground(Muted)
+
+	// HelpSepStyle for help separators
+	HelpSepStyle = lipgloss.NewStyle().
+		Foreground(Muted).
+		SetString(" • ")
+)
+
+// =============================================================================
+// SPINNER STYLE
+// =============================================================================
+
+var (
+	// SpinnerStyle for loading spinners
+	SpinnerStyle = lipgloss.NewStyle().
+		Foreground(Primary)
+)

@@ -1,0 +1,119 @@
+package jobs
+
+// =============================================================================
+// EXAMPLE JOBS
+// =============================================================================
+// Sample cron jobs demonstrating patterns
+// =============================================================================
+
+import (
+	"log/slog"  // Structured logging
+	"time"      // Timing
+)
+
+// =============================================================================
+// JOBS STRUCT
+// =============================================================================
+
+// Jobs holds all cron job functions
+type Jobs struct {
+	logger *slog.Logger // Logger
+	// Add dependencies here (e.g., database, services)
+}
+
+// New creates a new Jobs instance
+// Parameters:
+//   - logger: Logger instance
+// Returns:
+//   - *Jobs: Jobs instance
+func New(logger *slog.Logger) *Jobs {
+	return &Jobs{
+		logger: logger,
+	}
+}
+
+// =============================================================================
+// CLEANUP JOB
+// =============================================================================
+
+// Cleanup performs periodic cleanup tasks
+// This is an example of a maintenance job
+func (j *Jobs) Cleanup() {
+	j.logger.Info("running cleanup job")
+
+	// Example: Clean old records
+	// j.db.DeleteOlderThan(30 * 24 * time.Hour)
+
+	// Example: Clear cache
+	// j.cache.Clear()
+
+	// Example: Remove temporary files
+	// os.RemoveAll("/tmp/myapp/*")
+
+	j.logger.Info("cleanup completed")
+}
+
+// =============================================================================
+// REPORT JOB
+// =============================================================================
+
+// GenerateReports generates periodic reports
+// This is an example of a reporting job
+func (j *Jobs) GenerateReports() {
+	j.logger.Info("generating reports")
+
+	start := time.Now()
+
+	// Example: Generate daily stats
+	// stats := j.service.GetDailyStats()
+	// j.email.Send("daily-report", stats)
+
+	// Example: Export data
+	// data := j.db.ExportRange(time.Now().AddDate(0, 0, -1), time.Now())
+	// j.storage.Upload("reports/daily.csv", data)
+
+	duration := time.Since(start)
+	j.logger.Info("reports generated",
+		slog.Duration("duration", duration),
+	)
+}
+
+// =============================================================================
+// SYNC JOB
+// =============================================================================
+
+// SyncExternalData syncs data from external sources
+// This is an example of an integration job
+func (j *Jobs) SyncExternalData() {
+	j.logger.Info("syncing external data")
+
+	// Example: Fetch from API
+	// data, err := j.client.FetchLatest()
+	// if err != nil {
+	//     j.logger.Error("sync failed", slog.String("error", err.Error()))
+	//     return
+	// }
+	// j.db.Upsert(data)
+
+	j.logger.Info("sync completed")
+}
+
+// =============================================================================
+// HEALTH CHECK JOB
+// =============================================================================
+
+// HealthCheck performs periodic health checks
+// This is an example of a monitoring job
+func (j *Jobs) HealthCheck() {
+	// Example: Check dependencies
+	// if err := j.db.Ping(); err != nil {
+	//     j.logger.Error("database unhealthy", slog.String("error", err.Error()))
+	// }
+
+	// Example: Check external services
+	// if err := j.client.Ping(); err != nil {
+	//     j.logger.Error("external service unhealthy", slog.String("error", err.Error()))
+	// }
+
+	j.logger.Debug("health check passed")
+}

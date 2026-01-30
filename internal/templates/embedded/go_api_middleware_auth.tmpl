@@ -1,0 +1,132 @@
+package middleware
+
+// =============================================================================
+// AUTH MIDDLEWARE
+// =============================================================================
+// JWT authentication middleware
+// =============================================================================
+
+import (
+	"context"   // Context for passing values
+	"fmt"       // Formatting
+	"net/http"  // HTTP types
+	"strings"   // String manipulation
+)
+
+// =============================================================================
+// CONTEXT KEYS
+// =============================================================================
+
+// contextKey type for context values
+type contextKey string
+
+const (
+	UserIDKey contextKey = "user_id" // User ID from JWT
+	ClaimsKey contextKey = "claims"  // JWT claims
+)
+
+// =============================================================================
+// AUTH CONFIG
+// =============================================================================
+
+// AuthConfig holds authentication settings
+type AuthConfig struct {
+	SecretKey     string   // JWT secret key
+	SkipPaths     []string // Paths to skip authentication
+	TokenHeader   string   // Header name for token (default: Authorization)
+	TokenPrefix   string   // Token prefix (default: Bearer)
+}
+
+// DefaultAuthConfig returns default auth configuration
+func DefaultAuthConfig() AuthConfig {
+	return AuthConfig{
+		SecretKey:   "your-secret-key-change-in-production", // Change in production!
+		SkipPaths:   []string{"/health", "/ready"},          // Health checks don't need auth
+		TokenHeader: "Authorization",                        // Standard header
+		TokenPrefix: "Bearer",                               // Standard prefix
+	}
+}
+
+// =============================================================================
+// AUTH MIDDLEWARE
+// =============================================================================
+
+// Auth returns JWT authentication middleware
+// Parameters:
+//   - config: Auth configuration
+// Returns:
+//   - func: Middleware function
+func Auth(config AuthConfig) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			// Check if path should be skipped
+			for _, path := range config.SkipPaths {
+				if r.URL.Path == path { // Skip authentication
+					next.ServeHTTP(w, r)
+					return
+				}
+			}
+
+			// Get token from header
+			authHeader := r.Header.Get(config.TokenHeader)
+			if authHeader == "" {
+				http.Error(w, "missing authorization header", http.StatusUnauthorized)
+				return
+			}
+
+			// Remove prefix
+			token := strings.TrimPrefix(authHeader, config.TokenPrefix+" ")
+			if token == authHeader { // Prefix not found
+				http.Error(w, "invalid authorization format", http.StatusUnauthorized)
+				return
+			}
+
+			// Validate token (simplified - use proper JWT library in production)
+			userID, err := validateToken(token, config.SecretKey)
+			if err != nil {
+				http.Error(w, fmt.Sprintf("invalid token: %v", err), http.StatusUnauthorized)
+				return
+			}
+
+			// Add user ID to context
+			ctx := context.WithValue(r.Context(), UserIDKey, userID)
+			next.ServeHTTP(w, r.WithContext(ctx))
+		})
+	}
+}
+
+// =============================================================================
+// TOKEN HELPERS
+// =============================================================================
+
+// validateToken validates JWT and returns user ID
+// Parameters:
+//   - token: JWT token string
+//   - secretKey: Secret key for validation
+// Returns:
+//   - string: User ID from token
+//   - error: Error if validation fails
+func validateToken(token, secretKey string) (string, error) {
+	// TODO: Implement proper JWT validation using a library like golang-jwt/jwt
+	// This is a simplified placeholder
+	if token == "" {
+		return "", fmt.Errorf("empty token")
+	}
+	
+	// In production, decode and validate the JWT here
+	// For now, return a placeholder
+	return "user-id-from-jwt", nil
+}
+
+// GetUserID extracts user ID from context
+// Parameters:
+//   - ctx: Request context
+// Returns:
+//   - string: User ID or empty string if not found
+func GetUserID(ctx context.Context) string {
+	userID, ok := ctx.Value(UserIDKey).(string)
+	if !ok {
+		return ""
+	}
+	return userID
+}

@@ -1,0 +1,147 @@
+package output
+
+// =============================================================================
+// OUTPUT UTILITIES
+// =============================================================================
+// Styled terminal output with colors, spinners, and progress
+// =============================================================================
+
+import (
+	"fmt"     // Formatting
+	"os"      // Standard output
+	"strings" // String manipulation
+)
+
+// =============================================================================
+// COLORS - ANSI escape codes
+// =============================================================================
+
+const (
+	Reset   = "\033[0m"  // Reset all attributes
+	Bold    = "\033[1m"  // Bold text
+	Dim     = "\033[2m"  // Dim text
+	
+	// Colors
+	Red     = "\033[31m" // Red text
+	Green   = "\033[32m" // Green text
+	Yellow  = "\033[33m" // Yellow text
+	Blue    = "\033[34m" // Blue text
+	Magenta = "\033[35m" // Magenta text
+	Cyan    = "\033[36m" // Cyan text
+	White   = "\033[37m" // White text
+)
+
+// =============================================================================
+// STYLED OUTPUT FUNCTIONS
+// =============================================================================
+
+// Success prints a green success message
+// Parameters:
+//   - format: Printf format string
+//   - args: Format arguments
+func Success(format string, args ...interface{}) {
+	msg := fmt.Sprintf(format, args...)
+	fmt.Fprintf(os.Stdout, "%s✓%s %s\n", Green, Reset, msg)
+}
+
+// Error prints a red error message
+// Parameters:
+//   - format: Printf format string
+//   - args: Format arguments
+func Error(format string, args ...interface{}) {
+	msg := fmt.Sprintf(format, args...)
+	fmt.Fprintf(os.Stderr, "%s✗%s %s\n", Red, Reset, msg)
+}
+
+// Warning prints a yellow warning message
+// Parameters:
+//   - format: Printf format string
+//   - args: Format arguments
+func Warning(format string, args ...interface{}) {
+	msg := fmt.Sprintf(format, args...)
+	fmt.Fprintf(os.Stdout, "%s⚠%s %s\n", Yellow, Reset, msg)
+}
+
+// Info prints a blue info message
+// Parameters:
+//   - format: Printf format string
+//   - args: Format arguments
+func Info(format string, args ...interface{}) {
+	msg := fmt.Sprintf(format, args...)
+	fmt.Fprintf(os.Stdout, "%sℹ%s %s\n", Blue, Reset, msg)
+}
+
+// Debug prints a dim debug message (only if verbose)
+// Parameters:
+//   - verbose: Whether verbose mode is enabled
+//   - format: Printf format string
+//   - args: Format arguments
+func Debug(verbose bool, format string, args ...interface{}) {
+	if !verbose {
+		return // Skip if not verbose
+	}
+	msg := fmt.Sprintf(format, args...)
+	fmt.Fprintf(os.Stdout, "%s[DEBUG]%s %s\n", Dim, Reset, msg)
+}
+
+// =============================================================================
+// HEADER AND SECTION
+// =============================================================================
+
+// Header prints a bold header
+// Parameters:
+//   - text: Header text
+func Header(text string) {
+	fmt.Printf("\n%s%s%s\n", Bold, text, Reset)
+	fmt.Println(strings.Repeat("─", len(text)))
+}
+
+// Section prints a section title
+// Parameters:
+//   - text: Section text
+func Section(text string) {
+	fmt.Printf("\n%s%s%s\n", Cyan, text, Reset)
+}
+
+// =============================================================================
+// LISTS AND TABLES
+// =============================================================================
+
+// List prints items as a bulleted list
+// Parameters:
+//   - items: List items
+func List(items []string) {
+	for _, item := range items {
+		fmt.Printf("  • %s\n", item)
+	}
+}
+
+// KeyValue prints a key-value pair
+// Parameters:
+//   - key: The key
+//   - value: The value
+func KeyValue(key string, value interface{}) {
+	fmt.Printf("  %s%-15s%s %v\n", Dim, key+":", Reset, value)
+}
+
+// =============================================================================
+// PROGRESS
+// =============================================================================
+
+// Step prints a numbered step
+// Parameters:
+//   - num: Step number
+//   - total: Total steps
+//   - msg: Step message
+func Step(num, total int, msg string) {
+	fmt.Printf("%s[%d/%d]%s %s\n", Cyan, num, total, Reset, msg)
+}
+
+// Done prints a completion message
+// Parameters:
+//   - format: Printf format string
+//   - args: Format arguments
+func Done(format string, args ...interface{}) {
+	msg := fmt.Sprintf(format, args...)
+	fmt.Printf("\n%s%s✓ Done!%s %s\n", Bold, Green, Reset, msg)
+}

@@ -1,0 +1,64 @@
+// Package {{.ProjectName}} provides [brief description of your library].
+//
+// # Overview
+//
+// This package offers functionality for [describe main purpose].
+// It is designed to be [simple/fast/flexible/etc].
+//
+// # Installation
+//
+//	go get {{.ModuleName}}
+//
+// # Quick Start
+//
+// Basic usage example:
+//
+//	package main
+//
+//	import (
+//		"fmt"
+//		"{{.ModuleName}}"
+//	)
+//
+//	func main() {
+//		// Create a new instance
+//		lib := {{.ProjectName}}.New()
+//
+//		// Use the library
+//		result, err := lib.Process("input")
+//		if err != nil {
+//			panic(err)
+//		}
+//		fmt.Println(result)
+//	}
+//
+// # Configuration
+//
+// The library supports functional options for configuration:
+//
+//	lib := {{.ProjectName}}.New(
+//		{{.ProjectName}}.WithDebug(true),
+//		{{.ProjectName}}.WithTimeout(30 * time.Second),
+//		{{.ProjectName}}.WithMaxRetries(5),
+//	)
+//
+// # Error Handling
+//
+// The library provides sentinel errors for common cases:
+//
+//	result, err := lib.Process(input)
+//	if errors.Is(err, {{.ProjectName}}.ErrNotFound) {
+//		// Handle not found
+//	}
+//	if errors.Is(err, {{.ProjectName}}.ErrInvalidInput) {
+//		// Handle invalid input
+//	}
+//
+// # Thread Safety
+//
+// All exported methods are safe for concurrent use.
+//
+// # License
+//
+// This library is released under the MIT License.
+package {{.ProjectName}}

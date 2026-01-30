@@ -1,0 +1,127 @@
+package config
+
+// =============================================================================
+// CLI CONFIGURATION
+// =============================================================================
+// Configuration file handling with YAML support
+// =============================================================================
+
+import (
+	"fmt"      // Formatting
+	"os"       // File operations
+	"path/filepath" // Path handling
+
+	"gopkg.in/yaml.v3" // YAML parsing
+)
+
+// =============================================================================
+// CONFIG STRUCTURE
+// =============================================================================
+
+// Config holds application configuration
+type Config struct {
+	// General settings
+	Verbose bool   `yaml:"verbose"` // Enable verbose output
+	Output  string `yaml:"output"`  // Output format (text, json)
+
+	// Add your configuration fields here
+	// Example:
+	// APIKey  string `yaml:"api_key"`
+	// Timeout int    `yaml:"timeout"`
+}
+
+// =============================================================================
+// CONFIG FUNCTIONS
+// =============================================================================
+
+// Default returns default configuration
+// Returns:
+//   - *Config: Configuration with default values
+func Default() *Config {
+	return &Config{
+		Verbose: false,  // Default: quiet mode
+		Output:  "text", // Default: text output
+	}
+}
+
+// Path returns the configuration file path
+// Returns:
+//   - string: Path to config file (~/.{{.ProjectName}}/config.yaml)
+func Path() string {
+	home, err := os.UserHomeDir() // Get user home directory
+	if err != nil {
+		return ".{{.ProjectName}}.yaml" // Fallback to current directory
+	}
+	return filepath.Join(home, ".{{.ProjectName}}", "config.yaml") // Build path
+}
+
+// Load reads configuration from file
+// Returns:
+//   - *Config: Loaded configuration (or defaults if file doesn't exist)
+func Load() *Config {
+	cfg := Default() // Start with defaults
+
+	data, err := os.ReadFile(Path()) // Read config file
+	if err != nil {
+		return cfg // Return defaults if file doesn't exist
+	}
+
+	if err := yaml.Unmarshal(data, cfg); err != nil { // Parse YAML
+		return cfg // Return defaults if parsing fails
+	}
+
+	return cfg // Return loaded config
+}
+
+// Save writes configuration to file
+// Returns:
+//   - error: Error if save fails
+func (c *Config) Save() error {
+	configPath := Path() // Get config path
+
+	// Create directory if it doesn't exist
+	dir := filepath.Dir(configPath)
+	if err := os.MkdirAll(dir, 0755); err != nil { // Create directory
+		return fmt.Errorf("create config directory: %w", err)
+	}
+
+	data, err := yaml.Marshal(c) // Convert to YAML
+	if err != nil {
+		return fmt.Errorf("marshal config: %w", err)
+	}
+
+	if err := os.WriteFile(configPath, data, 0644); err != nil { // Write file
+		return fmt.Errorf("write config: %w", err)
+	}
+
+	return nil // Success
+}
+
+// Set sets a configuration value by key
+// Parameters:
+//   - key: Configuration key to set
+//   - value: Value to set
+// Returns:
+//   - error: Error if key is invalid
+func (c *Config) Set(key, value string) error {
+	switch key { // Switch on key
+	case "verbose":
+		c.Verbose = value == "true" || value == "1" // Parse boolean
+	case "output":
+		if value != "text" && value != "json" { // Validate output format
+			return fmt.Errorf("invalid output format: %s (use 'text' or 'json')", value)
+		}
+		c.Output = value // Set output format
+	default:
+		return fmt.Errorf("unknown config key: %s", key) // Unknown key
+	}
+	return nil // Success
+}
+
+// Print displays configuration in formatted output
+func (c *Config) Print() {
+	fmt.Println("Configuration:")
+	fmt.Printf("  verbose: %v\n", c.Verbose)
+	fmt.Printf("  output:  %s\n", c.Output)
+	fmt.Printf("\nConfig file: %s\n", Path())
+}

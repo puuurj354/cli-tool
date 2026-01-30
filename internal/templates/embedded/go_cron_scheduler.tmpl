@@ -1,0 +1,168 @@
+package scheduler
+
+// =============================================================================
+// CRON SCHEDULER
+// =============================================================================
+// Managed scheduler with lifecycle control
+// =============================================================================
+
+import (
+	"context"   // Context for cancellation
+	"log/slog"  // Structured logging
+	"sync"      // Synchronization
+	"time"      // Timing
+
+	"github.com/robfig/cron/v3" // Cron library
+)
+
+// =============================================================================
+// SCHEDULER
+// =============================================================================
+
+// Scheduler manages cron jobs
+type Scheduler struct {
+	cron     *cron.Cron    // Underlying cron scheduler
+	logger   *slog.Logger  // Logger
+	jobs     []JobEntry    // Registered jobs
+	mu       sync.RWMutex  // Mutex for jobs
+}
+
+// JobEntry represents a registered job
+type JobEntry struct {
+	ID       cron.EntryID // Entry ID
+	Name     string       // Job name
+	Schedule string       // Cron expression
+	Func     func()       // Job function
+}
+
+// =============================================================================
+// CONSTRUCTOR
+// =============================================================================
+
+// New creates a new scheduler
+// Parameters:
+//   - logger: Logger instance
+// Returns:
+//   - *Scheduler: New scheduler
+func New(logger *slog.Logger) *Scheduler {
+	return &Scheduler{
+		cron:   cron.New(cron.WithSeconds()),
+		logger: logger,
+		jobs:   make([]JobEntry, 0),
+	}
+}
+
+// =============================================================================
+// REGISTRATION
+// =============================================================================
+
+// AddJob adds a new cron job
+// Parameters:
+//   - name: Job name for logging
+//   - schedule: Cron expression (with seconds)
+//   - fn: Function to execute
+// Returns:
+//   - error: Registration error
+func (s *Scheduler) AddJob(name, schedule string, fn func()) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	// Wrap function with logging
+	wrappedFn := s.wrapJob(name, fn)
+
+	// Register with cron
+	id, err := s.cron.AddFunc(schedule, wrappedFn)
+	if err != nil {
+		s.logger.Error("failed to add job",
+			slog.String("name", name),
+			slog.String("error", err.Error()),
+		)
+		return err
+	}
+
+	// Track job
+	s.jobs = append(s.jobs, JobEntry{
+		ID:       id,
+		Name:     name,
+		Schedule: schedule,
+		Func:     fn,
+	})
+
+	s.logger.Info("job registered",
+		slog.String("name", name),
+		slog.String("schedule", schedule),
+	)
+
+	return nil
+}
+
+// wrapJob wraps a job function with logging and recovery
+// Parameters:
+//   - name: Job name
+//   - fn: Original function
+// Returns:
+//   - func(): Wrapped function
+func (s *Scheduler) wrapJob(name string, fn func()) func() {
+	return func() {
+		start := time.Now()
+		s.logger.Info("job started", slog.String("name", name))
+
+		// Recover from panics
+		defer func() {
+			if r := recover(); r != nil {
+				s.logger.Error("job panicked",
+					slog.String("name", name),
+					slog.Any("panic", r),
+				)
+			}
+		}()
+
+		// Execute job
+		fn()
+
+		duration := time.Since(start)
+		s.logger.Info("job completed",
+			slog.String("name", name),
+			slog.Duration("duration", duration),
+		)
+	}
+}
+
+// =============================================================================
+// LIFECYCLE
+// =============================================================================
+
+// Start starts the scheduler
+func (s *Scheduler) Start() {
+	s.logger.Info("starting scheduler", slog.Int("jobs", len(s.jobs)))
+	s.cron.Start()
+}
+
+// Stop stops the scheduler gracefully
+func (s *Scheduler) Stop() context.Context {
+	s.logger.Info("stopping scheduler")
+	return s.cron.Stop()
+}
+
+// =============================================================================
+// INSPECTION
+// =============================================================================
+
+// Jobs returns all registered jobs
+// Returns:
+//   - []JobEntry: List of jobs
+func (s *Scheduler) Jobs() []JobEntry {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return append([]JobEntry{}, s.jobs...)
+}
+
+// NextRun returns the next run time for a job
+// Parameters:
+//   - id: Job entry ID
+// Returns:
+//   - time.Time: Next scheduled run
+func (s *Scheduler) NextRun(id cron.EntryID) time.Time {
+	entry := s.cron.Entry(id)
+	return entry.Next
+}

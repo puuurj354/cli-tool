@@ -1,0 +1,93 @@
+package middleware
+
+// =============================================================================
+// CORS MIDDLEWARE
+// =============================================================================
+// Cross-Origin Resource Sharing (CORS) configuration
+// =============================================================================
+
+import (
+	"net/http"  // HTTP types
+	"strings"   // String manipulation
+)
+
+// =============================================================================
+// CORS CONFIGURATION
+// =============================================================================
+
+// CORSConfig holds CORS settings
+type CORSConfig struct {
+	AllowedOrigins   []string // Origins allowed to access (e.g., ["http://localhost:3000"])
+	AllowedMethods   []string // Methods allowed (e.g., ["GET", "POST", "PUT", "DELETE"])
+	AllowedHeaders   []string // Headers allowed (e.g., ["Content-Type", "Authorization"])
+	ExposedHeaders   []string // Headers exposed to browser
+	AllowCredentials bool     // Allow credentials (cookies, auth headers)
+	MaxAge           int      // Preflight cache duration in seconds
+}
+
+// DefaultCORSConfig returns sensible CORS defaults
+// Returns:
+//   - CORSConfig: Default configuration
+func DefaultCORSConfig() CORSConfig {
+	return CORSConfig{
+		AllowedOrigins: []string{"*"},                                      // All origins (restrict in production)
+		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}, // Common methods
+		AllowedHeaders: []string{"Content-Type", "Authorization", "X-Request-ID"}, // Common headers
+		ExposedHeaders: []string{"X-Request-ID"},                            // Exposed headers
+		AllowCredentials: false,                                             // Credentials disabled by default
+		MaxAge:           86400,                                             // 24 hours
+	}
+}
+
+// =============================================================================
+// CORS MIDDLEWARE
+// =============================================================================
+
+// CORS returns middleware that handles CORS
+// Parameters:
+//   - config: CORS configuration
+// Returns:
+//   - func: Middleware function
+func CORS(config CORSConfig) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			origin := r.Header.Get("Origin") // Get request origin
+
+			// Check if origin is allowed
+			allowed := false
+			for _, o := range config.AllowedOrigins {
+				if o == "*" || o == origin { // Wildcard or exact match
+					allowed = true
+					break
+				}
+			}
+
+			if allowed {
+				w.Header().Set("Access-Control-Allow-Origin", origin) // Set allowed origin
+			}
+
+			// Set other CORS headers
+			if len(config.AllowedMethods) > 0 {
+				w.Header().Set("Access-Control-Allow-Methods", strings.Join(config.AllowedMethods, ", "))
+			}
+			if len(config.AllowedHeaders) > 0 {
+				w.Header().Set("Access-Control-Allow-Headers", strings.Join(config.AllowedHeaders, ", "))
+			}
+			if len(config.ExposedHeaders) > 0 {
+				w.Header().Set("Access-Control-Expose-Headers", strings.Join(config.ExposedHeaders, ", "))
+			}
+			if config.AllowCredentials {
+				w.Header().Set("Access-Control-Allow-Credentials", "true")
+			}
+
+			// Handle preflight requests
+			if r.Method == http.MethodOptions {
+				w.Header().Set("Access-Control-Max-Age", fmt.Sprintf("%d", config.MaxAge))
+				w.WriteHeader(http.StatusNoContent) // 204 No Content
+				return
+			}
+
+			next.ServeHTTP(w, r) // Call next handler
+		})
+	}
+}

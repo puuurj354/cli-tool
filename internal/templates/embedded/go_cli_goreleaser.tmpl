@@ -1,0 +1,61 @@
+# {{.ProjectName}} Release Configuration
+# Documentation: https://goreleaser.com
+
+version: 1
+
+before:
+  hooks:
+    - go mod tidy
+    - go generate ./...
+
+builds:
+  - id: {{.ProjectName}}
+    main: .
+    binary: {{.ProjectName}}
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -X {{.ModuleName}}/cmd.Version={{"{{"}} .Version {{"}}"}}
+      - -X {{.ModuleName}}/cmd.Commit={{"{{"}} .Commit {{"}}"}}
+      - -X {{.ModuleName}}/cmd.Date={{"{{"}} .Date {{"}}"}}
+
+archives:
+  - id: {{.ProjectName}}
+    name_template: '{{"{{"}} .ProjectName {{"}}"}}_{{"{{"}} .Version {{"}}"}}_{{"{{"}} .Os {{"}}"}}_{{"{{"}} .Arch {{"}}"}}'
+    format_overrides:
+      - goos: windows
+        format: zip
+    files:
+      - README.md
+      - LICENSE*
+
+checksum:
+  name_template: 'checksums.txt'
+
+snapshot:
+  name_template: "{{"{{"}} incpatch .Version {{"}}"}}-next"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      - '^ci:'
+      - Merge pull request
+      - Merge branch
+
+release:
+  github:
+    owner: your-username
+    name: {{.ProjectName}}
+  draft: false
+  prerelease: auto

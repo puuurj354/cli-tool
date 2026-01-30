@@ -1,0 +1,93 @@
+package server_test
+
+// =============================================================================
+// GRPC SERVER TESTS
+// =============================================================================
+
+import (
+	"context"  // Context
+	"net"      // Networking
+	"testing"  // Testing framework
+
+	"google.golang.org/grpc"                     // gRPC
+	"google.golang.org/grpc/credentials/insecure" // Credentials
+	"google.golang.org/grpc/test/bufconn"        // Buffer connection
+
+	pb "{{.ModuleName}}/api/proto"
+)
+
+// =============================================================================
+// TEST SETUP
+// =============================================================================
+
+const bufSize = 1024 * 1024
+
+var lis *bufconn.Listener
+
+func bufDialer(context.Context, string) (net.Conn, error) {
+	return lis.Dial()
+}
+
+func setupTestServer(t *testing.T) pb.{{.ProjectName}}ServiceClient {
+	t.Helper()
+
+	lis = bufconn.Listen(bufSize)
+	s := grpc.NewServer()
+
+	// Register your service
+	// pb.Register{{.ProjectName}}ServiceServer(s, NewServer())
+
+	go func() {
+		if err := s.Serve(lis); err != nil {
+			t.Logf("Server exited with error: %v", err)
+		}
+	}()
+
+	t.Cleanup(func() {
+		s.Stop()
+		lis.Close()
+	})
+
+	conn, err := grpc.DialContext(
+		context.Background(),
+		"bufnet",
+		grpc.WithContextDialer(bufDialer),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	)
+	if err != nil {
+		t.Fatalf("Failed to dial bufnet: %v", err)
+	}
+	t.Cleanup(func() { conn.Close() })
+
+	return pb.New{{.ProjectName}}ServiceClient(conn)
+}
+
+// =============================================================================
+// TESTS
+// =============================================================================
+
+func TestPing(t *testing.T) {
+	// client := setupTestServer(t)
+	
+	// resp, err := client.Ping(context.Background(), &pb.PingRequest{})
+	// if err != nil {
+	//     t.Fatalf("Ping failed: %v", err)
+	// }
+	// if resp.Message != "pong" {
+	//     t.Errorf("Expected 'pong', got %q", resp.Message)
+	// }
+	
+	t.Skip("Implement after defining proto")
+}
+
+func TestCreate(t *testing.T) {
+	t.Skip("Implement after defining proto")
+}
+
+func TestGet(t *testing.T) {
+	t.Skip("Implement after defining proto")
+}
+
+func TestList(t *testing.T) {
+	t.Skip("Implement after defining proto")
+}

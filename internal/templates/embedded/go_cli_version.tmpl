@@ -1,0 +1,95 @@
+package cmd
+
+// =============================================================================
+// VERSION COMMAND
+// =============================================================================
+// Displays version, build info, and system information
+// =============================================================================
+
+import (
+	"fmt"      // Formatting output
+	"runtime"  // Runtime information
+
+	"github.com/spf13/cobra" // CLI framework
+)
+
+// =============================================================================
+// BUILD VARIABLES - Set at compile time via ldflags
+// =============================================================================
+
+var (
+	// Version is the semantic version (set via -ldflags)
+	Version = "dev"
+	// Commit is the git commit hash (set via -ldflags)
+	Commit = "none"
+	// Date is the build date (set via -ldflags)
+	Date = "unknown"
+)
+
+// =============================================================================
+// VERSION COMMAND DEFINITION
+// =============================================================================
+
+// versionCmd represents the version command
+var versionCmd = &cobra.Command{
+	Use:   "version",                          // Command name
+	Short: "Print version information",        // Short description
+	Long: `Display version, build information, and runtime details.
+
+Examples:
+  {{.ProjectName}} version
+  {{.ProjectName}} version --short`,
+	Run: runVersion, // Handler function
+}
+
+// short flag for minimal output
+var shortVersion bool
+
+// =============================================================================
+// INIT - Register command and flags
+// =============================================================================
+
+func init() {
+	rootCmd.AddCommand(versionCmd)                                        // Add to root
+	versionCmd.Flags().BoolVarP(&shortVersion, "short", "s", false, "Print version only") // Short flag
+}
+
+// =============================================================================
+// VERSION HANDLER
+// =============================================================================
+
+// runVersion prints version information
+// Parameters:
+//   - cmd: The cobra command being executed
+//   - args: Command line arguments (unused)
+func runVersion(cmd *cobra.Command, args []string) {
+	if shortVersion { // Short format requested
+		fmt.Println(Version) // Print version only
+		return
+	}
+
+	// Full version info
+	fmt.Printf("{{.ProjectName}} version %s\n", Version)
+	fmt.Printf("  Commit:     %s\n", Commit)
+	fmt.Printf("  Built:      %s\n", Date)
+	fmt.Printf("  Go version: %s\n", runtime.Version())
+	fmt.Printf("  OS/Arch:    %s/%s\n", runtime.GOOS, runtime.GOARCH)
+}
+
+// =============================================================================
+// VERSION HELPERS
+// =============================================================================
+
+// GetVersion returns the current version string
+// Returns:
+//   - string: The version string
+func GetVersion() string {
+	return Version
+}
+
+// GetFullVersion returns complete version info as formatted string
+// Returns:
+//   - string: Formatted version information
+func GetFullVersion() string {
+	return fmt.Sprintf("%s (commit: %s, built: %s)", Version, Commit, Date)
+}

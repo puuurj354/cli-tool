@@ -1,0 +1,182 @@
+package components
+
+// =============================================================================
+// LIST COMPONENT
+// =============================================================================
+// Reusable list component with selection
+// =============================================================================
+
+import (
+	"fmt"     // Formatting
+	"strings" // String operations
+
+	"github.com/charmbracelet/bubbles/key"  // Key bindings
+	tea "github.com/charmbracelet/bubbletea" // Bubble Tea
+	"github.com/charmbracelet/lipgloss"      // Styling
+
+	"{{.ModuleName}}/internal/ui/styles"
+)
+
+// =============================================================================
+// LIST ITEM INTERFACE
+// =============================================================================
+
+// ListItem represents an item that can be displayed in a list
+type ListItem interface {
+	Title() string       // Primary text
+	Description() string // Secondary text
+	FilterValue() string // Value used for filtering
+}
+
+// =============================================================================
+// LIST MODEL
+// =============================================================================
+
+// List is a selectable list component
+type List struct {
+	Items         []ListItem // List items
+	Cursor        int        // Current cursor position
+	Selected      int        // Selected item index (-1 if none)
+	Title         string     // List title
+	Height        int        // Visible height
+	ShowSelection bool       // Show selection indicator
+}
+
+// NewList creates a new list component
+// Parameters:
+//   - items: List items
+//   - title: List title
+// Returns:
+//   - List: New list component
+func NewList(items []ListItem, title string) List {
+	return List{
+		Items:         items,
+		Cursor:        0,
+		Selected:      -1,
+		Title:         title,
+		Height:        10,
+		ShowSelection: true,
+	}
+}
+
+// =============================================================================
+// BUBBLE TEA INTERFACE
+// =============================================================================
+
+// Update handles key events
+// Parameters:
+//   - msg: Key message
+// Returns:
+//   - List: Updated list
+//   - tea.Cmd: Command (if any)
+func (l List) Update(msg tea.KeyMsg) (List, tea.Cmd) {
+	switch {
+	case key.Matches(msg, key.NewBinding(key.WithKeys("up", "k"))):
+		l.MoveUp()
+	case key.Matches(msg, key.NewBinding(key.WithKeys("down", "j"))):
+		l.MoveDown()
+	case key.Matches(msg, key.NewBinding(key.WithKeys("enter"))):
+		l.Selected = l.Cursor
+	case key.Matches(msg, key.NewBinding(key.WithKeys("home"))):
+		l.Cursor = 0
+	case key.Matches(msg, key.NewBinding(key.WithKeys("end"))):
+		l.Cursor = len(l.Items) - 1
+	}
+	return l, nil
+}
+
+// View renders the list
+// Returns:
+//   - string: Rendered list
+func (l List) View() string {
+	var b strings.Builder
+
+	// Title
+	if l.Title != "" {
+		b.WriteString(styles.TitleStyle.Render(l.Title))
+		b.WriteString("\n\n")
+	}
+
+	// Calculate visible range
+	start := 0
+	end := len(l.Items)
+	if end > l.Height {
+		// Scroll to keep cursor visible
+		if l.Cursor >= l.Height {
+			start = l.Cursor - l.Height + 1
+		}
+		end = start + l.Height
+		if end > len(l.Items) {
+			end = len(l.Items)
+		}
+	}
+
+	// Render visible items
+	for i := start; i < end; i++ {
+		item := l.Items[i]
+		cursor := "  " // No cursor
+		style := styles.TextStyle
+
+		if i == l.Cursor {
+			cursor = "> "
+			style = styles.FocusedStyle
+		}
+
+		// Render item
+		line := fmt.Sprintf("%s%s", cursor, item.Title())
+		b.WriteString(style.Render(line))
+
+		// Description on same line (dimmed)
+		if desc := item.Description(); desc != "" {
+			b.WriteString(styles.MutedStyle.Render(" - " + desc))
+		}
+		b.WriteString("\n")
+	}
+
+	// Scroll indicator
+	if len(l.Items) > l.Height {
+		b.WriteString(styles.MutedStyle.Render(
+			fmt.Sprintf("\n[%d/%d]", l.Cursor+1, len(l.Items)),
+		))
+	}
+
+	return b.String()
+}
+
+// =============================================================================
+// LIST METHODS
+// =============================================================================
+
+// MoveUp moves cursor up
+func (l *List) MoveUp() {
+	if l.Cursor > 0 {
+		l.Cursor--
+	}
+}
+
+// MoveDown moves cursor down
+func (l *List) MoveDown() {
+	if l.Cursor < len(l.Items)-1 {
+		l.Cursor++
+	}
+}
+
+// SelectedItem returns the currently selected item
+// Returns:
+//   - ListItem: Selected item or nil
+func (l List) SelectedItem() ListItem {
+	if l.Selected >= 0 && l.Selected < len(l.Items) {
+		return l.Items[l.Selected]
+	}
+	return nil
+}
+
+// CurrentItem returns the item under cursor
+// Returns:
+//   - ListItem: Current item or nil
+func (l List) CurrentItem() ListItem {
+	if l.Cursor >= 0 && l.Cursor < len(l.Items) {
+		return l.Items[l.Cursor]
+	}
+	return nil
+}

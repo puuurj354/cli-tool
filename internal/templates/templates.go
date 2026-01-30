@@ -66,6 +66,11 @@ var (
 	cronJobsTmpl                       = loadEmbedded("cron_jobs.tmpl")
 	cronMainTmpl                       = loadEmbedded("cron_main.tmpl")
 	cronSchedulerTmpl                  = loadEmbedded("cron_scheduler.tmpl")
+	goCronSchedulerTmpl                = loadEmbedded("go_cron_scheduler.tmpl")
+	goCronJobsTmpl                     = loadEmbedded("go_cron_jobs.tmpl")
+	goCronConfigTmpl                   = loadEmbedded("go_cron_config.tmpl")
+	goCronHealthTmpl                   = loadEmbedded("go_cron_health.tmpl")
+	goCronDockerfileTmpl               = loadEmbedded("go_cron_dockerfile.tmpl")
 	dsaLinkedListTestTmpl              = loadEmbedded("dsa_linked_list_test.tmpl")
 	dsaLinkedListTmpl                  = loadEmbedded("dsa_linked_list.tmpl")
 	dsaQueueTestTmpl                   = loadEmbedded("dsa_queue_test.tmpl")
@@ -98,30 +103,69 @@ var (
 	fullstackTailwindConfigTmpl        = loadEmbedded("fullstack_tailwind_config.tmpl")
 	fullstackPostcssConfigTmpl         = loadEmbedded("fullstack_postcss_config.tmpl")
 	goAPIMainTmpl                      = loadEmbedded("go_api_main.tmpl")
+	goAPIMiddlewareLoggingTmpl         = loadEmbedded("go_api_middleware_logging.tmpl")
+	goAPIMiddlewareCORSTmpl            = loadEmbedded("go_api_middleware_cors.tmpl")
+	goAPIMiddlewareAuthTmpl            = loadEmbedded("go_api_middleware_auth.tmpl")
+	goAPIValidatorTmpl                 = loadEmbedded("go_api_validator.tmpl")
+	goAPIHandlerTestTmpl               = loadEmbedded("go_api_handler_test.tmpl")
+	goAPIServiceTestTmpl               = loadEmbedded("go_api_service_test.tmpl")
+	goAPIDockerfileTmpl                = loadEmbedded("go_api_dockerfile.tmpl")
 	goCLIMainTmpl                      = loadEmbedded("go_cli_main.tmpl")
 	goCLIRootTmpl                      = loadEmbedded("go_cli_root.tmpl")
+	goCLIVersionTmpl                   = loadEmbedded("go_cli_version.tmpl")
+	goCLIConfigCmdTmpl                 = loadEmbedded("go_cli_config_cmd.tmpl")
+	goCLICompletionTmpl                = loadEmbedded("go_cli_completion.tmpl")
+	goCLIConfigTmpl                    = loadEmbedded("go_cli_config.tmpl")
+	goCLIConfigTestTmpl                = loadEmbedded("go_cli_config_test.tmpl")
+	goCLIOutputTmpl                    = loadEmbedded("go_cli_output.tmpl")
+	goCLIMakefileTmpl                  = loadEmbedded("go_cli_makefile.tmpl")
+	goCLIGoreleaserTmpl                = loadEmbedded("go_cli_goreleaser.tmpl")
 	goConfigTmpl                       = loadEmbedded("go_config.tmpl")
 	goGRPCClientTmpl                   = loadEmbedded("go_grpc_client.tmpl")
 	goGRPCMakefileTmpl                 = loadEmbedded("go_grpc_makefile.tmpl")
 	goGRPCProtoTmpl                    = loadEmbedded("go_grpc_proto.tmpl")
 	goGRPCServerTmpl                   = loadEmbedded("go_grpc_server.tmpl")
+	goGRPCInterceptorsTmpl             = loadEmbedded("go_grpc_interceptors.tmpl")
+	goGRPCHealthTmpl                   = loadEmbedded("go_grpc_health.tmpl")
+	goGRPCServerTestTmpl               = loadEmbedded("go_grpc_server_test.tmpl")
+	goGRPCDockerfileTmpl               = loadEmbedded("go_grpc_dockerfile.tmpl")
 	goHandlerTmpl                      = loadEmbedded("go_handler.tmpl")
 	goLibExampleTmpl                   = loadEmbedded("go_lib_example.tmpl")
 	goLibMainTmpl                      = loadEmbedded("go_lib_main.tmpl")
 	goLibTestTmpl                      = loadEmbedded("go_lib_test.tmpl")
+	goLibOptionsTmpl                   = loadEmbedded("go_lib_options.tmpl")
+	goLibErrorsTmpl                    = loadEmbedded("go_lib_errors.tmpl")
+	goLibBenchmarkTmpl                 = loadEmbedded("go_lib_benchmark.tmpl")
+	goLibDocTmpl                       = loadEmbedded("go_lib_doc.tmpl")
+	goLibCITmpl                        = loadEmbedded("go_lib_ci.tmpl")
 	goModelTmpl                        = loadEmbedded("go_model.tmpl")
 	goRepositoryTmpl                   = loadEmbedded("go_repository.tmpl")
 	goServiceTmpl                      = loadEmbedded("go_service.tmpl")
 	goTUIMainTmpl                      = loadEmbedded("go_tui_main.tmpl")
 	goTUIModelTmpl                     = loadEmbedded("go_tui_model.tmpl")
+	goTUIStylesTmpl                    = loadEmbedded("go_tui_styles.tmpl")
+	goTUIKeysTmpl                      = loadEmbedded("go_tui_keys.tmpl")
+	goTUIListTmpl                      = loadEmbedded("go_tui_list.tmpl")
+	goTUIInputTmpl                     = loadEmbedded("go_tui_input.tmpl")
+	goTUIHomeTmpl                      = loadEmbedded("go_tui_home.tmpl")
 	goWorkerJobTmpl                    = loadEmbedded("go_worker_job.tmpl")
+	goWorkerJobTestTmpl                = loadEmbedded("go_worker_job_test.tmpl")
 	goWorkerMainTmpl                   = loadEmbedded("go_worker_main.tmpl")
 	goWorkerQueueTmpl                  = loadEmbedded("go_worker_queue.tmpl")
+	goWorkerQueueTestTmpl              = loadEmbedded("go_worker_queue_test.tmpl")
+	goWorkerRetryTmpl                  = loadEmbedded("go_worker_retry.tmpl")
+	goWorkerMetricsTmpl                = loadEmbedded("go_worker_metrics.tmpl")
+	goWorkerPoolTmpl                   = loadEmbedded("go_worker_pool.tmpl")
+	goWorkerDockerfileTmpl             = loadEmbedded("go_worker_dockerfile.tmpl")
 	gitignoreGoTmpl                    = loadEmbedded("gitignore_go.tmpl")
 	graphqlConfigTmpl                  = loadEmbedded("graphql_config.tmpl")
 	graphqlMainTmpl                    = loadEmbedded("graphql_main.tmpl")
 	graphqlResolverTmpl                = loadEmbedded("graphql_resolver.tmpl")
 	graphqlSchemaTmpl                  = loadEmbedded("graphql_schema.tmpl")
+	graphqlDataloaderTmpl              = loadEmbedded("graphql_dataloader.tmpl")
+	graphqlResolverTestTmpl            = loadEmbedded("graphql_resolver_test.tmpl")
+	graphqlMiddlewareTmpl              = loadEmbedded("graphql_middleware.tmpl")
+	graphqlDockerfileTmpl              = loadEmbedded("graphql_dockerfile.tmpl")
 	kafkaConsumerMainTmpl              = loadEmbedded("kafka_consumer_main.tmpl")
 	kafkaConsumerTmpl                  = loadEmbedded("kafka_consumer.tmpl")
 	kafkaDockerComposeTmpl             = loadEmbedded("kafka_docker_compose.tmpl")
@@ -292,15 +336,24 @@ func initBuiltInTemplates() {
 				"internal/service",
 				"internal/repository",
 				"internal/model",
+				"internal/middleware",
+				"internal/validator",
 				"pkg/config",
 			},
 			Files: []FileTemplate{
 				{Path: "cmd/api/main.go", Content: goAPIMainTmpl},
 				{Path: "internal/handler/handler.go", Content: goHandlerTmpl},
+				{Path: "internal/handler/handler_test.go", Content: goAPIHandlerTestTmpl},
 				{Path: "internal/service/service.go", Content: goServiceTmpl},
+				{Path: "internal/service/service_test.go", Content: goAPIServiceTestTmpl},
 				{Path: "internal/repository/repository.go", Content: goRepositoryTmpl},
 				{Path: "internal/model/model.go", Content: goModelTmpl},
+				{Path: "internal/middleware/logging.go", Content: goAPIMiddlewareLoggingTmpl},
+				{Path: "internal/middleware/cors.go", Content: goAPIMiddlewareCORSTmpl},
+				{Path: "internal/middleware/auth.go", Content: goAPIMiddlewareAuthTmpl},
+				{Path: "internal/validator/validator.go", Content: goAPIValidatorTmpl},
 				{Path: "pkg/config/config.go", Content: goConfigTmpl},
+				{Path: "Dockerfile", Content: goAPIDockerfileTmpl},
 				{Path: "README.md", Content: readmeTmpl},
 				{Path: ".gitignore", Content: gitignoreGoTmpl},
 			},
@@ -310,12 +363,20 @@ func initBuiltInTemplates() {
 			Description: "Go CLI application with Cobra",
 			Directories: []string{
 				"cmd",
-				"internal",
-				"pkg",
+				"internal/config",
+				"internal/output",
 			},
 			Files: []FileTemplate{
 				{Path: "main.go", Content: goCLIMainTmpl},
 				{Path: "cmd/root.go", Content: goCLIRootTmpl},
+				{Path: "cmd/version.go", Content: goCLIVersionTmpl},
+				{Path: "cmd/config.go", Content: goCLIConfigCmdTmpl},
+				{Path: "cmd/completion.go", Content: goCLICompletionTmpl},
+				{Path: "internal/config/config.go", Content: goCLIConfigTmpl},
+				{Path: "internal/config/config_test.go", Content: goCLIConfigTestTmpl},
+				{Path: "internal/output/output.go", Content: goCLIOutputTmpl},
+				{Path: "Makefile", Content: goCLIMakefileTmpl},
+				{Path: ".goreleaser.yaml", Content: goCLIGoreleaserTmpl},
 				{Path: "README.md", Content: readmeTmpl},
 				{Path: ".gitignore", Content: gitignoreGoTmpl},
 			},
@@ -326,11 +387,17 @@ func initBuiltInTemplates() {
 			Directories: []string{
 				"internal",
 				"examples",
+				".github/workflows",
 			},
 			Files: []FileTemplate{
 				{Path: "{{.ProjectName}}.go", Content: goLibMainTmpl},
 				{Path: "{{.ProjectName}}_test.go", Content: goLibTestTmpl},
+				{Path: "options.go", Content: goLibOptionsTmpl},
+				{Path: "errors.go", Content: goLibErrorsTmpl},
+				{Path: "doc.go", Content: goLibDocTmpl},
+				{Path: "benchmark_test.go", Content: goLibBenchmarkTmpl},
 				{Path: "examples/main.go", Content: goLibExampleTmpl},
+				{Path: ".github/workflows/ci.yml", Content: goLibCITmpl},
 				{Path: "README.md", Content: readmeTmpl},
 				{Path: ".gitignore", Content: gitignoreGoTmpl},
 			},
@@ -414,13 +481,19 @@ func initBuiltInTemplates() {
 				"cmd/server",
 				"cmd/client",
 				"internal/service",
+				"internal/interceptors",
+				"internal/health",
 				"proto",
 			},
 			Files: []FileTemplate{
 				{Path: "cmd/server/main.go", Content: goGRPCServerTmpl},
+				{Path: "cmd/server/main_test.go", Content: goGRPCServerTestTmpl},
 				{Path: "cmd/client/main.go", Content: goGRPCClientTmpl},
+				{Path: "internal/interceptors/interceptors.go", Content: goGRPCInterceptorsTmpl},
+				{Path: "internal/health/health.go", Content: goGRPCHealthTmpl},
 				{Path: "proto/service.proto", Content: goGRPCProtoTmpl},
 				{Path: "Makefile", Content: goGRPCMakefileTmpl},
+				{Path: "Dockerfile", Content: goGRPCDockerfileTmpl},
 				{Path: "README.md", Content: readmeTmpl},
 				{Path: ".gitignore", Content: gitignoreGoTmpl},
 			},
@@ -432,11 +505,20 @@ func initBuiltInTemplates() {
 				"cmd/worker",
 				"internal/job",
 				"internal/queue",
+				"internal/retry",
+				"internal/metrics",
+				"internal/worker",
 			},
 			Files: []FileTemplate{
 				{Path: "cmd/worker/main.go", Content: goWorkerMainTmpl},
 				{Path: "internal/job/job.go", Content: goWorkerJobTmpl},
+				{Path: "internal/job/job_test.go", Content: goWorkerJobTestTmpl},
 				{Path: "internal/queue/queue.go", Content: goWorkerQueueTmpl},
+				{Path: "internal/queue/queue_test.go", Content: goWorkerQueueTestTmpl},
+				{Path: "internal/retry/retry.go", Content: goWorkerRetryTmpl},
+				{Path: "internal/metrics/metrics.go", Content: goWorkerMetricsTmpl},
+				{Path: "internal/worker/pool.go", Content: goWorkerPoolTmpl},
+				{Path: "Dockerfile", Content: goWorkerDockerfileTmpl},
 				{Path: "README.md", Content: readmeTmpl},
 				{Path: ".gitignore", Content: gitignoreGoTmpl},
 			},
@@ -446,10 +528,19 @@ func initBuiltInTemplates() {
 			Description: "Terminal UI app with Bubbletea",
 			Directories: []string{
 				"internal/ui",
+				"internal/ui/styles",
+				"internal/ui/keys",
+				"internal/ui/components",
+				"internal/ui/views",
 			},
 			Files: []FileTemplate{
 				{Path: "main.go", Content: goTUIMainTmpl},
 				{Path: "internal/ui/model.go", Content: goTUIModelTmpl},
+				{Path: "internal/ui/styles/styles.go", Content: goTUIStylesTmpl},
+				{Path: "internal/ui/keys/keys.go", Content: goTUIKeysTmpl},
+				{Path: "internal/ui/components/list.go", Content: goTUIListTmpl},
+				{Path: "internal/ui/components/input.go", Content: goTUIInputTmpl},
+				{Path: "internal/ui/views/home.go", Content: goTUIHomeTmpl},
 				{Path: "README.md", Content: readmeTmpl},
 				{Path: ".gitignore", Content: gitignoreGoTmpl},
 			},
@@ -738,12 +829,18 @@ func initBuiltInTemplates() {
 			Directories: []string{
 				"cmd/server",
 				"graph",
+				"graph/dataloaders",
+				"internal/middleware",
 			},
 			Files: []FileTemplate{
 				{Path: "cmd/server/main.go", Content: graphqlMainTmpl},
 				{Path: "graph/schema.graphqls", Content: graphqlSchemaTmpl},
 				{Path: "graph/resolver.go", Content: graphqlResolverTmpl},
+				{Path: "graph/resolver_test.go", Content: graphqlResolverTestTmpl},
+				{Path: "graph/dataloaders/dataloaders.go", Content: graphqlDataloaderTmpl},
+				{Path: "internal/middleware/middleware.go", Content: graphqlMiddlewareTmpl},
 				{Path: "gqlgen.yml", Content: graphqlConfigTmpl},
+				{Path: "Dockerfile", Content: graphqlDockerfileTmpl},
 				{Path: "README.md", Content: readmeTmpl},
 				{Path: ".gitignore", Content: gitignoreGoTmpl},
 			},
@@ -768,14 +865,21 @@ func initBuiltInTemplates() {
 			Name:        "go-cron",
 			Description: "Scheduled jobs with cron",
 			Directories: []string{
-				"cmd/scheduler",
+				"cmd/cron",
 				"internal/jobs",
 				"internal/scheduler",
+				"internal/config",
+				"internal/health",
 			},
 			Files: []FileTemplate{
-				{Path: "cmd/scheduler/main.go", Content: cronMainTmpl},
+				{Path: "cmd/cron/main.go", Content: cronMainTmpl},
 				{Path: "internal/jobs/jobs.go", Content: cronJobsTmpl},
+				{Path: "internal/jobs/examples.go", Content: goCronJobsTmpl},
 				{Path: "internal/scheduler/scheduler.go", Content: cronSchedulerTmpl},
+				{Path: "internal/scheduler/manager.go", Content: goCronSchedulerTmpl},
+				{Path: "internal/config/config.go", Content: goCronConfigTmpl},
+				{Path: "internal/health/health.go", Content: goCronHealthTmpl},
+				{Path: "Dockerfile", Content: goCronDockerfileTmpl},
 				{Path: "README.md", Content: readmeTmpl},
 				{Path: ".gitignore", Content: gitignoreGoTmpl},
 			},

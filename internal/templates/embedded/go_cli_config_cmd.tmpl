@@ -1,0 +1,110 @@
+package cmd
+
+// =============================================================================
+// CONFIG COMMAND
+// =============================================================================
+// Manage application configuration (view, set, reset)
+// =============================================================================
+
+import (
+	"fmt" // Formatting output
+
+	"github.com/spf13/cobra" // CLI framework
+	"{{.ModuleName}}/internal/config" // Config package
+)
+
+// =============================================================================
+// CONFIG COMMAND DEFINITION
+// =============================================================================
+
+// configCmd represents the config command
+var configCmd = &cobra.Command{
+	Use:   "config",                                      // Command name
+	Short: "Manage configuration",                        // Short description
+	Long: `View and manage application configuration.
+
+Subcommands:
+  show    Display current configuration
+  set     Set a configuration value
+  reset   Reset configuration to defaults
+  path    Show configuration file path
+
+Examples:
+  {{.ProjectName}} config show
+  {{.ProjectName}} config set key value
+  {{.ProjectName}} config reset`,
+	Run: func(cmd *cobra.Command, args []string) {
+		cmd.Help() // Show help if no subcommand
+	},
+}
+
+// =============================================================================
+// CONFIG SUBCOMMANDS
+// =============================================================================
+
+// configShowCmd displays current configuration
+var configShowCmd = &cobra.Command{
+	Use:   "show",                         // Command name
+	Short: "Display current configuration", // Short description
+	Run: func(cmd *cobra.Command, args []string) {
+		cfg := config.Load() // Load current config
+		cfg.Print()          // Display formatted config
+	},
+}
+
+// configSetCmd sets a configuration value
+var configSetCmd = &cobra.Command{
+	Use:   "set <key> <value>",           // Command name with args
+	Short: "Set a configuration value",   // Short description
+	Args:  cobra.ExactArgs(2),            // Require exactly 2 args
+	Run: func(cmd *cobra.Command, args []string) {
+		key := args[0]   // Get key from args
+		value := args[1] // Get value from args
+
+		cfg := config.Load() // Load current config
+		if err := cfg.Set(key, value); err != nil { // Set value
+			fmt.Printf("Error: %v\n", err) // Print error
+			return
+		}
+		if err := cfg.Save(); err != nil { // Save to file
+			fmt.Printf("Error saving config: %v\n", err) // Print error
+			return
+		}
+		fmt.Printf("Set %s = %s\n", key, value) // Confirm success
+	},
+}
+
+// configResetCmd resets configuration to defaults
+var configResetCmd = &cobra.Command{
+	Use:   "reset",                              // Command name
+	Short: "Reset configuration to defaults",    // Short description
+	Run: func(cmd *cobra.Command, args []string) {
+		cfg := config.Default() // Get default config
+		if err := cfg.Save(); err != nil { // Save defaults
+			fmt.Printf("Error: %v\n", err) // Print error
+			return
+		}
+		fmt.Println("Configuration reset to defaults") // Confirm success
+	},
+}
+
+// configPathCmd shows the configuration file path
+var configPathCmd = &cobra.Command{
+	Use:   "path",                           // Command name
+	Short: "Show configuration file path",   // Short description
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println(config.Path()) // Print config path
+	},
+}
+
+// =============================================================================
+// INIT - Register commands
+// =============================================================================
+
+func init() {
+	rootCmd.AddCommand(configCmd) // Add config to root
+	configCmd.AddCommand(configShowCmd)  // Add show subcommand
+	configCmd.AddCommand(configSetCmd)   // Add set subcommand
+	configCmd.AddCommand(configResetCmd) // Add reset subcommand
+	configCmd.AddCommand(configPathCmd)  // Add path subcommand
+}

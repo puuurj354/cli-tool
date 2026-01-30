@@ -1,0 +1,115 @@
+package health
+
+// =============================================================================
+// GRPC HEALTH CHECK
+// =============================================================================
+// gRPC health checking following the standard protocol
+// =============================================================================
+
+import (
+	"context"  // Context
+	"sync"     // Synchronization
+
+	"google.golang.org/grpc/codes"           // Status codes
+	"google.golang.org/grpc/health/grpc_health_v1" // Health proto
+	"google.golang.org/grpc/status"          // Status handling
+)
+
+// =============================================================================
+// HEALTH SERVER
+// =============================================================================
+
+// Server implements grpc_health_v1.HealthServer
+type Server struct {
+	grpc_health_v1.UnimplementedHealthServer
+	mu       sync.RWMutex
+	services map[string]grpc_health_v1.HealthCheckResponse_ServingStatus
+}
+
+// NewServer creates a new health server
+// Returns:
+//   - *Server: Health server instance
+func NewServer() *Server {
+	return &Server{
+		services: make(map[string]grpc_health_v1.HealthCheckResponse_ServingStatus),
+	}
+}
+
+// =============================================================================
+// HEALTH CHECK
+// =============================================================================
+
+// Check implements health check
+func (s *Server) Check(
+	ctx context.Context,
+	req *grpc_health_v1.HealthCheckRequest,
+) (*grpc_health_v1.HealthCheckResponse, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	// Get status for service
+	status, ok := s.services[req.Service]
+	if !ok {
+		// If service not registered, assume serving
+		status = grpc_health_v1.HealthCheckResponse_SERVING
+	}
+
+	return &grpc_health_v1.HealthCheckResponse{
+		Status: status,
+	}, nil
+}
+
+// Watch implements streaming health check
+func (s *Server) Watch(
+	req *grpc_health_v1.HealthCheckRequest,
+	stream grpc_health_v1.Health_WatchServer,
+) error {
+	// Send initial status
+	s.mu.RLock()
+	status, ok := s.services[req.Service]
+	if !ok {
+		status = grpc_health_v1.HealthCheckResponse_SERVING
+	}
+	s.mu.RUnlock()
+
+	if err := stream.Send(&grpc_health_v1.HealthCheckResponse{
+		Status: status,
+	}); err != nil {
+		return err
+	}
+
+	// Keep stream open (simplified - production would watch for changes)
+	<-stream.Context().Done()
+	return stream.Context().Err()
+}
+
+// =============================================================================
+// STATUS MANAGEMENT
+// =============================================================================
+
+// SetServingStatus sets the status of a service
+// Parameters:
+//   - service: Service name
+//   - status: Serving status
+func (s *Server) SetServingStatus(
+	service string,
+	status grpc_health_v1.HealthCheckResponse_ServingStatus,
+) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.services[service] = status
+}
+
+// SetServing marks a service as serving
+// Parameters:
+//   - service: Service name
+func (s *Server) SetServing(service string) {
+	s.SetServingStatus(service, grpc_health_v1.HealthCheckResponse_SERVING)
+}
+
+// SetNotServing marks a service as not serving
+// Parameters:
+//   - service: Service name
+func (s *Server) SetNotServing(service string) {
+	s.SetServingStatus(service, grpc_health_v1.HealthCheckResponse_NOT_SERVING)
+}

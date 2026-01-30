@@ -1,0 +1,65 @@
+package job
+
+// =============================================================================
+// JOB TESTS
+// =============================================================================
+
+import (
+	"testing"  // Testing framework
+	"time"     // Timing
+)
+
+// =============================================================================
+// JOB TESTS
+// =============================================================================
+
+// TestJobProcess tests successful job processing
+func TestJobProcess(t *testing.T) {
+	j := Job{
+		ID:      1,
+		Payload: "test payload",
+	}
+
+	err := j.Process()
+	if err != nil {
+		t.Errorf("Process() error = %v, want nil", err)
+	}
+}
+
+// TestJobProcessParallel tests concurrent job processing
+func TestJobProcessParallel(t *testing.T) {
+	t.Parallel()
+
+	jobs := []Job{
+		{ID: 1, Payload: "job 1"},
+		{ID: 2, Payload: "job 2"},
+		{ID: 3, Payload: "job 3"},
+	}
+
+	for _, j := range jobs {
+		j := j // Capture range variable
+		t.Run(j.Payload, func(t *testing.T) {
+			t.Parallel()
+			if err := j.Process(); err != nil {
+				t.Errorf("Process() error = %v", err)
+			}
+		})
+	}
+}
+
+// =============================================================================
+// BENCHMARK TESTS
+// =============================================================================
+
+// BenchmarkJobProcess benchmarks job processing
+func BenchmarkJobProcess(b *testing.B) {
+	j := Job{
+		ID:      1,
+		Payload: "benchmark payload",
+	}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		j.Process()
+	}
+}

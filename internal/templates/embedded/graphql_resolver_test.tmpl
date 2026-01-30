@@ -1,0 +1,147 @@
+package graph_test
+
+// =============================================================================
+// GRAPHQL RESOLVER TESTS
+// =============================================================================
+
+import (
+	"context"  // Context
+	"testing"  // Testing
+
+	"github.com/99designs/gqlgen/client"   // Test client
+	"github.com/99designs/gqlgen/graphql/handler" // Handler
+	
+	"{{.ModuleName}}/graph"
+	"{{.ModuleName}}/graph/generated"
+)
+
+// =============================================================================
+// TEST SETUP
+// =============================================================================
+
+func setupTestClient(t *testing.T) *client.Client {
+	t.Helper()
+
+	resolver := &graph.Resolver{
+		// Initialize with mocks
+	}
+
+	srv := handler.NewDefaultServer(
+		generated.NewExecutableSchema(generated.Config{
+			Resolvers: resolver,
+		}),
+	)
+
+	return client.New(srv)
+}
+
+// =============================================================================
+// QUERY TESTS
+// =============================================================================
+
+func TestQueryHello(t *testing.T) {
+	c := setupTestClient(t)
+
+	var resp struct {
+		Hello string `json:"hello"`
+	}
+
+	err := c.Post(`
+		query {
+			hello
+		}
+	`, &resp)
+
+	if err != nil {
+		t.Fatalf("Query failed: %v", err)
+	}
+
+	if resp.Hello != "world" {
+		t.Errorf("Expected 'world', got %q", resp.Hello)
+	}
+}
+
+func TestQueryGetItem(t *testing.T) {
+	c := setupTestClient(t)
+
+	var resp struct {
+		Item struct {
+			ID   string `json:"id"`
+			Name string `json:"name"`
+		} `json:"item"`
+	}
+
+	err := c.Post(`
+		query GetItem($id: ID!) {
+			item(id: $id) {
+				id
+				name
+			}
+		}
+	`, &resp, client.Var("id", "123"))
+
+	if err != nil {
+		t.Fatalf("Query failed: %v", err)
+	}
+
+	// Add assertions
+}
+
+// =============================================================================
+// MUTATION TESTS
+// =============================================================================
+
+func TestMutationCreateItem(t *testing.T) {
+	c := setupTestClient(t)
+
+	var resp struct {
+		CreateItem struct {
+			ID   string `json:"id"`
+			Name string `json:"name"`
+		} `json:"createItem"`
+	}
+
+	err := c.Post(`
+		mutation CreateItem($input: CreateItemInput!) {
+			createItem(input: $input) {
+				id
+				name
+			}
+		}
+	`, &resp, client.Var("input", map[string]interface{}{
+		"name": "Test Item",
+	}))
+
+	if err != nil {
+		t.Fatalf("Mutation failed: %v", err)
+	}
+
+	if resp.CreateItem.Name != "Test Item" {
+		t.Errorf("Expected 'Test Item', got %q", resp.CreateItem.Name)
+	}
+}
+
+// =============================================================================
+// ERROR TESTS
+// =============================================================================
+
+func TestQueryNotFound(t *testing.T) {
+	c := setupTestClient(t)
+
+	var resp struct {
+		Item interface{} `json:"item"`
+	}
+
+	err := c.Post(`
+		query {
+			item(id: "nonexistent") {
+				id
+			}
+		}
+	`, &resp)
+
+	// Check for expected error
+	if err == nil {
+		t.Error("Expected error for nonexistent item")
+	}
+}

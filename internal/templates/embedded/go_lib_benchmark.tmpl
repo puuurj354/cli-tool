@@ -1,0 +1,110 @@
+package {{.ProjectName}}_test
+
+// =============================================================================
+// BENCHMARKS
+// =============================================================================
+// Performance benchmarks for the library
+// =============================================================================
+
+import (
+	"testing" // Testing framework
+
+	"{{.ModuleName}}"
+)
+
+// =============================================================================
+// BASIC BENCHMARKS
+// =============================================================================
+
+// BenchmarkNew benchmarks creating a new instance
+func BenchmarkNew(b *testing.B) {
+	b.ReportAllocs() // Report memory allocations
+
+	for i := 0; i < b.N; i++ {
+		_ = {{.ProjectName}}.New()
+	}
+}
+
+// BenchmarkNewWithOptions benchmarks creation with options
+func BenchmarkNewWithOptions(b *testing.B) {
+	b.ReportAllocs()
+
+	for i := 0; i < b.N; i++ {
+		_ = {{.ProjectName}}.New(
+			{{.ProjectName}}.WithDebug(true),
+			{{.ProjectName}}.WithMaxRetries(5),
+		)
+	}
+}
+
+// =============================================================================
+// OPERATION BENCHMARKS
+// =============================================================================
+
+// BenchmarkProcess benchmarks the main processing function
+func BenchmarkProcess(b *testing.B) {
+	lib := {{.ProjectName}}.New()
+	input := "benchmark input data"
+
+	b.ResetTimer()
+	b.ReportAllocs()
+
+	for i := 0; i < b.N; i++ {
+		_, _ = lib.Process(input)
+	}
+}
+
+// BenchmarkProcessParallel benchmarks parallel processing
+func BenchmarkProcessParallel(b *testing.B) {
+	lib := {{.ProjectName}}.New()
+	input := "benchmark input data"
+
+	b.ResetTimer()
+	b.ReportAllocs()
+
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			_, _ = lib.Process(input)
+		}
+	})
+}
+
+// =============================================================================
+// COMPARISON BENCHMARKS
+// =============================================================================
+
+// BenchmarkSmallInput benchmarks with small input
+func BenchmarkSmallInput(b *testing.B) {
+	lib := {{.ProjectName}}.New()
+	input := "small"
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_, _ = lib.Process(input)
+	}
+}
+
+// BenchmarkLargeInput benchmarks with large input
+func BenchmarkLargeInput(b *testing.B) {
+	lib := {{.ProjectName}}.New()
+	input := string(make([]byte, 10000)) // 10KB input
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_, _ = lib.Process(input)
+	}
+}
+
+// =============================================================================
+// MEMORY BENCHMARKS
+// =============================================================================
+
+// BenchmarkMemoryUsage tracks memory allocations
+func BenchmarkMemoryUsage(b *testing.B) {
+	b.ReportAllocs()
+
+	for i := 0; i < b.N; i++ {
+		lib := {{.ProjectName}}.New()
+		_, _ = lib.Process("test data")
+	}
+}

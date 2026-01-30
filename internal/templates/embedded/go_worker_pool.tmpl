@@ -1,0 +1,188 @@
+package worker
+
+// =============================================================================
+// WORKER POOL
+// =============================================================================
+// Managed pool of concurrent workers
+// =============================================================================
+
+import (
+	"context"       // Context for cancellation
+	"log/slog"      // Structured logging
+	"sync"          // Synchronization
+	"time"          // Timing
+
+	"{{.ModuleName}}/internal/job"
+	"{{.ModuleName}}/internal/metrics"
+	"{{.ModuleName}}/internal/queue"
+	"{{.ModuleName}}/internal/retry"
+)
+
+// =============================================================================
+// POOL CONFIGURATION
+// =============================================================================
+
+// PoolConfig holds worker pool configuration
+type PoolConfig struct {
+	NumWorkers   int           // Number of concurrent workers
+	RetryConfig  retry.Config  // Retry configuration
+	ShutdownWait time.Duration // Max time to wait for graceful shutdown
+}
+
+// DefaultPoolConfig returns default pool configuration
+// Returns:
+//   - PoolConfig: Default configuration
+func DefaultPoolConfig() PoolConfig {
+	return PoolConfig{
+		NumWorkers:   5,                  // 5 workers
+		RetryConfig:  retry.DefaultConfig(),
+		ShutdownWait: 30 * time.Second,   // 30s shutdown timeout
+	}
+}
+
+// =============================================================================
+// WORKER POOL
+// =============================================================================
+
+// Pool manages a pool of workers
+type Pool struct {
+	config   PoolConfig       // Pool configuration
+	queue    *queue.Queue     // Job queue
+	metrics  *metrics.Metrics // Metrics collector
+	logger   *slog.Logger     // Logger
+	wg       sync.WaitGroup   // Wait group for workers
+	cancel   context.CancelFunc
+}
+
+// NewPool creates a new worker pool
+// Parameters:
+//   - cfg: Pool configuration
+//   - q: Job queue
+//   - m: Metrics collector
+//   - logger: Logger instance
+// Returns:
+//   - *Pool: New worker pool
+func NewPool(cfg PoolConfig, q *queue.Queue, m *metrics.Metrics, logger *slog.Logger) *Pool {
+	return &Pool{
+		config:  cfg,
+		queue:   q,
+		metrics: m,
+		logger:  logger,
+	}
+}
+
+// =============================================================================
+// POOL LIFECYCLE
+// =============================================================================
+
+// Start starts all workers in the pool
+// Parameters:
+//   - ctx: Context for cancellation
+func (p *Pool) Start(ctx context.Context) {
+	ctx, p.cancel = context.WithCancel(ctx)
+
+	p.logger.Info("starting worker pool", slog.Int("workers", p.config.NumWorkers))
+
+	for i := 1; i <= p.config.NumWorkers; i++ {
+		p.wg.Add(1)
+		go p.worker(ctx, i)
+	}
+
+	p.metrics.SetActiveWorkers(int64(p.config.NumWorkers))
+}
+
+// Stop gracefully stops all workers
+func (p *Pool) Stop() {
+	p.logger.Info("stopping worker pool")
+
+	// Cancel context
+	if p.cancel != nil {
+		p.cancel()
+	}
+
+	// Wait for workers with timeout
+	done := make(chan struct{})
+	go func() {
+		p.wg.Wait()
+		close(done)
+	}()
+
+	select {
+	case <-done:
+		p.logger.Info("worker pool stopped gracefully")
+	case <-time.After(p.config.ShutdownWait):
+		p.logger.Warn("worker pool shutdown timeout")
+	}
+}
+
+// =============================================================================
+// WORKER LOGIC
+// =============================================================================
+
+// worker is the main worker loop
+// Parameters:
+//   - ctx: Context for cancellation
+//   - id: Worker ID for logging
+func (p *Pool) worker(ctx context.Context, id int) {
+	defer p.wg.Done()
+
+	logger := p.logger.With(slog.Int("worker_id", id))
+	logger.Info("worker started")
+
+	for {
+		select {
+		case <-ctx.Done():
+			logger.Info("worker stopped")
+			return
+		default:
+			// Try to get job from queue
+			j, ok := p.queue.Dequeue()
+			if !ok {
+				// No job available, brief sleep to prevent spin
+				time.Sleep(10 * time.Millisecond)
+				continue
+			}
+
+			// Process job with retry
+			p.processJob(ctx, logger, j)
+		}
+	}
+}
+
+// processJob processes a single job with retry
+// Parameters:
+//   - ctx: Context for cancellation
+//   - logger: Logger with worker ID
+//   - j: Job to process
+func (p *Pool) processJob(ctx context.Context, logger *slog.Logger, j job.Job) {
+	start := time.Now()
+	p.metrics.IncActiveWorkers()
+	defer p.metrics.DecActiveWorkers()
+
+	logger.Info("processing job", slog.Int("job_id", j.ID))
+
+	err := retry.Do(ctx, p.config.RetryConfig, func() error {
+		p.metrics.IncJobsRetried() // Count all attempts
+		return j.Process()
+	})
+
+	duration := time.Since(start)
+	p.metrics.RecordProcessingTime(duration)
+	p.metrics.IncJobsProcessed()
+
+	if err != nil {
+		p.metrics.IncJobsFailed()
+		logger.Error("job failed",
+			slog.Int("job_id", j.ID),
+			slog.Duration("duration", duration),
+			slog.String("error", err.Error()),
+		)
+		return
+	}
+
+	p.metrics.IncJobsSucceeded()
+	logger.Info("job completed",
+		slog.Int("job_id", j.ID),
+		slog.Duration("duration", duration),
+	)
+}

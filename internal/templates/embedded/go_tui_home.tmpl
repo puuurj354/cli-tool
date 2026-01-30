@@ -1,0 +1,145 @@
+package views
+
+// =============================================================================
+// HOME VIEW
+// =============================================================================
+// Main landing view for the TUI application
+// =============================================================================
+
+import (
+	"fmt"     // Formatting
+	"strings" // String operations
+
+	tea "github.com/charmbracelet/bubbletea" // Bubble Tea
+	"github.com/charmbracelet/lipgloss"       // Styling
+
+	"{{.ModuleName}}/internal/ui/components"
+	"{{.ModuleName}}/internal/ui/keys"
+	"{{.ModuleName}}/internal/ui/styles"
+)
+
+// =============================================================================
+// MENU ITEM
+// =============================================================================
+
+// MenuItem represents a menu item
+type MenuItem struct {
+	title string // Item title
+	desc  string // Item description
+	key   string // Shortcut key
+}
+
+// Title implements ListItem interface
+func (m MenuItem) Title() string { return m.title }
+
+// Description implements ListItem interface
+func (m MenuItem) Description() string { return m.desc }
+
+// FilterValue implements ListItem interface
+func (m MenuItem) FilterValue() string { return m.title }
+
+// =============================================================================
+// HOME MODEL
+// =============================================================================
+
+// Home is the main menu view
+type Home struct {
+	list    components.List // Menu list
+	keys    keys.KeyMap     // Key bindings
+	width   int             // Terminal width
+	height  int             // Terminal height
+}
+
+// NewHome creates a new home view
+// Returns:
+//   - Home: New home view
+func NewHome() Home {
+	// Define menu items
+	items := []components.ListItem{
+		MenuItem{title: "New Project", desc: "Create a new project", key: "n"},
+		MenuItem{title: "Open Recent", desc: "Open recent projects", key: "o"},
+		MenuItem{title: "Settings", desc: "Configure application", key: "s"},
+		MenuItem{title: "Help", desc: "View documentation", key: "?"},
+		MenuItem{title: "Quit", desc: "Exit application", key: "q"},
+	}
+
+	return Home{
+		list: components.NewList(items, "Main Menu"),
+		keys: keys.DefaultKeyMap(),
+	}
+}
+
+// =============================================================================
+// BUBBLE TEA INTERFACE
+// =============================================================================
+
+// Init initializes the view
+func (h Home) Init() tea.Cmd {
+	return nil
+}
+
+// Update handles messages
+// Parameters:
+//   - msg: Tea message
+// Returns:
+//   - tea.Model: Updated model
+//   - tea.Cmd: Command
+func (h Home) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.WindowSizeMsg:
+		h.width = msg.Width
+		h.height = msg.Height
+		h.list.Height = msg.Height - 10 // Reserve space for header/footer
+
+	case tea.KeyMsg:
+		switch msg.String() {
+		case "q", "ctrl+c":
+			return h, tea.Quit
+		case "enter":
+			// Handle selection
+			if item := h.list.SelectedItem(); item != nil {
+				switch item.Title() {
+				case "Quit":
+					return h, tea.Quit
+				}
+			}
+		}
+
+		// Update list
+		var cmd tea.Cmd
+		h.list, cmd = h.list.Update(msg)
+		return h, cmd
+	}
+
+	return h, nil
+}
+
+// View renders the view
+// Returns:
+//   - string: Rendered view
+func (h Home) View() string {
+	var b strings.Builder
+
+	// Header
+	header := styles.TitleStyle.Render("{{.ProjectName}}")
+	b.WriteString(lipgloss.PlaceHorizontal(h.width, lipgloss.Center, header))
+	b.WriteString("\n\n")
+
+	// Menu list
+	b.WriteString(h.list.View())
+	b.WriteString("\n")
+
+	// Help footer
+	help := styles.HelpKeyStyle.Render("↑/↓") + styles.HelpDescStyle.Render(" navigate") +
+		styles.HelpSepStyle.Render("") +
+		styles.HelpKeyStyle.Render("enter") + styles.HelpDescStyle.Render(" select") +
+		styles.HelpSepStyle.Render("") +
+		styles.HelpKeyStyle.Render("q") + styles.HelpDescStyle.Render(" quit")
+
+	b.WriteString("\n")
+	b.WriteString(styles.MutedStyle.Render("─────────────────────────────"))
+	b.WriteString("\n")
+	b.WriteString(help)
+
+	return b.String()
+}

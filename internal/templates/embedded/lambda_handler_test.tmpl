@@ -1,0 +1,124 @@
+package handler_test
+
+// =============================================================================
+// LAMBDA HANDLER TESTS
+// =============================================================================
+
+import (
+	"context"  // Context
+	"encoding/json" // JSON
+	"testing"  // Testing
+
+	"github.com/aws/aws-lambda-go/events" // Lambda events
+
+	"{{.ModuleName}}/internal/handler"
+)
+
+// =============================================================================
+// TEST HELPERS
+// =============================================================================
+
+// makeRequest creates a test API Gateway request
+func makeRequest(method, path, body string) events.APIGatewayProxyRequest {
+	return events.APIGatewayProxyRequest{
+		HTTPMethod: method,
+		Path:       path,
+		Body:       body,
+		Headers: map[string]string{
+			"Content-Type": "application/json",
+		},
+		RequestContext: events.APIGatewayProxyRequestContext{
+			RequestID: "test-request-id",
+		},
+	}
+}
+
+// =============================================================================
+// HANDLER TESTS
+// =============================================================================
+
+func TestHandleRequest(t *testing.T) {
+	tests := []struct {
+		name           string
+		method         string
+		path           string
+		body           string
+		wantStatusCode int
+		wantContains   string
+	}{
+		{
+			name:           "GET success",
+			method:         "GET",
+			path:           "/",
+			wantStatusCode: 200,
+		},
+		{
+			name:           "POST with body",
+			method:         "POST",
+			path:           "/",
+			body:           `{"name":"test"}`,
+			wantStatusCode: 201,
+		},
+		{
+			name:           "invalid method",
+			method:         "PATCH",
+			path:           "/",
+			wantStatusCode: 405,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req := makeRequest(tt.method, tt.path, tt.body)
+			
+			resp, err := handler.HandleRequest(context.Background(), req)
+			if err != nil {
+				t.Fatalf("HandleRequest error: %v", err)
+			}
+
+			if resp.StatusCode != tt.wantStatusCode {
+				t.Errorf("StatusCode = %d, want %d", resp.StatusCode, tt.wantStatusCode)
+			}
+
+			if tt.wantContains != "" && !contains(resp.Body, tt.wantContains) {
+				t.Errorf("Body = %q, want to contain %q", resp.Body, tt.wantContains)
+			}
+		})
+	}
+}
+
+// contains checks if s contains substr
+func contains(s, substr string) bool {
+	return len(s) >= len(substr) && (s == substr || len(substr) == 0 || (len(s) > 0 && (s[0:len(substr)] == substr || contains(s[1:], substr))))
+}
+
+// =============================================================================
+// ERROR TESTS
+// =============================================================================
+
+func TestHandleRequest_ValidationError(t *testing.T) {
+	req := makeRequest("POST", "/", `{"invalid":"json`)
+	
+	resp, err := handler.HandleRequest(context.Background(), req)
+	if err != nil {
+		t.Fatalf("HandleRequest error: %v", err)
+	}
+
+	if resp.StatusCode != 400 {
+		t.Errorf("StatusCode = %d, want 400", resp.StatusCode)
+	}
+}
+
+// =============================================================================
+// BENCHMARK
+// =============================================================================
+
+func BenchmarkHandleRequest(b *testing.B) {
+	req := makeRequest("GET", "/", "")
+	ctx := context.Background()
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		handler.HandleRequest(ctx, req)
+	}
+}

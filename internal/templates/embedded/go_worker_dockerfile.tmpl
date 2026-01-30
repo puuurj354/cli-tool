@@ -1,0 +1,49 @@
+# Build stage
+FROM golang:1.22-alpine AS builder
+
+# Install dependencies
+RUN apk add --no-cache git
+
+# Set working directory
+WORKDIR /app
+
+# Copy go mod files
+COPY go.mod go.sum ./
+
+# Download dependencies
+RUN go mod download
+
+# Copy source
+COPY . .
+
+# Build
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-w -s" -o /app/worker ./cmd/worker
+
+# =============================================================================
+# Final stage
+# =============================================================================
+FROM alpine:3.19
+
+# Install ca-certificates
+RUN apk --no-cache add ca-certificates tzdata
+
+# Create non-root user
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
+WORKDIR /app
+
+# Copy binary
+COPY --from=builder /app/worker .
+
+# Change ownership
+RUN chown -R appuser:appgroup /app
+
+# Switch to non-root user  
+USER appuser
+
+# Default environment
+ENV WORKER_COUNT=5
+ENV LOG_LEVEL=info
+
+# Run worker
+CMD ["./worker"]

@@ -1,0 +1,117 @@
+# Makefile for {{.ProjectName}}
+# Build, test, install, and release automation
+
+# =============================================================================
+# VARIABLES
+# =============================================================================
+
+# Binary name
+BINARY_NAME={{.ProjectName}}
+
+# Version from git tag (or "dev" if not set)
+VERSION=$(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
+
+# Git commit hash
+COMMIT=$(shell git rev-parse --short HEAD 2>/dev/null || echo "none")
+
+# Build date
+DATE=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+# Go build flags
+LDFLAGS=-ldflags "-X {{.ModuleName}}/cmd.Version=$(VERSION) -X {{.ModuleName}}/cmd.Commit=$(COMMIT) -X {{.ModuleName}}/cmd.Date=$(DATE)"
+
+# =============================================================================
+# DEFAULT TARGET
+# =============================================================================
+
+.PHONY: all
+all: build
+
+# =============================================================================
+# BUILD TARGETS
+# =============================================================================
+
+.PHONY: build
+build: ## Build the binary
+	go build $(LDFLAGS) -o $(BINARY_NAME) .
+
+.PHONY: build-all
+build-all: ## Build for all platforms
+	GOOS=linux GOARCH=amd64 go build $(LDFLAGS) -o dist/$(BINARY_NAME)-linux-amd64 .
+	GOOS=linux GOARCH=arm64 go build $(LDFLAGS) -o dist/$(BINARY_NAME)-linux-arm64 .
+	GOOS=darwin GOARCH=amd64 go build $(LDFLAGS) -o dist/$(BINARY_NAME)-darwin-amd64 .
+	GOOS=darwin GOARCH=arm64 go build $(LDFLAGS) -o dist/$(BINARY_NAME)-darwin-arm64 .
+	GOOS=windows GOARCH=amd64 go build $(LDFLAGS) -o dist/$(BINARY_NAME)-windows-amd64.exe .
+
+# =============================================================================
+# INSTALL TARGET
+# =============================================================================
+
+.PHONY: install
+install: ## Install to $GOPATH/bin
+	go install $(LDFLAGS) .
+
+# =============================================================================
+# TEST TARGETS
+# =============================================================================
+
+.PHONY: test
+test: ## Run tests
+	go test -v ./...
+
+.PHONY: test-cover
+test-cover: ## Run tests with coverage
+	go test -v -cover -coverprofile=coverage.out ./...
+	go tool cover -html=coverage.out -o coverage.html
+
+.PHONY: bench
+bench: ## Run benchmarks
+	go test -bench=. -benchmem ./...
+
+# =============================================================================
+# QUALITY TARGETS
+# =============================================================================
+
+.PHONY: lint
+lint: ## Run linter
+	golangci-lint run ./...
+
+.PHONY: fmt
+fmt: ## Format code
+	go fmt ./...
+	gofmt -s -w .
+
+.PHONY: vet
+vet: ## Run go vet
+	go vet ./...
+
+# =============================================================================
+# CLEAN TARGET
+# =============================================================================
+
+.PHONY: clean
+clean: ## Clean build artifacts
+	rm -f $(BINARY_NAME)
+	rm -rf dist/
+	rm -f coverage.out coverage.html
+
+# =============================================================================
+# DEVELOPMENT TARGETS
+# =============================================================================
+
+.PHONY: run
+run: ## Run without building
+	go run . $(ARGS)
+
+.PHONY: watch
+watch: ## Watch for changes and rebuild
+	@which air > /dev/null || go install github.com/cosmtrek/air@latest
+	air
+
+# =============================================================================
+# HELP TARGET
+# =============================================================================
+
+.PHONY: help
+help: ## Show this help
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-15s\033[0m %s\n", $$1, $$2}'

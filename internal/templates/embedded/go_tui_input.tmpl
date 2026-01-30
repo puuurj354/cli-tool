@@ -1,0 +1,155 @@
+package components
+
+// =============================================================================
+// INPUT COMPONENT
+// =============================================================================
+// Text input component with validation
+// =============================================================================
+
+import (
+	"strings" // String operations
+
+	"github.com/charmbracelet/bubbles/textinput" // Text input
+	tea "github.com/charmbracelet/bubbletea"      // Bubble Tea
+	"github.com/charmbracelet/lipgloss"           // Styling
+
+	"{{.ModuleName}}/internal/ui/styles"
+)
+
+// =============================================================================
+// INPUT MODEL
+// =============================================================================
+
+// Input is a text input component
+type Input struct {
+	textinput textinput.Model // Underlying text input
+	Label     string          // Input label
+	Error     string          // Validation error
+	Validate  func(string) error // Validation function
+}
+
+// NewInput creates a new input component
+// Parameters:
+//   - label: Input label
+//   - placeholder: Placeholder text
+// Returns:
+//   - Input: New input component
+func NewInput(label, placeholder string) Input {
+	ti := textinput.New()
+	ti.Placeholder = placeholder
+	ti.Focus()
+	ti.CharLimit = 100
+	ti.Width = 40
+	ti.PromptStyle = styles.FocusedStyle
+	ti.TextStyle = styles.TextStyle
+
+	return Input{
+		textinput: ti,
+		Label:     label,
+	}
+}
+
+// =============================================================================
+// BUBBLE TEA INTERFACE
+// =============================================================================
+
+// Init initializes the input
+func (i Input) Init() tea.Cmd {
+	return textinput.Blink
+}
+
+// Update handles input events
+// Parameters:
+//   - msg: Tea message
+// Returns:
+//   - Input: Updated input
+//   - tea.Cmd: Command
+func (i Input) Update(msg tea.Msg) (Input, tea.Cmd) {
+	var cmd tea.Cmd
+
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		// Clear error on any key
+		i.Error = ""
+	}
+
+	i.textinput, cmd = i.textinput.Update(msg)
+
+	// Validate if function provided
+	if i.Validate != nil {
+		if err := i.Validate(i.textinput.Value()); err != nil {
+			i.Error = err.Error()
+		}
+	}
+
+	return i, cmd
+}
+
+// View renders the input
+// Returns:
+//   - string: Rendered input
+func (i Input) View() string {
+	var b strings.Builder
+
+	// Label
+	if i.Label != "" {
+		b.WriteString(styles.TextStyle.Render(i.Label))
+		b.WriteString("\n")
+	}
+
+	// Input field
+	b.WriteString(i.textinput.View())
+
+	// Error message
+	if i.Error != "" {
+		b.WriteString("\n")
+		b.WriteString(styles.ErrorStyle.Render(i.Error))
+	}
+
+	return b.String()
+}
+
+// =============================================================================
+// INPUT METHODS
+// =============================================================================
+
+// Value returns the current input value
+// Returns:
+//   - string: Input value
+func (i Input) Value() string {
+	return i.textinput.Value()
+}
+
+// SetValue sets the input value
+// Parameters:
+//   - value: New value
+func (i *Input) SetValue(value string) {
+	i.textinput.SetValue(value)
+}
+
+// Focus focuses the input
+func (i *Input) Focus() tea.Cmd {
+	return i.textinput.Focus()
+}
+
+// Blur removes focus from the input
+func (i *Input) Blur() {
+	i.textinput.Blur()
+}
+
+// Focused returns whether the input is focused
+// Returns:
+//   - bool: True if focused
+func (i Input) Focused() bool {
+	return i.textinput.Focused()
+}
+
+// IsValid returns whether the input value is valid
+// Returns:
+//   - bool: True if valid
+func (i Input) IsValid() bool {
+	if i.Validate == nil {
+		return true
+	}
+	return i.Validate(i.textinput.Value()) == nil
+}

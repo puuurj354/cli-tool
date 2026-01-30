@@ -1,0 +1,115 @@
+package {{.ProjectName}}
+
+// =============================================================================
+// FUNCTIONAL OPTIONS
+// =============================================================================
+// Options pattern for flexible configuration
+// =============================================================================
+
+// =============================================================================
+// OPTION TYPE
+// =============================================================================
+
+// Option is a function that configures the library
+type Option func(*Config)
+
+// Config holds library configuration
+type Config struct {
+	Debug      bool          // Enable debug mode
+	Timeout    time.Duration // Operation timeout
+	MaxRetries int           // Maximum retries
+	Logger     Logger        // Custom logger
+}
+
+// DefaultConfig returns default configuration
+// Returns:
+//   - Config: Default configuration values
+func DefaultConfig() Config {
+	return Config{
+		Debug:      false,
+		Timeout:    30 * time.Second,
+		MaxRetries: 3,
+		Logger:     defaultLogger{},
+	}
+}
+
+// =============================================================================
+// OPTION FUNCTIONS
+// =============================================================================
+
+// WithDebug enables debug mode
+// Returns:
+//   - Option: Debug option
+func WithDebug(enabled bool) Option {
+	return func(c *Config) {
+		c.Debug = enabled
+	}
+}
+
+// WithTimeout sets the operation timeout
+// Parameters:
+//   - d: Timeout duration
+// Returns:
+//   - Option: Timeout option
+func WithTimeout(d time.Duration) Option {
+	return func(c *Config) {
+		c.Timeout = d
+	}
+}
+
+// WithMaxRetries sets the maximum retries
+// Parameters:
+//   - n: Number of retries
+// Returns:
+//   - Option: MaxRetries option
+func WithMaxRetries(n int) Option {
+	return func(c *Config) {
+		c.MaxRetries = n
+	}
+}
+
+// WithLogger sets a custom logger
+// Parameters:
+//   - l: Logger implementation
+// Returns:
+//   - Option: Logger option
+func WithLogger(l Logger) Option {
+	return func(c *Config) {
+		c.Logger = l
+	}
+}
+
+// =============================================================================
+// APPLY OPTIONS
+// =============================================================================
+
+// applyOptions applies options to config
+// Parameters:
+//   - opts: Options to apply
+// Returns:
+//   - Config: Configured config
+func applyOptions(opts ...Option) Config {
+	cfg := DefaultConfig()
+	for _, opt := range opts {
+		opt(&cfg)
+	}
+	return cfg
+}
+
+// =============================================================================
+// LOGGER INTERFACE
+// =============================================================================
+
+// Logger interface for custom logging
+type Logger interface {
+	Debug(msg string, args ...interface{})
+	Info(msg string, args ...interface{})
+	Error(msg string, args ...interface{})
+}
+
+// defaultLogger is a no-op logger
+type defaultLogger struct{}
+
+func (d defaultLogger) Debug(msg string, args ...interface{}) {}
+func (d defaultLogger) Info(msg string, args ...interface{})  {}
+func (d defaultLogger) Error(msg string, args ...interface{}) {}

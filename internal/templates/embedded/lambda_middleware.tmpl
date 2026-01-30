@@ -1,0 +1,135 @@
+package middleware
+
+// =============================================================================
+// LAMBDA MIDDLEWARE
+// =============================================================================
+// Middleware chain for AWS Lambda handlers
+// =============================================================================
+
+import (
+	"context"   // Context
+	"encoding/json" // JSON
+	"log/slog"  // Logging
+	"time"      // Timing
+
+	"github.com/aws/aws-lambda-go/events" // Lambda events
+)
+
+// =============================================================================
+// TYPES
+// =============================================================================
+
+// Handler is the Lambda handler function type
+type Handler func(context.Context, events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error)
+
+// Middleware wraps a handler with additional functionality
+type Middleware func(Handler) Handler
+
+// =============================================================================
+// CHAIN
+// =============================================================================
+
+// Chain applies middlewares to a handler
+// Parameters:
+//   - handler: Base handler
+//   - middlewares: Middlewares to apply
+// Returns:
+//   - Handler: Wrapped handler
+func Chain(handler Handler, middlewares ...Middleware) Handler {
+	for i := len(middlewares) - 1; i >= 0; i-- {
+		handler = middlewares[i](handler)
+	}
+	return handler
+}
+
+// =============================================================================
+// LOGGING MIDDLEWARE
+// =============================================================================
+
+// Logging adds request/response logging
+// Parameters:
+//   - logger: Logger instance
+// Returns:
+//   - Middleware: Logging middleware
+func Logging(logger *slog.Logger) Middleware {
+	return func(next Handler) Handler {
+		return func(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+			start := time.Now()
+
+			// Log request
+			logger.Info("request received",
+				slog.String("method", req.HTTPMethod),
+				slog.String("path", req.Path),
+				slog.String("request_id", req.RequestContext.RequestID),
+			)
+
+			// Call handler
+			resp, err := next(ctx, req)
+
+			// Log response
+			logger.Info("response sent",
+				slog.Int("status", resp.StatusCode),
+				slog.Duration("duration", time.Since(start)),
+			)
+
+			return resp, err
+		}
+	}
+}
+
+// =============================================================================
+// RECOVERY MIDDLEWARE
+// =============================================================================
+
+// Recovery recovers from panics
+// Parameters:
+//   - logger: Logger instance
+// Returns:
+//   - Middleware: Recovery middleware
+func Recovery(logger *slog.Logger) Middleware {
+	return func(next Handler) Handler {
+		return func(ctx context.Context, req events.APIGatewayProxyRequest) (resp events.APIGatewayProxyResponse, err error) {
+			defer func() {
+				if r := recover(); r != nil {
+					logger.Error("panic recovered",
+						slog.Any("panic", r),
+						slog.String("request_id", req.RequestContext.RequestID),
+					)
+					resp = events.APIGatewayProxyResponse{
+						StatusCode: 500,
+						Body:       `{"error":"internal server error"}`,
+						Headers:    map[string]string{"Content-Type": "application/json"},
+					}
+				}
+			}()
+			return next(ctx, req)
+		}
+	}
+}
+
+// =============================================================================
+// CORS MIDDLEWARE
+// =============================================================================
+
+// CORS adds CORS headers
+// Parameters:
+//   - allowedOrigins: Allowed origins
+// Returns:
+//   - Middleware: CORS middleware
+func CORS(allowedOrigins string) Middleware {
+	return func(next Handler) Handler {
+		return func(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+			resp, err := next(ctx, req)
+
+			// Add CORS headers
+			if resp.Headers == nil {
+				resp.Headers = make(map[string]string)
+			}
+			resp.Headers["Access-Control-Allow-Origin"] = allowedOrigins
+			resp.Headers["Access-Control-Allow-Headers"] = "Content-Type,Authorization"
+			resp.Headers["Access-Control-Allow-Methods"] = "GET,POST,PUT,DELETE,OPTIONS"
+
+			return resp, err
+		}
+	}
+}

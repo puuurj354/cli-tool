@@ -1,0 +1,132 @@
+package queue
+
+// =============================================================================
+// QUEUE TESTS
+// =============================================================================
+
+import (
+	"sync"     // Synchronization
+	"testing"  // Testing framework
+
+	"{{.ModuleName}}/internal/job"
+)
+
+// =============================================================================
+// QUEUE TESTS
+// =============================================================================
+
+// TestQueueEnqueueDequeue tests basic enqueue/dequeue
+func TestQueueEnqueueDequeue(t *testing.T) {
+	q := New(10)
+
+	// Enqueue
+	j := job.Job{ID: 1, Payload: "test"}
+	q.Enqueue(j)
+
+	// Dequeue
+	got, ok := q.Dequeue()
+	if !ok {
+		t.Error("Dequeue() returned false, want true")
+	}
+	if got.ID != j.ID {
+		t.Errorf("Dequeue() got ID = %d, want %d", got.ID, j.ID)
+	}
+}
+
+// TestQueueEmpty tests dequeue from empty queue
+func TestQueueEmpty(t *testing.T) {
+	q := New(10)
+
+	_, ok := q.Dequeue()
+	if ok {
+		t.Error("Dequeue() on empty queue returned true, want false")
+	}
+}
+
+// TestQueueSize tests queue size tracking
+func TestQueueSize(t *testing.T) {
+	q := New(10)
+
+	// Empty queue
+	if q.Size() != 0 {
+		t.Errorf("Size() = %d, want 0", q.Size())
+	}
+
+	// Add items
+	for i := 1; i <= 5; i++ {
+		q.Enqueue(job.Job{ID: i})
+	}
+	if q.Size() != 5 {
+		t.Errorf("Size() = %d, want 5", q.Size())
+	}
+
+	// Remove items
+	q.Dequeue()
+	q.Dequeue()
+	if q.Size() != 3 {
+		t.Errorf("Size() = %d, want 3", q.Size())
+	}
+}
+
+// TestQueueConcurrent tests concurrent access
+func TestQueueConcurrent(t *testing.T) {
+	q := New(100)
+	var wg sync.WaitGroup
+
+	// Concurrent enqueue
+	for i := 0; i < 50; i++ {
+		wg.Add(1)
+		go func(id int) {
+			defer wg.Done()
+			q.Enqueue(job.Job{ID: id})
+		}(i)
+	}
+
+	// Concurrent dequeue
+	for i := 0; i < 25; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			q.Dequeue()
+		}()
+	}
+
+	wg.Wait()
+
+	// Should have ~25 items left (50 added - 25 removed)
+	// Due to concurrency, might be slightly off
+	size := q.Size()
+	if size < 20 || size > 30 {
+		t.Errorf("Size() = %d, expected ~25", size)
+	}
+}
+
+// =============================================================================
+// BENCHMARK
+// =============================================================================
+
+// BenchmarkQueueEnqueue benchmarks enqueue
+func BenchmarkQueueEnqueue(b *testing.B) {
+	q := New(b.N + 10)
+	j := job.Job{ID: 1, Payload: "bench"}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		q.Enqueue(j)
+	}
+}
+
+// BenchmarkQueueDequeue benchmarks dequeue
+func BenchmarkQueueDequeue(b *testing.B) {
+	q := New(b.N + 10)
+
+	// Pre-fill queue
+	for i := 0; i < b.N; i++ {
+		q.Enqueue(job.Job{ID: i})
+	}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		q.Dequeue()
+	}
+}

@@ -1,0 +1,215 @@
+package dataloaders
+
+// =============================================================================
+// GRAPHQL DATALOADERS
+// =============================================================================
+// Batching and caching for N+1 query prevention
+// =============================================================================
+
+import (
+	"context" // Context
+	"sync"    // Synchronization
+	"time"    // Timing
+)
+
+// =============================================================================
+// LOADER INTERFACE
+// =============================================================================
+
+// Loader is a generic dataloader interface
+type Loader[K comparable, V any] interface {
+	Load(ctx context.Context, key K) (V, error)
+	LoadMany(ctx context.Context, keys []K) ([]V, error)
+	Prime(key K, value V)
+	Clear(key K)
+	ClearAll()
+}
+
+// =============================================================================
+// BATCH LOADER
+// =============================================================================
+
+// BatchLoader implements batched loading
+type BatchLoader[K comparable, V any] struct {
+	batchFn   func(ctx context.Context, keys []K) (map[K]V, error)
+	cache     map[K]V
+	pending   map[K][]chan result[V]
+	mu        sync.Mutex
+	batchSize int
+	wait      time.Duration
+}
+
+// result wraps a value and error for channel
+type result[V any] struct {
+	value V
+	err   error
+}
+
+// =============================================================================
+// CONSTRUCTOR
+// =============================================================================
+
+// NewBatchLoader creates a new batch loader
+// Parameters:
+//   - batchFn: Function to load a batch of keys
+// Returns:
+//   - *BatchLoader: New batch loader
+func NewBatchLoader[K comparable, V any](
+	batchFn func(ctx context.Context, keys []K) (map[K]V, error),
+) *BatchLoader[K, V] {
+	return &BatchLoader[K, V]{
+		batchFn:   batchFn,
+		cache:     make(map[K]V),
+		pending:   make(map[K][]chan result[V]),
+		batchSize: 100,
+		wait:      2 * time.Millisecond,
+	}
+}
+
+// =============================================================================
+// LOAD METHODS
+// =============================================================================
+
+// Load loads a single key
+// Parameters:
+//   - ctx: Context
+//   - key: Key to load
+// Returns:
+//   - V: Loaded value
+//   - error: Load error
+func (l *BatchLoader[K, V]) Load(ctx context.Context, key K) (V, error) {
+	l.mu.Lock()
+
+	// Check cache
+	if v, ok := l.cache[key]; ok {
+		l.mu.Unlock()
+		return v, nil
+	}
+
+	// Add to pending
+	ch := make(chan result[V], 1)
+	l.pending[key] = append(l.pending[key], ch)
+
+	// Schedule batch if first
+	if len(l.pending) == 1 {
+		go l.scheduleBatch(ctx)
+	}
+
+	l.mu.Unlock()
+
+	// Wait for result
+	select {
+	case <-ctx.Done():
+		var zero V
+		return zero, ctx.Err()
+	case r := <-ch:
+		return r.value, r.err
+	}
+}
+
+// LoadMany loads multiple keys
+// Parameters:
+//   - ctx: Context
+//   - keys: Keys to load
+// Returns:
+//   - []V: Loaded values
+//   - error: First error encountered
+func (l *BatchLoader[K, V]) LoadMany(ctx context.Context, keys []K) ([]V, error) {
+	results := make([]V, len(keys))
+	errors := make([]error, len(keys))
+
+	var wg sync.WaitGroup
+	for i, key := range keys {
+		wg.Add(1)
+		go func(i int, key K) {
+			defer wg.Done()
+			results[i], errors[i] = l.Load(ctx, key)
+		}(i, key)
+	}
+	wg.Wait()
+
+	// Return first error
+	for _, err := range errors {
+		if err != nil {
+			return results, err
+		}
+	}
+	return results, nil
+}
+
+// =============================================================================
+// BATCH EXECUTION
+// =============================================================================
+
+// scheduleBatch schedules a batch load
+func (l *BatchLoader[K, V]) scheduleBatch(ctx context.Context) {
+	time.Sleep(l.wait)
+	l.executeBatch(ctx)
+}
+
+// executeBatch executes the batch load
+func (l *BatchLoader[K, V]) executeBatch(ctx context.Context) {
+	l.mu.Lock()
+	pending := l.pending
+	l.pending = make(map[K][]chan result[V])
+	l.mu.Unlock()
+
+	if len(pending) == 0 {
+		return
+	}
+
+	// Collect keys
+	keys := make([]K, 0, len(pending))
+	for k := range pending {
+		keys = append(keys, k)
+	}
+
+	// Execute batch function
+	results, err := l.batchFn(ctx, keys)
+
+	// Distribute results
+	l.mu.Lock()
+	defer l.mu.Unlock()
+
+	for key, chs := range pending {
+		var r result[V]
+		if err != nil {
+			r.err = err
+		} else if v, ok := results[key]; ok {
+			r.value = v
+			l.cache[key] = v
+		} else {
+			// Key not found - leave as zero value
+		}
+
+		for _, ch := range chs {
+			ch <- r
+			close(ch)
+		}
+	}
+}
+
+// =============================================================================
+// CACHE METHODS
+// =============================================================================
+
+// Prime primes the cache with a value
+func (l *BatchLoader[K, V]) Prime(key K, value V) {
+	l.mu.Lock()
+	l.cache[key] = value
+	l.mu.Unlock()
+}
+
+// Clear clears a key from the cache
+func (l *BatchLoader[K, V]) Clear(key K) {
+	l.mu.Lock()
+	delete(l.cache, key)
+	l.mu.Unlock()
+}
+
+// ClearAll clears the entire cache
+func (l *BatchLoader[K, V]) ClearAll() {
+	l.mu.Lock()
+	l.cache = make(map[K]V)
+	l.mu.Unlock()
+}

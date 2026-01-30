@@ -1,0 +1,166 @@
+package metrics
+
+// =============================================================================
+// WORKER METRICS
+// =============================================================================
+// Prometheus-compatible metrics for worker monitoring
+// =============================================================================
+
+import (
+	"sync"      // Synchronization
+	"sync/atomic" // Atomic operations
+	"time"      // Timing
+)
+
+// =============================================================================
+// METRICS STRUCTURE
+// =============================================================================
+
+// Metrics holds worker metrics
+type Metrics struct {
+	// Counters
+	jobsProcessed  uint64 // Total jobs processed
+	jobsSucceeded  uint64 // Successful jobs
+	jobsFailed     uint64 // Failed jobs
+	jobsRetried    uint64 // Retried jobs
+
+	// Gauges
+	activeWorkers  int64  // Currently active workers
+	queueSize      int64  // Current queue size
+
+	// Histograms (simplified - store last N durations)
+	processingTimes []time.Duration // Recent processing times
+	mu              sync.RWMutex    // Mutex for histograms
+}
+
+// New creates a new Metrics instance
+// Returns:
+//   - *Metrics: New metrics instance
+func New() *Metrics {
+	return &Metrics{
+		processingTimes: make([]time.Duration, 0, 1000), // Store last 1000
+	}
+}
+
+// =============================================================================
+// COUNTER METHODS
+// =============================================================================
+
+// IncJobsProcessed increments jobs processed counter
+func (m *Metrics) IncJobsProcessed() {
+	atomic.AddUint64(&m.jobsProcessed, 1)
+}
+
+// IncJobsSucceeded increments successful jobs counter
+func (m *Metrics) IncJobsSucceeded() {
+	atomic.AddUint64(&m.jobsSucceeded, 1)
+}
+
+// IncJobsFailed increments failed jobs counter
+func (m *Metrics) IncJobsFailed() {
+	atomic.AddUint64(&m.jobsFailed, 1)
+}
+
+// IncJobsRetried increments retried jobs counter
+func (m *Metrics) IncJobsRetried() {
+	atomic.AddUint64(&m.jobsRetried, 1)
+}
+
+// =============================================================================
+// GAUGE METHODS
+// =============================================================================
+
+// SetActiveWorkers sets current active worker count
+// Parameters:
+//   - n: Number of active workers
+func (m *Metrics) SetActiveWorkers(n int64) {
+	atomic.StoreInt64(&m.activeWorkers, n)
+}
+
+// IncActiveWorkers increments active worker count
+func (m *Metrics) IncActiveWorkers() {
+	atomic.AddInt64(&m.activeWorkers, 1)
+}
+
+// DecActiveWorkers decrements active worker count
+func (m *Metrics) DecActiveWorkers() {
+	atomic.AddInt64(&m.activeWorkers, -1)
+}
+
+// SetQueueSize sets current queue size
+// Parameters:
+//   - n: Current queue size
+func (m *Metrics) SetQueueSize(n int64) {
+	atomic.StoreInt64(&m.queueSize, n)
+}
+
+// =============================================================================
+// HISTOGRAM METHODS
+// =============================================================================
+
+// RecordProcessingTime records a job processing duration
+// Parameters:
+//   - d: Processing duration
+func (m *Metrics) RecordProcessingTime(d time.Duration) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	// Keep only last 1000
+	if len(m.processingTimes) >= 1000 {
+		m.processingTimes = m.processingTimes[1:]
+	}
+	m.processingTimes = append(m.processingTimes, d)
+}
+
+// =============================================================================
+// SNAPSHOT
+// =============================================================================
+
+// Snapshot holds a point-in-time snapshot of metrics
+type Snapshot struct {
+	JobsProcessed   uint64        `json:"jobs_processed"`
+	JobsSucceeded   uint64        `json:"jobs_succeeded"`
+	JobsFailed      uint64        `json:"jobs_failed"`
+	JobsRetried     uint64        `json:"jobs_retried"`
+	ActiveWorkers   int64         `json:"active_workers"`
+	QueueSize       int64         `json:"queue_size"`
+	AvgProcessTime  time.Duration `json:"avg_process_time"`
+	P99ProcessTime  time.Duration `json:"p99_process_time"`
+}
+
+// GetSnapshot returns current metrics snapshot
+// Returns:
+//   - Snapshot: Current metrics values
+func (m *Metrics) GetSnapshot() Snapshot {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	snap := Snapshot{
+		JobsProcessed: atomic.LoadUint64(&m.jobsProcessed),
+		JobsSucceeded: atomic.LoadUint64(&m.jobsSucceeded),
+		JobsFailed:    atomic.LoadUint64(&m.jobsFailed),
+		JobsRetried:   atomic.LoadUint64(&m.jobsRetried),
+		ActiveWorkers: atomic.LoadInt64(&m.activeWorkers),
+		QueueSize:     atomic.LoadInt64(&m.queueSize),
+	}
+
+	// Calculate averages
+	if len(m.processingTimes) > 0 {
+		var total time.Duration
+		for _, d := range m.processingTimes {
+			total += d
+		}
+		snap.AvgProcessTime = total / time.Duration(len(m.processingTimes))
+
+		// Simple P99 (sort and get 99th percentile)
+		if len(m.processingTimes) > 0 {
+			idx := int(float64(len(m.processingTimes)) * 0.99)
+			if idx >= len(m.processingTimes) {
+				idx = len(m.processingTimes) - 1
+			}
+			snap.P99ProcessTime = m.processingTimes[idx]
+		}
+	}
+
+	return snap
+}

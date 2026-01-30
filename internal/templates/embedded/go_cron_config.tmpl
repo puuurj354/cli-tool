@@ -1,0 +1,105 @@
+package config
+
+// =============================================================================
+// CRON CONFIGURATION
+// =============================================================================
+// Configuration for cron scheduler
+// =============================================================================
+
+import (
+	"os"      // Environment variables
+	"strconv" // String conversion
+	"time"    // Timing
+)
+
+// =============================================================================
+// CONFIG STRUCT
+// =============================================================================
+
+// Config holds application configuration
+type Config struct {
+	// General settings
+	AppName     string        // Application name
+	LogLevel    string        // Log level (debug, info, warn, error)
+	LogFormat   string        // Log format (json, text)
+	
+	// Scheduler settings
+	Timezone    string        // Timezone (e.g., "UTC", "America/New_York")
+	EnableJobs  bool          // Enable job execution
+	
+	// Health check settings
+	HealthPort  int           // Health check HTTP port
+	HealthPath  string        // Health check endpoint path
+	
+	// Graceful shutdown
+	ShutdownTimeout time.Duration // Shutdown timeout
+}
+
+// =============================================================================
+// DEFAULTS
+// =============================================================================
+
+// defaultConfig returns default configuration
+// Returns:
+//   - Config: Default configuration
+func defaultConfig() Config {
+	return Config{
+		AppName:         "cron-app",
+		LogLevel:        "info",
+		LogFormat:       "json",
+		Timezone:        "UTC",
+		EnableJobs:      true,
+		HealthPort:      8080,
+		HealthPath:      "/health",
+		ShutdownTimeout: 30 * time.Second,
+	}
+}
+
+// =============================================================================
+// LOADER
+// =============================================================================
+
+// Load loads configuration from environment
+// Returns:
+//   - *Config: Loaded configuration
+func Load() *Config {
+	cfg := defaultConfig()
+
+	// General settings
+	if v := os.Getenv("APP_NAME"); v != "" {
+		cfg.AppName = v
+	}
+	if v := os.Getenv("LOG_LEVEL"); v != "" {
+		cfg.LogLevel = v
+	}
+	if v := os.Getenv("LOG_FORMAT"); v != "" {
+		cfg.LogFormat = v
+	}
+
+	// Scheduler settings
+	if v := os.Getenv("TIMEZONE"); v != "" {
+		cfg.Timezone = v
+	}
+	if v := os.Getenv("ENABLE_JOBS"); v != "" {
+		cfg.EnableJobs = v == "true" || v == "1"
+	}
+
+	// Health check settings
+	if v := os.Getenv("HEALTH_PORT"); v != "" {
+		if port, err := strconv.Atoi(v); err == nil {
+			cfg.HealthPort = port
+		}
+	}
+	if v := os.Getenv("HEALTH_PATH"); v != "" {
+		cfg.HealthPath = v
+	}
+
+	// Shutdown settings
+	if v := os.Getenv("SHUTDOWN_TIMEOUT"); v != "" {
+		if d, err := time.ParseDuration(v); err == nil {
+			cfg.ShutdownTimeout = d
+		}
+	}
+
+	return &cfg
+}

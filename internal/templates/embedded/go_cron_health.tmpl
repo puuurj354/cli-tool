@@ -1,0 +1,163 @@
+package health
+
+// =============================================================================
+// HEALTH CHECK SERVER
+// =============================================================================
+// HTTP health check endpoint for containers
+// =============================================================================
+
+import (
+	"context"    // Context
+	"encoding/json" // JSON encoding
+	"fmt"        // Formatting
+	"log/slog"   // Logging
+	"net/http"   // HTTP server
+	"sync"       // Synchronization
+	"time"       // Timing
+)
+
+// =============================================================================
+// HEALTH STATUS
+// =============================================================================
+
+// Status represents health status
+type Status string
+
+const (
+	StatusHealthy   Status = "healthy"   // Service is healthy
+	StatusUnhealthy Status = "unhealthy" // Service is unhealthy
+	StatusDegraded  Status = "degraded"  // Service is degraded
+)
+
+// =============================================================================
+// HEALTH RESPONSE
+// =============================================================================
+
+// Response represents a health check response
+type Response struct {
+	Status    Status            `json:"status"`    // Overall status
+	Timestamp time.Time         `json:"timestamp"` // Check time
+	Checks    map[string]Check  `json:"checks"`    // Individual checks
+}
+
+// Check represents an individual health check
+type Check struct {
+	Status  Status `json:"status"`           // Check status
+	Message string `json:"message,omitempty"` // Optional message
+}
+
+// =============================================================================
+// HEALTH SERVER
+// =============================================================================
+
+// Server is an HTTP health check server
+type Server struct {
+	server  *http.Server  // HTTP server
+	logger  *slog.Logger  // Logger
+	checks  map[string]func() error // Health check functions
+	mu      sync.RWMutex  // Mutex for checks
+}
+
+// =============================================================================
+// CONSTRUCTOR
+// =============================================================================
+
+// NewServer creates a new health server
+// Parameters:
+//   - port: HTTP port
+//   - path: Health check path
+//   - logger: Logger
+// Returns:
+//   - *Server: Health server
+func NewServer(port int, path string, logger *slog.Logger) *Server {
+	s := &Server{
+		logger: logger,
+		checks: make(map[string]func() error),
+	}
+
+	mux := http.NewServeMux()
+	mux.HandleFunc(path, s.handleHealth)
+
+	s.server = &http.Server{
+		Addr:    fmt.Sprintf(":%d", port),
+		Handler: mux,
+	}
+
+	return s
+}
+
+// =============================================================================
+// CHECK REGISTRATION
+// =============================================================================
+
+// AddCheck adds a health check
+// Parameters:
+//   - name: Check name
+//   - fn: Check function (returns error if unhealthy)
+func (s *Server) AddCheck(name string, fn func() error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.checks[name] = fn
+}
+
+// =============================================================================
+// HANDLER
+// =============================================================================
+
+// handleHealth handles health check requests
+func (s *Server) handleHealth(w http.ResponseWriter, r *http.Request) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	response := Response{
+		Status:    StatusHealthy,
+		Timestamp: time.Now(),
+		Checks:    make(map[string]Check),
+	}
+
+	// Run all checks
+	for name, fn := range s.checks {
+		if err := fn(); err != nil {
+			response.Status = StatusUnhealthy
+			response.Checks[name] = Check{
+				Status:  StatusUnhealthy,
+				Message: err.Error(),
+			}
+		} else {
+			response.Checks[name] = Check{
+				Status: StatusHealthy,
+			}
+		}
+	}
+
+	// Set status code based on health
+	statusCode := http.StatusOK
+	if response.Status != StatusHealthy {
+		statusCode = http.StatusServiceUnavailable
+	}
+
+	// Write response
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
+	json.NewEncoder(w).Encode(response)
+}
+
+// =============================================================================
+// LIFECYCLE
+// =============================================================================
+
+// Start starts the health server
+func (s *Server) Start() error {
+	s.logger.Info("starting health server", slog.String("addr", s.server.Addr))
+	return s.server.ListenAndServe()
+}
+
+// Stop stops the health server
+// Parameters:
+//   - ctx: Context for timeout
+// Returns:
+//   - error: Shutdown error
+func (s *Server) Stop(ctx context.Context) error {
+	s.logger.Info("stopping health server")
+	return s.server.Shutdown(ctx)
+}

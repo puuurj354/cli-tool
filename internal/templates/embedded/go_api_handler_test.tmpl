@@ -1,0 +1,151 @@
+package handler
+
+// =============================================================================
+// HANDLER TESTS
+// =============================================================================
+
+import (
+	"encoding/json" // JSON encoding/decoding
+	"net/http"      // HTTP types
+	"net/http/httptest" // HTTP testing
+	"strings"       // String manipulation
+	"testing"       // Testing framework
+)
+
+// =============================================================================
+// HEALTH ENDPOINT TESTS
+// =============================================================================
+
+// TestHealthHandler tests the health check endpoint
+func TestHealthHandler(t *testing.T) {
+	// Create handler
+	handler := &Handler{}
+
+	// Create test request
+	req := httptest.NewRequest(http.MethodGet, "/health", nil)
+	rec := httptest.NewRecorder()
+
+	// Call handler
+	handler.Health(rec, req)
+
+	// Assert status code
+	if rec.Code != http.StatusOK {
+		t.Errorf("status = %d, want %d", rec.Code, http.StatusOK)
+	}
+
+	// Assert response body
+	var response map[string]string
+	if err := json.Unmarshal(rec.Body.Bytes(), &response); err != nil {
+		t.Fatalf("failed to decode response: %v", err)
+	}
+
+	if response["status"] != "ok" {
+		t.Errorf("status = %s, want ok", response["status"])
+	}
+}
+
+// =============================================================================
+// CRUD ENDPOINT TESTS
+// =============================================================================
+
+// TestCreateHandler tests the create endpoint
+func TestCreateHandler(t *testing.T) {
+	tests := []struct {
+		name       string
+		body       string
+		wantStatus int
+	}{
+		{
+			name:       "valid request",
+			body:       `{"name": "Test Item"}`,
+			wantStatus: http.StatusCreated,
+		},
+		{
+			name:       "empty body",
+			body:       ``,
+			wantStatus: http.StatusBadRequest,
+		},
+		{
+			name:       "invalid json",
+			body:       `{invalid}`,
+			wantStatus: http.StatusBadRequest,
+		},
+	}
+
+	handler := &Handler{}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodPost, "/items", strings.NewReader(tt.body))
+			req.Header.Set("Content-Type", "application/json")
+			rec := httptest.NewRecorder()
+
+			handler.Create(rec, req)
+
+			if rec.Code != tt.wantStatus {
+				t.Errorf("status = %d, want %d", rec.Code, tt.wantStatus)
+			}
+		})
+	}
+}
+
+// TestGetHandler tests the get endpoint
+func TestGetHandler(t *testing.T) {
+	tests := []struct {
+		name       string
+		id         string
+		wantStatus int
+	}{
+		{
+			name:       "existing item",
+			id:         "1",
+			wantStatus: http.StatusOK,
+		},
+		{
+			name:       "non-existing item",
+			id:         "999",
+			wantStatus: http.StatusNotFound,
+		},
+		{
+			name:       "invalid id",
+			id:         "invalid",
+			wantStatus: http.StatusBadRequest,
+		},
+	}
+
+	handler := &Handler{}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodGet, "/items/"+tt.id, nil)
+			rec := httptest.NewRecorder()
+
+			// Note: In real tests, you'd need to extract ID from URL
+			// using a router like chi or gorilla/mux
+			handler.Get(rec, req)
+
+			if rec.Code != tt.wantStatus {
+				t.Errorf("status = %d, want %d", rec.Code, tt.wantStatus)
+			}
+		})
+	}
+}
+
+// =============================================================================
+// CONTENT TYPE TESTS
+// =============================================================================
+
+// TestResponseContentType verifies JSON content type
+func TestResponseContentType(t *testing.T) {
+	handler := &Handler{}
+
+	req := httptest.NewRequest(http.MethodGet, "/health", nil)
+	rec := httptest.NewRecorder()
+
+	handler.Health(rec, req)
+
+	contentType := rec.Header().Get("Content-Type")
+	if contentType != "application/json" {
+		t.Errorf("Content-Type = %s, want application/json", contentType)
+	}
+}

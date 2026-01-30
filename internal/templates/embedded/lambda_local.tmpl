@@ -1,0 +1,111 @@
+package local
+
+// =============================================================================
+// LOCAL DEVELOPMENT SERVER
+// =============================================================================
+// HTTP server for local Lambda testing
+// =============================================================================
+
+import (
+	"context"    // Context
+	"encoding/json" // JSON
+	"io"         // IO
+	"log/slog"   // Logging
+	"net/http"   // HTTP
+	"strings"    // String operations
+
+	"github.com/aws/aws-lambda-go/events" // Lambda events
+
+	"{{.ModuleName}}/internal/handler"
+)
+
+// =============================================================================
+// SERVER
+// =============================================================================
+
+// Server is a local development server
+type Server struct {
+	addr   string
+	logger *slog.Logger
+}
+
+// NewServer creates a new local server
+// Parameters:
+//   - addr: Server address
+//   - logger: Logger instance
+// Returns:
+//   - *Server: Local server
+func NewServer(addr string, logger *slog.Logger) *Server {
+	return &Server{
+		addr:   addr,
+		logger: logger,
+	}
+}
+
+// =============================================================================
+// START
+// =============================================================================
+
+// Start starts the local server
+// Returns:
+//   - error: Start error
+func (s *Server) Start() error {
+	s.logger.Info("starting local server", slog.String("addr", s.addr))
+
+	http.HandleFunc("/", s.handleRequest)
+	return http.ListenAndServe(s.addr, nil)
+}
+
+// =============================================================================
+// HANDLER
+// =============================================================================
+
+// handleRequest converts HTTP requests to Lambda events
+func (s *Server) handleRequest(w http.ResponseWriter, r *http.Request) {
+	// Read body
+	body, _ := io.ReadAll(r.Body)
+
+	// Convert headers
+	headers := make(map[string]string)
+	for k, v := range r.Header {
+		headers[k] = strings.Join(v, ",")
+	}
+
+	// Build Lambda request
+	req := events.APIGatewayProxyRequest{
+		HTTPMethod:      r.Method,
+		Path:            r.URL.Path,
+		Body:            string(body),
+		Headers:         headers,
+		QueryStringParameters: convertQuery(r.URL.Query()),
+		RequestContext: events.APIGatewayProxyRequestContext{
+			RequestID: "local-dev",
+		},
+	}
+
+	// Call handler
+	resp, err := handler.HandleRequest(context.Background(), req)
+	if err != nil {
+		s.logger.Error("handler error", slog.String("error", err.Error()))
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Write response headers
+	for k, v := range resp.Headers {
+		w.Header().Set(k, v)
+	}
+	w.WriteHeader(resp.StatusCode)
+	w.Write([]byte(resp.Body))
+}
+
+// convertQuery converts url.Values to map
+func convertQuery(query map[string][]string) map[string]string {
+	result := make(map[string]string)
+	for k, v := range query {
+		if len(v) > 0 {
+			result[k] = v[0]
+		}
+	}
+	return result
+}
