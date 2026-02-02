@@ -1,0 +1,44 @@
+# {{.ProjectName|title}}
+
+A modern Go web application using **HTMX** for interactivity and standard `html/template` for server-side rendering.
+
+## Features
+
+- **SSR**: Fast, SEO-friendly server-side rendering.
+- **HTMX**: Dynamic interactions without writing JavaScript.
+- **Tailwind CSS**: Utility-first styling (via CDN for simplicity).
+- **Standard Lib**: No heavy frameworks, just pure Go `net/http`.
+
+## Structure
+
+```
+.
+├── cmd/server/
+│   └── main.go       # HTTP server and handlers
+├── templates/
+│   ├── index.html    # Main layout
+│   └── list.html     # Partial fragments
+├── go.mod
+└── README.md
+```
+
+## Running
+
+```bash
+go run cmd/server/main.go
+```
+
+Visit `http://localhost:8080`.
+
+## How it works
+
+1.  **Initial Load**: The server renders request to `/` as a full HTML page.
+2.  **Interaction**: When you submit a form or click a button, HTMX sends an AJAX request.
+3.  **Fragment Update**: The server returns *only* the HTML fragment that changed (e.g., the new list of todos).
+4.  **DOM Swap**: HTMX swaps the old list with the new HTML in the DOM.
+
+## Customization
+
+- **Templates**: Add new `.html` files in `templates/`.
+- **Styling**: Replace the Tailwind CDN with a build step (e.g., using `tailwindcss` CLI) for production.
+- **Database**: Connect a real database (SQLite, Postgres) in `NewHandler`.

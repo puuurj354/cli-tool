@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>{{.ProjectName}} - WebAssembly</title>
+	<script src="wasm_exec.js"></script>
+	<script>
+		const go = new Go();
+		WebAssembly.instantiateStreaming(fetch("main.wasm"), go.importObject).then((result) => {
+			go.run(result.instance);
+		});
+	</script>
+	<style>
+		body { font-family: sans-serif; padding: 20px; }
+		button { padding: 10px; cursor: pointer; }
+	</style>
+</head>
+<body>
+	<h1>Go WebAssembly Demo</h1>
+	<p>Open the console to see "Hello from Go WebAssembly!"</p>
+	
+	<div>
+		<button onclick="console.log('Result of 2+3 from Go:', add(2, 3)); alert('Calculated in Go: 2+3='+add(2,3))">
+			Test Math (2+3)
+		</button>
+		
+		<button onclick="updateDOM()">
+			Modify DOM from Go
+		</button>
+	</div>
+</body>
+</html>

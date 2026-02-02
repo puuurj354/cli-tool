@@ -1,0 +1,24 @@
+package main
+
+import (
+	"log"
+	"net/http"
+	"strings"
+)
+
+func main() {
+	fs := http.FileServer(http.Dir("."))
+	
+	// Create a handler that sets correct MIME types
+	http.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasSuffix(r.URL.Path, ".wasm") {
+			w.Header().Set("Content-Type", "application/wasm")
+		}
+		fs.ServeHTTP(w, r)
+	}))
+
+	log.Println("Serving WASM app on http://localhost:8080")
+	if err := http.ListenAndServe(":8080", nil); err != nil {
+		log.Fatal(err)
+	}
+}

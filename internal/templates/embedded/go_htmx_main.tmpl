@@ -1,0 +1,149 @@
+package main
+
+// =============================================================================
+// GO HTMX APP
+// =============================================================================
+// Server-side rendering with HTMX interactions
+// =============================================================================
+
+import (
+	"html/template" // HTML templating
+	"log/slog"      // Structured logging
+	"net/http"      // HTTP server
+	"os"            // OS operations
+	"time"          // Time
+)
+
+// =============================================================================
+// HANDLER
+// =============================================================================
+
+type Handler struct {
+	tmpl   *template.Template
+	logger *slog.Logger
+	todos  []Todo
+}
+
+type Todo struct {
+	ID        int
+	Title     string
+	Completed bool
+}
+
+// NewHandler creates a new handler
+func NewHandler(logger *slog.Logger) *Handler {
+	// Parse templates on startup
+	tmpl := template.Must(template.ParseGlob("templates/*.html"))
+	
+	return &Handler{
+		tmpl:   tmpl,
+		logger: logger,
+		todos: []Todo{
+			{1, "Learn Go", true},
+			{2, "Learn HTMX", false},
+		},
+	}
+}
+
+// ServeHTTP handles requests
+func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	mux := http.NewServeMux()
+	
+	// Routes
+	mux.HandleFunc("GET /", h.handleIndex)
+	mux.HandleFunc("POST /add", h.handleAdd)
+	mux.HandleFunc("POST /toggle/{id}", h.handleToggle)
+	mux.HandleFunc("DELETE /delete/{id}", h.handleDelete)
+	
+	// Middleware
+	var handler http.Handler = mux
+	handler = h.loggingMiddleware(handler)
+	
+	handler.ServeHTTP(w, r)
+}
+
+// =============================================================================
+// ENDPOINTS
+// =============================================================================
+
+// handleIndex renders the full page
+func (h *Handler) handleIndex(w http.ResponseWriter, r *http.Request) {
+	h.tmpl.ExecuteTemplate(w, "index.html", map[string]any{
+		"Todos": h.todos,
+	})
+}
+
+// handleAdd adds a new todo and returns the list fragment
+func (h *Handler) handleAdd(w http.ResponseWriter, r *http.Request) {
+	title := r.FormValue("title")
+	if title != "" {
+		h.todos = append(h.todos, Todo{
+			ID:    len(h.todos) + 1,
+			Title: title,
+		})
+	}
+	
+	// Return only the todo list fragment
+	h.tmpl.ExecuteTemplate(w, "todo-list", map[string]any{
+		"Todos": h.todos,
+	})
+}
+
+// handleToggle toggles completion status
+func (h *Handler) handleToggle(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+	// Simplified ID lookup...
+	for i := range h.todos {
+		// Mock toggle logic
+		if h.todos[i].Title == "Learn HTMX" && id == "2" {
+			h.todos[i].Completed = !h.todos[i].Completed
+		}
+	}
+	
+	h.tmpl.ExecuteTemplate(w, "todo-list", map[string]any{
+		"Todos": h.todos,
+	})
+}
+
+// handleDelete removes a todo
+func (h *Handler) handleDelete(w http.ResponseWriter, r *http.Request) {
+	// Simplified delete logic
+	if len(h.todos) > 0 {
+		h.todos = h.todos[:len(h.todos)-1]
+	}
+	
+	h.tmpl.ExecuteTemplate(w, "todo-list", map[string]any{
+		"Todos": h.todos,
+	})
+}
+
+// =============================================================================
+// MIDDLEWARE
+// =============================================================================
+
+func (h *Handler) loggingMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+		next.ServeHTTP(w, r)
+		h.logger.Info("request",
+			slog.String("method", r.Method),
+			slog.String("path", r.URL.Path),
+			slog.Duration("duration", time.Since(start)),
+		)
+	})
+}
+
+// =============================================================================
+// MAIN
+// =============================================================================
+
+func main() {
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	handler := NewHandler(logger)
+	
+	logger.Info("starting server on :8080")
+	if err := http.ListenAndServe(":8080", handler); err != nil {
+		logger.Error("server error", slog.String("error", err.Error()))
+		os.Exit(1)
+	}
+}

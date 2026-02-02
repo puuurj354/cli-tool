@@ -1,0 +1,28 @@
+# {{.ProjectName|title}}
+
+Experimental **WebAssembly** application using Go.
+
+## Prerequisites
+
+- Go 1.21+
+
+## Getting Started
+
+1. **Build the WASM binary**:
+   (This also copies the necessary `wasm_exec.js` from your Go installation)
+   ```bash
+   make build
+   ```
+
+2. **Serve the application**:
+   ```bash
+   make serve
+   ```
+
+3. Open browser at [http://localhost:8080](http://localhost:8080).
+
+## How it works
+
+- `main.go`: The Go code compiled to WebAssembly. interacting with JS via `syscall/js`.
+- `server.go`: A simple HTTP server ensuring `.wasm` files are served with the correct `application/wasm` Content-Type.
+- `index.html`: Loads the `wasm_exec.js` shim and instantiates the WASM module.

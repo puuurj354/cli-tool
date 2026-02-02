@@ -1,0 +1,58 @@
+package v1alpha1
+
+import (
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+)
+
+// GroupVersion is group version used to register these objects
+var GroupVersion = schema.GroupVersion{Group: "apps.purnama.dev", Version: "v1alpha1"}
+
+// SchemeBuilder is used to add go types to the GroupVersionKind scheme
+var SchemeBuilder = runtime.NewSchemeBuilder(addKnownTypes)
+
+// AddToScheme adds the types in this group-version to the given scheme.
+var AddToScheme = SchemeBuilder.AddToScheme
+
+// MyResourceSpec defines the desired state of MyResource
+type MyResourceSpec struct {
+	// Foo is an example field of MyResource. Edit myresource_types.go to remove/update
+	Foo string `json:"foo,omitempty"`
+}
+
+// MyResourceStatus defines the observed state of MyResource
+type MyResourceStatus struct {
+	// Status of the resource
+	Active bool `json:"active"`
+}
+
+// +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
+
+// MyResource is the Schema for the myresources API
+type MyResource struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
+
+	Spec   MyResourceSpec   `json:"spec,omitempty"`
+	Status MyResourceStatus `json:"status,omitempty"`
+}
+
+// +kubebuilder:object:root=true
+
+// MyResourceList contains a list of MyResource
+type MyResourceList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []MyResource `json:"items"`
+}
+
+func addKnownTypes(scheme *runtime.Scheme) error {
+	scheme.AddKnownTypes(GroupVersion,
+		&MyResource{},
+		&MyResourceList{},
+	)
+	metav1.AddToGroupVersion(scheme, GroupVersion)
+	return nil
+}

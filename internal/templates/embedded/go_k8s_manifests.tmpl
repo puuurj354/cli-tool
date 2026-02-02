@@ -1,0 +1,39 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: myresources.apps.purnama.dev
+spec:
+  group: apps.purnama.dev
+  names:
+    kind: MyResource
+    listKind: MyResourceList
+    plural: myresources
+    singular: myresource
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        properties:
+          spec:
+            properties:
+              foo:
+                type: string
+            type: object
+          status:
+            properties:
+              active:
+                type: boolean
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+---
+apiVersion: apps.purnama.dev/v1alpha1
+kind: MyResource
+metadata:
+  name: myresource-sample
+spec:
+  foo: "bar"

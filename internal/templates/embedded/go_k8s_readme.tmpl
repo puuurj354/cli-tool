@@ -1,0 +1,46 @@
+# {{.ProjectName|title}}
+
+Kubernetes Operator built with `controller-runtime`.
+
+## Description
+
+This operator manages `MyResource` custom resources.
+
+## Quick Start
+
+### Prerequisites
+- Go 1.22+
+- Docker
+- Minikube or Kind cluster
+
+### Running locally
+1. Install the CRD:
+```sh
+kubectl apply -f manifests/crd.yaml
+```
+
+2. Run the controller:
+```sh
+go run main.go
+```
+
+3. create a sample resource:
+```sh
+kubectl apply -f manifests/sample.yaml
+```
+
+### Running in Cluster
+1. Build and push image:
+```sh
+docker build -t <your-registry>/{{.ProjectName}}:latest .
+docker push <your-registry>/{{.ProjectName}}:latest
+```
+
+2. Deploy:
+(You'll need valid Deployment manifests pointing to this image)
+
+## Project Structure
+- `api/`: API definitions (CRDs)
+- `internal/controller/`: Reconciliation logic
+- `manifests/`: YAML manifests
+- `main.go`: Entrypoint

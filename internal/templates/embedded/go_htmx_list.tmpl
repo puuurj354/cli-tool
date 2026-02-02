@@ -1,0 +1,27 @@
+{{define "todo-list"}}
+    {{range .Todos}}
+        <div class="flex items-center justify-between p-3 bg-gray-50 rounded group hover:bg-gray-100 transition">
+            <div class="flex items-center gap-3">
+                <input type="checkbox" 
+                       {{if .Completed}}checked{{end}}
+                       hx-post="/toggle/{{.ID}}"
+                       hx-target="#todo-list"
+                       hx-swap="innerHTML"
+                       class="w-5 h-5 text-blue-500 rounded focus:ring-blue-500 cursor-pointer">
+                
+                <span class="{{if .Completed}}line-through text-gray-400{{else}}text-gray-700{{end}}">
+                    {{.Title}}
+                </span>
+            </div>
+            
+            <button hx-delete="/delete/{{.ID}}"
+                    hx-target="#todo-list"
+                    hx-swap="innerHTML"
+                    class="text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition">
+                Delete
+            </button>
+        </div>
+    {{else}}
+        <p class="text-center text-gray-400 italic py-4">No todos yet. Add one above!</p>
+    {{end}}
+{{end}}

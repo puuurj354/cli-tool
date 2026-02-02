@@ -1,0 +1,17 @@
+# Makefile for Go WASM
+
+GOROOT := $(shell go env GOROOT)
+
+.PHONY: all build serve clean
+
+all: build
+
+build:
+	cp "$(GOROOT)/misc/wasm/wasm_exec.js" .
+	GOOS=js GOARCH=wasm go build -o main.wasm main.go
+
+serve: build
+	go run server.go
+
+clean:
+	rm -f main.wasm wasm_exec.js
