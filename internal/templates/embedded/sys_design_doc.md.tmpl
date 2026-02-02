@@ -1,0 +1,65 @@
+# System Design: URL Shortener
+
+**Goal**: Design a URL shortening service like Bit.ly or TinyURL.
+
+## 1. Requirements
+
+### Functional
+- [ ] Users can input a long URL and get a short URL (e.g., `http://tiny.url/xyz123`).
+- [ ] Users can access the short URL and get redirected to the long URL.
+- [ ] (Optional) Custom alias.
+- [ ] (Optional) Expiration time.
+
+### Non-Functional
+- [ ] Highly available (redirects must succeed).
+- [ ] Low latency (redirects must be fast).
+- [ ] Read-heavy (100:1 read/write ratio).
+
+## 2. API Design
+
+### `POST /v1/shorten`
+- Request: `{ "long_url": "https://...", "custom_alias": "..." }`
+- Response: `{ "short_url": "..." }`
+
+### `GET /{alias}`
+- Response: 301/302 Redirect
+
+## 3. Data Model
+
+**Database Schema**:
+*   `id` (PK): integer / string?
+*   `long_url`: varchar
+*   `short_code`: varchar (Index)
+*   `created_at`: timestamp
+*   `expires_at`: timestamp
+
+## 4. Key Design Decisions
+
+### How to generate unique short codes?
+*   Base62 encoding of Database ID?
+*   Random string generation? (Collisions?)
+*   Pre-generated token service?
+
+### Database Choice?
+*   SQL (Postgres/MySQL)?
+*   NoSQL (DynamoDB/Cassandra/Redis)?
+
+### Caching?
+*   Redis/Memcached to cache `short_code -> long_url`.
+
+## 5. Estimations (Back-of-envelope)
+
+*   **Write QPS**: 100 requests/sec => 8.6M / day
+*   **Read QPS**: 10,000 requests/sec (100x reads)
+*   **Storage**: 500 bytes per entry * 8.6M entries * 365 days * 5 years = ~7.8 TB
+
+## 6. Architecture Diagram
+
+```mermaid
+graph LR
+    User --> LoadBalancer
+    LoadBalancer --> API[API Service]
+    API --> Cache[Redis Cache]
+    API --> DB[(Database)]
+    API --> KeyGen[Key Generation Service]
+```

@@ -121,6 +121,8 @@ func TestGetAllTemplates(t *testing.T) {
 		"mini-":        {},
 		"refactoring-": {},
 		"code-review-": {},
+		"algorithm-":   {},
+		"system-":      {},
 		"fullstack":    {},
 	}
 

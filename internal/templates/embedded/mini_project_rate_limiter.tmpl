@@ -1,0 +1,45 @@
+package main
+
+import (
+	"fmt"
+	"testing"
+	"time"
+)
+
+// RateLimiter implements a Token Bucket algorithm
+type RateLimiter struct {
+	// TODO: Add fields
+}
+
+// NewRateLimiter creates a limiter that allows `rate` events per second, with max burst `capacity`
+func NewRateLimiter(rate float64, capacity int) *RateLimiter {
+	return &RateLimiter{}
+}
+
+// Allow checks if a request is allowed. Returns true if allowed, false otherwise.
+func (rl *RateLimiter) Allow() bool {
+	// TODO: Implement logic
+	return true
+}
+
+func main() {
+	rl := NewRateLimiter(1.0, 3) // 1 request per second, burst 3
+
+	for i := 0; i < 10; i++ {
+		if rl.Allow() {
+			fmt.Printf("Request %d: Allowed\n", i+1)
+		} else {
+			fmt.Printf("Request %d: Denied\n", i+1)
+		}
+		time.Sleep(200 * time.Millisecond)
+	}
+}
+
+func TestRateLimiter(t *testing.T) {
+	rl := NewRateLimiter(10, 10) // 10 rps
+	
+	if !rl.Allow() {
+		t.Error("Should allow first request")
+	}
+	// TODO: Write more tests including timing tests
+}

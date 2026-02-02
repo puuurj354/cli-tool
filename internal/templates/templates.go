@@ -285,6 +285,16 @@ var (
 	learnPerfBenchTestTmpl   = loadEmbedded("learn_perf_bench_test.tmpl")
 	learnPerfPprofTmpl       = loadEmbedded("learn_perf_pprof.tmpl")
 	learnPerfOptTmpl         = loadEmbedded("learn_perf_opt.tmpl")
+	// Skill: Algo & System Design
+	algoReadmeTmpl          = loadEmbedded("algo_readme.tmpl")
+	algoEasyTmpl            = loadEmbedded("algo_easy_two_sum.tmpl")
+	algoMediumTmpl          = loadEmbedded("algo_medium_lru_cache.tmpl")
+	algoHardTmpl            = loadEmbedded("algo_hard_merge_k_lists.tmpl")
+	sysDesignReadmeTmpl     = loadEmbedded("sys_design_readme.tmpl")
+	sysDesignDocTmpl        = loadEmbedded("sys_design_doc.md.tmpl")
+	sysDesignInterfacesTmpl = loadEmbedded("sys_design_interfaces.go.tmpl")
+	miniProjRateLimiterTmpl = loadEmbedded("mini_project_rate_limiter.tmpl")
+	miniProjKVTmpl          = loadEmbedded("mini_project_kv.tmpl")
 
 	microserviceDockerfileTmpl = loadEmbedded("microservice_dockerfile.tmpl")
 	microserviceHandlerTmpl    = loadEmbedded("microservice_handler.tmpl")
@@ -622,6 +632,36 @@ func initBuiltInTemplates() {
 			},
 		},
 		// Skill Coding Templates
+		"algorithm-challenges": {
+			Name:        "algorithm-challenges",
+			Description: "Algo challenges (Two Sum, LRU Cache, Merge K Lists)",
+			Directories: []string{
+				"easy",
+				"medium",
+				"hard",
+			},
+			Files: []FileTemplate{
+				{Path: "README.md", Content: algoReadmeTmpl},
+				{Path: "easy/main_test.go", Content: algoEasyTmpl},
+				{Path: "medium/main_test.go", Content: algoMediumTmpl},
+				{Path: "hard/main_test.go", Content: algoHardTmpl},
+				{Path: ".gitignore", Content: gitignoreGoTmpl},
+			},
+		},
+		"system-design-exercise": {
+			Name:        "system-design-exercise",
+			Description: "System Design practice (URL Shortener doc + interfaces)",
+			Directories: []string{
+				"design-docs",
+				"prototypes",
+			},
+			Files: []FileTemplate{
+				{Path: "README.md", Content: sysDesignReadmeTmpl},
+				{Path: "design-docs/url-shortener.md", Content: sysDesignDocTmpl},
+				{Path: "prototypes/main.go", Content: sysDesignInterfacesTmpl},
+				{Path: "go.mod", Content: "module system-design\ngo 1.22"},
+			},
+		},
 		"challenge-30days": {
 			Name:        "challenge-30days",
 			Description: "30-day Go coding challenge",
@@ -657,6 +697,8 @@ func initBuiltInTemplates() {
 			Directories: []string{
 				"todo-cli",
 				"url-shortener",
+				"rate-limiter",
+				"kv-store",
 			},
 			Files: []FileTemplate{
 				{Path: "README.md", Content: miniProjectReadmeTmpl},
@@ -666,6 +708,8 @@ func initBuiltInTemplates() {
 				{Path: "url-shortener/README.md", Content: urlShortenerReadmeTmpl},
 				{Path: "url-shortener/main.go", Content: urlShortenerMainTmpl},
 				{Path: "url-shortener/main_test.go", Content: urlShortenerTestTmpl},
+				{Path: "rate-limiter/main.go", Content: miniProjRateLimiterTmpl},
+				{Path: "kv-store/main.go", Content: miniProjKVTmpl},
 				{Path: ".gitignore", Content: gitignoreGoTmpl},
 			},
 		},

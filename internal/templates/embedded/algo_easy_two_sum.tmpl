@@ -1,0 +1,45 @@
+package easy
+
+import "testing"
+
+// TwoSum
+// Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target.
+// You may assume that each input would have exactly one solution, and you may not use the same element twice.
+// You can return the answer in any order.
+//
+// Example 1:
+// Input: nums = [2,7,11,15], target = 9
+// Output: [0,1]
+// Output: Because nums[0] + nums[1] == 9, we return [0, 1].
+func TwoSum(nums []int, target int) []int {
+	// TODO: Implement this function
+	return nil
+}
+
+func TestTwoSum(t *testing.T) {
+	tests := []struct {
+		name   string
+		nums   []int
+		target int
+		want   []int
+	}{
+		{"Example 1", []int{2, 7, 11, 15}, 9, []int{0, 1}},
+		{"Example 2", []int{3, 2, 4}, 6, []int{1, 2}},
+		{"Example 3", []int{3, 3}, 6, []int{0, 1}},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := TwoSum(tt.nums, tt.target)
+			if len(got) != 2 {
+				t.Errorf("TwoSum() = %v, want length 2", got)
+				return
+			}
+			// Verify logic regardless of order
+			sum := tt.nums[got[0]] + tt.nums[got[1]]
+			if sum != tt.target {
+				t.Errorf("TwoSum() indices %v sum to %d, want %d", got, sum, tt.target)
+			}
+		})
+	}
+}

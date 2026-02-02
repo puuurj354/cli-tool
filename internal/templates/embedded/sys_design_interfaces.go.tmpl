@@ -1,0 +1,23 @@
+package prototypes
+
+import "context"
+
+// Storage defines how we persist URLs.
+type Storage interface {
+	Save(ctx context.Context, shortCode string, longURL string) error
+	Get(ctx context.Context, shortCode string) (string, error)
+}
+
+// ShortenerService defines the core business logic.
+type ShortenerService interface {
+	// Shorten accepts a long URL and returns a unique short code.
+	Shorten(ctx context.Context, longURL string) (string, error)
+	
+	// Resolve accepts a short code and returns the original URL.
+	Resolve(ctx context.Context, shortCode string) (string, error)
+}
+
+// KeyGenerator defines how to create unique keys.
+type KeyGenerator interface {
+	GenerateKey() (string, error)
+}

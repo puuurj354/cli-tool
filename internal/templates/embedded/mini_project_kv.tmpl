@@ -1,0 +1,69 @@
+package main
+
+import (
+	"errors"
+	"testing"
+)
+
+// KVStore with transaction support
+type KVStore struct {
+	// TODO: Add fields
+}
+
+func NewKVStore() *KVStore {
+	return &KVStore{}
+}
+
+func (s *KVStore) Set(key, value string) {
+	// TODO
+}
+
+func (s *KVStore) Get(key string) (string, bool) {
+	// TODO
+	return "", false
+}
+
+// Transaction support
+func (s *KVStore) Begin() *Transaction {
+	return &Transaction{}
+}
+
+type Transaction struct {
+	// TODO: Track changes
+}
+
+func (tx *Transaction) Set(key, value string) {
+	// TODO
+}
+
+func (tx *Transaction) Commit() error {
+	// TODO: Apply changes
+	return nil
+}
+
+func (tx *Transaction) Rollback() {
+	// TODO: Discard changes
+}
+
+func TestKVStore(t *testing.T) {
+	s := NewKVStore()
+	s.Set("foo", "bar")
+	
+	if val, ok := s.Get("foo"); !ok || val != "bar" {
+		t.Errorf("Get(foo) = %s, %v; want bar, true", val, ok)
+	}
+	
+	tx := s.Begin()
+	tx.Set("foo", "baz")
+	
+	// Isolation: Main store should still see "bar" before commit
+	if val, _ := s.Get("foo"); val != "bar" {
+		t.Errorf("Isolation failed: Get(foo) = %s, want bar", val)
+	}
+	
+	tx.Commit()
+	
+	if val, _ := s.Get("foo"); val != "baz" {
+		t.Errorf("Commit failed: Get(foo) = %s, want baz", val)
+	}
+}

@@ -1,0 +1,61 @@
+package medium
+
+import "testing"
+
+// LRUCache
+// Design a data structure that follows the constraints of a Least Recently Used (LRU) cache.
+// Implement the LRUCache class:
+// - LRUCache(int capacity) Initialize the LRU cache with positive size capacity.
+// - int get(int key) Return the value of the key if the key exists, otherwise return -1.
+// - void put(int key, int value) Update the value of the key if the key exists. Otherwise, add the key-value pair to the cache. 
+//   If the number of keys exceeds the capacity from this operation, evict the least recently used key.
+// The functions get and put must each run in O(1) average time complexity.
+
+type LRUCache struct {
+	// TODO: Add fields here
+}
+
+func Constructor(capacity int) LRUCache {
+	return LRUCache{}
+}
+
+func (this *LRUCache) Get(key int) int {
+	// TODO: Implement Get
+	return -1
+}
+
+func (this *LRUCache) Put(key int, value int) {
+	// TODO: Implement Put
+}
+
+func TestLRUCache(t *testing.T) {
+	// Example flow
+	obj := Constructor(2)
+	obj.Put(1, 1) // cache is {1=1}
+	obj.Put(2, 2) // cache is {1=1, 2=2}
+	
+	if got := obj.Get(1); got != 1 {
+		t.Errorf("Get(1) = %d, want 1", got)
+	}
+	
+	obj.Put(3, 3) // LRU key was 2, evict 2? No, 1 was just accessed. Evict 2.
+	// Wait, standard LRU: existing items accessed become MRU.
+	// Sequence: Put(1,1), Put(2,2), Get(1) -> 1 is MRU, 2 is LRU.
+	// Put(3,3) -> Evict 2. Cache is {1=1, 3=3}
+	
+	if got := obj.Get(2); got != -1 {
+		t.Errorf("Get(2) = %d, want -1 (evicted)", got)
+	}
+	
+	obj.Put(4, 4) // Evicts 1. Cache is {4=4, 3=3}
+	
+	if got := obj.Get(1); got != -1 {
+		t.Errorf("Get(1) = %d, want -1 (evicted)", got)
+	}
+	if got := obj.Get(3); got != 3 {
+		t.Errorf("Get(3) = %d, want 3", got)
+	}
+	if got := obj.Get(4); got != 4 {
+		t.Errorf("Get(4) = %d, want 4", got)
+	}
+}
