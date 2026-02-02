@@ -1,0 +1,150 @@
+package service_test
+
+// =============================================================================
+// MICROSERVICE TESTS
+// =============================================================================
+
+import (
+	"bytes"        // Buffer
+	"context"      // Context
+	"encoding/json" // JSON
+	"net/http"     // HTTP
+	"net/http/httptest" // Test server
+	"testing"      // Testing
+	"time"         // Timing
+)
+
+// =============================================================================
+// SERVICE TEST
+// =============================================================================
+
+func TestServiceHealth(t *testing.T) {
+	// Create test server
+	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(map[string]string{"status": "healthy"})
+	})
+	server := httptest.NewServer(handler)
+	defer server.Close()
+
+	// Make request
+	resp, err := http.Get(server.URL + "/health")
+	if err != nil {
+		t.Fatalf("Health check failed: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("Expected 200, got %d", resp.StatusCode)
+	}
+
+	var result map[string]string
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		t.Fatalf("Failed to decode response: %v", err)
+	}
+
+	if result["status"] != "healthy" {
+		t.Errorf("Expected healthy, got %s", result["status"])
+	}
+}
+
+// =============================================================================
+// API ENDPOINT TESTS
+// =============================================================================
+
+func TestCreateResource(t *testing.T) {
+	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			w.WriteHeader(http.StatusMethodNotAllowed)
+			return
+		}
+
+		var body map[string]interface{}
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusCreated)
+		body["id"] = "123"
+		json.NewEncoder(w).Encode(body)
+	})
+	server := httptest.NewServer(handler)
+	defer server.Close()
+
+	payload := []byte(`{"name":"test"}`)
+	resp, err := http.Post(server.URL, "application/json", bytes.NewBuffer(payload))
+	if err != nil {
+		t.Fatalf("Request failed: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusCreated {
+		t.Errorf("Expected 201, got %d", resp.StatusCode)
+	}
+}
+
+func TestGetResource(t *testing.T) {
+	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"id":   "123",
+			"name": "test",
+		})
+	})
+	server := httptest.NewServer(handler)
+	defer server.Close()
+
+	resp, err := http.Get(server.URL + "/123")
+	if err != nil {
+		t.Fatalf("Request failed: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		t.Errorf("Expected 200, got %d", resp.StatusCode)
+	}
+}
+
+// =============================================================================
+// TIMEOUT TESTS
+// =============================================================================
+
+func TestRequestTimeout(t *testing.T) {
+	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		time.Sleep(100 * time.Millisecond)
+		w.WriteHeader(http.StatusOK)
+	})
+	server := httptest.NewServer(handler)
+	defer server.Close()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 50*time.Millisecond)
+	defer cancel()
+
+	req, _ := http.NewRequestWithContext(ctx, "GET", server.URL, nil)
+	_, err := http.DefaultClient.Do(req)
+
+	if err == nil {
+		t.Error("Expected timeout error")
+	}
+}
+
+// =============================================================================
+// BENCHMARK
+// =============================================================================
+
+func BenchmarkHealthCheck(b *testing.B) {
+	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
+	server := httptest.NewServer(handler)
+	defer server.Close()
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		resp, _ := http.Get(server.URL + "/health")
+		resp.Body.Close()
+	}
+}

@@ -1,0 +1,204 @@
+package websocket_test
+
+// =============================================================================
+// WEBSOCKET TESTS
+// =============================================================================
+
+import (
+	"net/http"      // HTTP
+	"net/http/httptest" // Test server
+	"strings"       // String operations
+	"testing"       // Testing
+	"time"          // Timing
+
+	"github.com/gorilla/websocket"
+)
+
+// =============================================================================
+// TEST UPGRADER
+// =============================================================================
+
+var upgrader = websocket.Upgrader{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
+	CheckOrigin:     func(r *http.Request) bool { return true },
+}
+
+// =============================================================================
+// ECHO SERVER
+// =============================================================================
+
+func echoHandler(w http.ResponseWriter, r *http.Request) {
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		return
+	}
+	defer conn.Close()
+
+	for {
+		msgType, msg, err := conn.ReadMessage()
+		if err != nil {
+			return
+		}
+		if err := conn.WriteMessage(msgType, msg); err != nil {
+			return
+		}
+	}
+}
+
+// =============================================================================
+// CONNECTION TESTS
+// =============================================================================
+
+func TestWebSocketConnection(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(echoHandler))
+	defer server.Close()
+
+	// Convert http URL to ws URL
+	wsURL := "ws" + strings.TrimPrefix(server.URL, "http")
+
+	conn, _, err := websocket.DefaultDialer.Dial(wsURL, nil)
+	if err != nil {
+		t.Fatalf("Failed to connect: %v", err)
+	}
+	defer conn.Close()
+
+	// Success - connection established
+}
+
+func TestWebSocketEcho(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(echoHandler))
+	defer server.Close()
+
+	wsURL := "ws" + strings.TrimPrefix(server.URL, "http")
+
+	conn, _, err := websocket.DefaultDialer.Dial(wsURL, nil)
+	if err != nil {
+		t.Fatalf("Failed to connect: %v", err)
+	}
+	defer conn.Close()
+
+	// Send message
+	message := "hello, websocket!"
+	err = conn.WriteMessage(websocket.TextMessage, []byte(message))
+	if err != nil {
+		t.Fatalf("Failed to send: %v", err)
+	}
+
+	// Read echo
+	_, received, err := conn.ReadMessage()
+	if err != nil {
+		t.Fatalf("Failed to read: %v", err)
+	}
+
+	if string(received) != message {
+		t.Errorf("Expected %q, got %q", message, string(received))
+	}
+}
+
+// =============================================================================
+// PING/PONG TESTS
+// =============================================================================
+
+func TestWebSocketPing(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(echoHandler))
+	defer server.Close()
+
+	wsURL := "ws" + strings.TrimPrefix(server.URL, "http")
+
+	conn, _, err := websocket.DefaultDialer.Dial(wsURL, nil)
+	if err != nil {
+		t.Fatalf("Failed to connect: %v", err)
+	}
+	defer conn.Close()
+
+	// Set pong handler
+	pongReceived := make(chan bool)
+	conn.SetPongHandler(func(string) error {
+		pongReceived <- true
+		return nil
+	})
+
+	// Send ping
+	if err := conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+		t.Fatalf("Failed to send ping: %v", err)
+	}
+
+	// Note: Echo handler doesn't send pong, so we just test ping sending works
+}
+
+// =============================================================================
+// CLOSE TESTS
+// =============================================================================
+
+func TestWebSocketClose(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(echoHandler))
+	defer server.Close()
+
+	wsURL := "ws" + strings.TrimPrefix(server.URL, "http")
+
+	conn, _, err := websocket.DefaultDialer.Dial(wsURL, nil)
+	if err != nil {
+		t.Fatalf("Failed to connect: %v", err)
+	}
+
+	// Send close message
+	err = conn.WriteMessage(websocket.CloseMessage, 
+		websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
+	if err != nil {
+		t.Fatalf("Failed to send close: %v", err)
+	}
+
+	conn.Close()
+}
+
+// =============================================================================
+// TIMEOUT TESTS
+// =============================================================================
+
+func TestWebSocketReadTimeout(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(echoHandler))
+	defer server.Close()
+
+	wsURL := "ws" + strings.TrimPrefix(server.URL, "http")
+
+	conn, _, err := websocket.DefaultDialer.Dial(wsURL, nil)
+	if err != nil {
+		t.Fatalf("Failed to connect: %v", err)
+	}
+	defer conn.Close()
+
+	// Set read deadline
+	conn.SetReadDeadline(time.Now().Add(50 * time.Millisecond))
+
+	// Try to read (should timeout)
+	_, _, err = conn.ReadMessage()
+	if err == nil {
+		t.Error("Expected timeout error")
+	}
+}
+
+// =============================================================================
+// BENCHMARK
+// =============================================================================
+
+func BenchmarkWebSocketEcho(b *testing.B) {
+	server := httptest.NewServer(http.HandlerFunc(echoHandler))
+	defer server.Close()
+
+	wsURL := "ws" + strings.TrimPrefix(server.URL, "http")
+
+	conn, _, err := websocket.DefaultDialer.Dial(wsURL, nil)
+	if err != nil {
+		b.Fatalf("Failed to connect: %v", err)
+	}
+	defer conn.Close()
+
+	message := []byte("benchmark message")
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		conn.WriteMessage(websocket.TextMessage, message)
+		conn.ReadMessage()
+	}
+}

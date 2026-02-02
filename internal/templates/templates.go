@@ -175,6 +175,10 @@ var (
 	lambdaMainTmpl                     = loadEmbedded("lambda_main.tmpl")
 	lambdaMakefileTmpl                 = loadEmbedded("lambda_makefile.tmpl")
 	lambdaSAMTmpl                      = loadEmbedded("lambda_sam.tmpl")
+	lambdaMiddlewareTmpl               = loadEmbedded("lambda_middleware.tmpl")
+	lambdaHandlerTestTmpl              = loadEmbedded("lambda_handler_test.tmpl")
+	lambdaSAMEnhancedTmpl              = loadEmbedded("lambda_sam_enhanced.tmpl")
+	lambdaLocalTmpl                    = loadEmbedded("lambda_local.tmpl")
 	learnBenchFuncTmpl                 = loadEmbedded("learn_bench_func.tmpl")
 	learnBenchTestTmpl                 = loadEmbedded("learn_bench_test.tmpl")
 	learnChannelsTmpl                  = loadEmbedded("learn_channels.tmpl")
@@ -280,6 +284,8 @@ var (
 	urlShortenerTestTmpl               = loadEmbedded("url_shortener_test.tmpl")
 	websocketClientTmpl                = loadEmbedded("websocket_client.tmpl")
 	websocketHTMLTmpl                  = loadEmbedded("websocket_html.tmpl")
+	goMicroserviceTestTmpl             = loadEmbedded("go_microservice_test.tmpl")
+	goWebsocketTestTmpl                = loadEmbedded("go_websocket_test.tmpl")
 	websocketHubTmpl                   = loadEmbedded("websocket_hub.tmpl")
 	websocketMainTmpl                  = loadEmbedded("websocket_main.tmpl")
 	// Debugging templates
@@ -796,6 +802,7 @@ func initBuiltInTemplates() {
 			},
 			Files: []FileTemplate{
 				{Path: "cmd/server/main.go", Content: microserviceMainTmpl},
+				{Path: "cmd/server/main_test.go", Content: goMicroserviceTestTmpl},
 				{Path: "internal/handler/handler.go", Content: microserviceHandlerTmpl},
 				{Path: "internal/middleware/logging.go", Content: microserviceLoggingTmpl},
 				{Path: "internal/health/health.go", Content: microserviceHealthTmpl},
@@ -817,6 +824,7 @@ func initBuiltInTemplates() {
 			Files: []FileTemplate{
 				{Path: "cmd/server/main.go", Content: websocketMainTmpl},
 				{Path: "internal/hub/hub.go", Content: websocketHubTmpl},
+				{Path: "internal/hub/hub_test.go", Content: goWebsocketTestTmpl},
 				{Path: "internal/client/client.go", Content: websocketClientTmpl},
 				{Path: "web/index.html", Content: websocketHTMLTmpl},
 				{Path: "README.md", Content: readmeTmpl},
@@ -850,12 +858,17 @@ func initBuiltInTemplates() {
 			Description: "AWS Lambda function with SAM",
 			Directories: []string{
 				"cmd/lambda",
+				"cmd/local",
 				"internal/handler",
+				"internal/middleware",
 			},
 			Files: []FileTemplate{
 				{Path: "cmd/lambda/main.go", Content: lambdaMainTmpl},
+				{Path: "cmd/local/main.go", Content: lambdaLocalTmpl},
 				{Path: "internal/handler/handler.go", Content: lambdaHandlerTmpl},
-				{Path: "template.yaml", Content: lambdaSAMTmpl},
+				{Path: "internal/handler/handler_test.go", Content: lambdaHandlerTestTmpl},
+				{Path: "internal/middleware/middleware.go", Content: lambdaMiddlewareTmpl},
+				{Path: "template.yaml", Content: lambdaSAMEnhancedTmpl},
 				{Path: "Makefile", Content: lambdaMakefileTmpl},
 				{Path: "README.md", Content: readmeTmpl},
 				{Path: ".gitignore", Content: gitignoreGoTmpl},
