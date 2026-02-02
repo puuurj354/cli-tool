@@ -1,0 +1,60 @@
+package main
+
+import (
+	"database/sql"
+	"fmt"
+	"log"
+
+	_ "github.com/mattn/go-sqlite3" // Driver
+)
+
+type User struct {
+	ID    int
+	Name  string
+	Email string
+}
+
+func main() {
+	// Connect
+	db, err := sql.Open("sqlite3", "./test.db")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+	// 1. Create Table
+	createTable := `CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, name TEXT, email TEXT);`
+	if _, err := db.Exec(createTable); err != nil {
+		log.Fatal(err)
+	}
+
+	// 2. Insert (Create)
+	stmt, _ := db.Prepare("INSERT INTO users(name, email) VALUES(?, ?)")
+	res, _ := stmt.Exec("John Doe", "john@example.com")
+	id, _ := res.LastInsertId()
+	fmt.Printf("Created user with ID: %d\n", id)
+
+	// 3. Query Row (Read One)
+	var u User
+	err = db.QueryRow("SELECT id, name, email FROM users WHERE id = ?", id).Scan(&u.ID, &u.Name, &u.Email)
+	fmt.Printf("Read User: %+v\n", u)
+
+	// 4. Query (Read Many)
+	rows, _ := db.Query("SELECT id, name, email FROM users")
+	defer rows.Close()
+	for rows.Next() {
+		var user User
+		rows.Scan(&user.ID, &user.Name, &user.Email)
+		fmt.Printf("Found: %s\n", user.Name)
+	}
+
+	// 5. Transaction
+	tx, _ := db.Begin()
+	_, err = tx.Exec("UPDATE users SET name = ? WHERE id = ?", "Jane Doe", id)
+	if err != nil {
+		tx.Rollback()
+	} else {
+		tx.Commit()
+		fmt.Println("Transaction committed: Name updated")
+	}
+}

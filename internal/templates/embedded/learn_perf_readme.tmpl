@@ -1,0 +1,18 @@
+# Learn Go Performance
+
+Techniques for measuring and improving code performance.
+
+## 1. Benchmarking (`benchmarking/`)
+Using `testing.B` to measure execution time and allocations.
+Run: `go test -bench . -benchmem`
+
+## 2. Profiling (`profiling/`)
+Using `net/http/pprof` to inspect running applications.
+1. Run `go run main.go`
+2. Visit `http://localhost:6060/debug/pprof/`
+3. Analyze CPU: `go tool pprof -http=:8081 http://localhost:6060/debug/pprof/profile?seconds=5`
+
+## 3. Optimizations (`optimization/`)
+Demonstrates common wins:
+- Pre-allocating slices (`make([]int, 0, n)`) avoids resize allocs.
+- `strings.Builder` is heavily optimized compared to `+=`.

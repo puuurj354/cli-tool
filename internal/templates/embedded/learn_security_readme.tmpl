@@ -1,0 +1,24 @@
+# Learn Go Security
+
+This module covers essential security practices for Go developers.
+
+## Contents
+
+### 1. SQL Injection (`vulnerabilities/sql_injection`)
+Demonstrates why you should **always** use parameterized queries (`?`, `$1`) instead of `fmt.Sprintf` for building SQL.
+
+### 2. XSS (Cross Site Scripting) (`vulnerabilities/xss`)
+Shows how Go's `html/template` package automatically protects you, and how incorrect usage (like `template.HTML`) opens holes.
+
+### 3. Password Hashing (`auth/hashing`)
+Uses `golang.org/x/crypto/argon2`, the modern standard for password hashing. Never store plain text or simple SHA1/MD5 hashes!
+
+### 4. Secure Headers (`config/secure`)
+Middleware to add crucial HTTP security headers like HSTS, CSP, and X-Content-Type-Options.
+
+## Running Examples
+
+```bash
+cd vulnerabilities/sql_injection
+go run main.go
+```

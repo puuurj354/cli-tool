@@ -1,0 +1,44 @@
+package main
+
+import (
+	"database/sql"
+	"fmt"
+	"log"
+	
+	_ "github.com/mattn/go-sqlite3"
+)
+
+func main() {
+	db, err := sql.Open("sqlite3", ":memory:")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+	// Setup table
+	db.Exec("CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT, email TEXT)")
+	db.Exec("INSERT INTO users (name, email) VALUES ('Alice', 'alice@example.com')")
+
+	userInput := "' OR '1'='1" // Malicious Input
+
+	// ❌ VULNERABLE: Direct string concatenation
+	fmt.Println("--- VULNERABLE QUERY ---")
+	queryBad := fmt.Sprintf("SELECT * FROM users WHERE name = '%s'", userInput)
+	fmt.Println("Executing:", queryBad)
+	// db.Query(queryBad) // This would return all users!
+
+	// ✅ SECURE: Parameterized Query
+	fmt.Println("\n--- SECURE QUERY ---")
+	queryGood := "SELECT * FROM users WHERE name = ?"
+	fmt.Println("Executing:", queryGood, "with param:", userInput)
+	
+	rows, _ := db.Query(queryGood, userInput)
+	if rows != nil {
+		defer rows.Close()
+		count := 0
+		for rows.Next() {
+			count++
+		}
+		fmt.Printf("Results found: %d (Expected: 0)\n", count)
+	}
+}

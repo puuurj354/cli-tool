@@ -1,0 +1,43 @@
+package main
+
+import (
+	"html/template"
+	"net/http"
+)
+
+// ❌ VULNERABLE: Bypassing Go's auto-escaping
+// Never use template.HTML with untrusted input!
+const badTmpl = `
+<h1>Vulnerable</h1>
+<div>{{.Content}}</div> 
+`
+
+// ✅ SECURE: Using standard escaping
+// Go html/template automatically context-escapes strings
+const goodTmpl = `
+<h1>Secure</h1>
+<div>{{.Content}}</div>
+`
+
+func main() {
+	// Attacker script
+	maliciousInput := `<script>alert("XSS")</script>`
+
+	http.HandleFunc("/vulnerable", func(w http.ResponseWriter, r *http.Request) {
+		t := template.Must(template.New("bad").Parse(badTmpl))
+		// DANGER: We are explicitly telling Go this string is safe HTML
+		t.Execute(w, map[string]interface{}{
+			"Content": template.HTML(maliciousInput), 
+		})
+	})
+
+	http.HandleFunc("/secure", func(w http.ResponseWriter, r *http.Request) {
+		t := template.Must(template.New("good").Parse(goodTmpl))
+		// SAFE: Go will render this as &lt;script&gt;...
+		t.Execute(w, map[string]interface{}{
+			"Content": maliciousInput, 
+		})
+	})
+
+	http.ListenAndServe(":8080", nil)
+}

@@ -1,0 +1,36 @@
+package main
+
+import (
+    "fmt"
+    "log"
+    "time"
+
+    "golang.org/x/crypto/argon2"
+)
+
+// Config for Argon2id
+// These params should be tuned based on your security requirements and hardware
+const (
+    timeCost   = 1         // Iterations
+    memoryCost = 64 * 1024 // 64MB memory
+    parallelism = 4        // Number of threads
+    keyLength  = 32        // Key length
+)
+
+func main() {
+    password := "my_secret_password_123!"
+    salt := []byte("unique_random_salt_per_user") // In prod, generate cryptographically random salt
+
+    fmt.Println("Hashing password using Argon2id...")
+    start := time.Now()
+
+    // Generate Hash
+    hash := argon2.IDKey([]byte(password), salt, timeCost, memoryCost, parallelism, keyLength)
+
+    duration := time.Since(start)
+    fmt.Printf("Hash generated in %v\n", duration)
+    fmt.Printf("Hex: %x\n", hash)
+
+    // Verification (concept only - in prod you'd compare constant time)
+    // To verify: Store salt & params, re-hash input, compare with stored hash
+}

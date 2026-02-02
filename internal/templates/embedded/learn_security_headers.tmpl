@@ -1,0 +1,37 @@
+package main
+
+import (
+    "fmt"
+    "net/http"
+)
+
+func secureHeadersMiddleware(next http.Handler) http.Handler {
+    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        // Prevent MIME type sniffing
+        w.Header().Set("X-Content-Type-Options", "nosniff")
+        
+        // Prevent clickjacking
+        w.Header().Set("X-Frame-Options", "DENY")
+        
+        // Enable XSS filtering in browser
+        w.Header().Set("X-XSS-Protection", "1; mode=block")
+        
+        // Content Security Policy (Strict)
+        w.Header().Set("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self'")
+        
+        // Transport Security (HSTS) - enforce HTTPS
+        w.Header().Set("Strict-Transport-Security", "max-age=63072000; includeSubDomains")
+
+        next.ServeHTTP(w, r)
+    })
+}
+
+func main() {
+    mux := http.NewServeMux()
+    mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+        fmt.Fprintf(w, "Check the response headers!")
+    })
+
+    fmt.Println("Server running on :8080")
+    http.ListenAndServe(":8080", secureHeadersMiddleware(mux))
+}

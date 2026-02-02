@@ -1,0 +1,44 @@
+package main
+
+import (
+	"fmt"
+	"log"
+
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
+)
+
+// GORM Model
+type Product struct {
+	gorm.Model // Adds ID, CreatedAt, UpdatedAt, DeletedAt
+	Code  string
+	Price uint
+}
+
+func main() {
+	// Connect
+	db, err := gorm.Open(sqlite.Open("gorm.db"), &gorm.Config{})
+	if err != nil {
+		log.Fatal("failed to connect database")
+	}
+
+	// Migrate the schema
+	db.AutoMigrate(&Product{})
+
+	// Create
+	db.Create(&Product{Code: "D42", Price: 100})
+	fmt.Println("Created product D42")
+
+	// Read
+	var product Product
+	db.First(&product, "code = ?", "D42") 
+	fmt.Printf("Read: %+v\n", product)
+
+	// Update
+	db.Model(&product).Update("Price", 200)
+	fmt.Println("Updated price to 200")
+
+	// Delete
+	db.Delete(&product, product.ID)
+	fmt.Println("Deleted product")
+}

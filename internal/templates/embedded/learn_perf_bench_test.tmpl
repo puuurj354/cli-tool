@@ -1,0 +1,56 @@
+package optimization
+
+import (
+	"bytes"
+	"strings"
+	"testing"
+)
+
+// Scenario: Building a large string
+
+// Approach 1: Bad (creates garbage at every step)
+func ConcatString(n int) string {
+	s := ""
+	for i := 0; i < n; i++ {
+		s += "a"
+	}
+	return s
+}
+
+// Approach 2: Better (using buffer, but growing dynamically)
+func BufferString(n int) string {
+	var b bytes.Buffer
+	for i := 0; i < n; i++ {
+		b.WriteString("a")
+	}
+	return b.String()
+}
+
+// Approach 3: Best (pre-allocated builder)
+func BuilderString(n int) string {
+	var b strings.Builder
+	b.Grow(n) // Allocating memory exactly once
+	for i := 0; i < n; i++ {
+		b.WriteString("a")
+	}
+	return b.String()
+}
+
+// Benchmarks
+func BenchmarkConcat(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		ConcatString(1000)
+	}
+}
+
+func BenchmarkBuffer(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		BufferString(1000)
+	}
+}
+
+func BenchmarkBuilder(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		BuilderString(1000)
+	}
+}

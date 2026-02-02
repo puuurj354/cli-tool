@@ -1,0 +1,35 @@
+package optimization
+
+import "testing"
+
+// Scenario: Appending to slices
+
+// Bad: Slice grows multiple times (allocations)
+func SliceNoCap(n int) []int {
+    var out []int
+    for i := 0; i < n; i++ {
+        out = append(out, i)
+    }
+    return out
+}
+
+// Good: Slice allocated once
+func SliceWithCap(n int) []int {
+    out := make([]int, 0, n)
+    for i := 0; i < n; i++ {
+        out = append(out, i)
+    }
+    return out
+}
+
+func BenchmarkSliceNoCap(b *testing.B) {
+    for i := 0; i < b.N; i++ {
+        SliceNoCap(10000)
+    }
+}
+
+func BenchmarkSliceWithCap(b *testing.B) {
+    for i := 0; i < b.N; i++ {
+        SliceWithCap(10000)
+    }
+}

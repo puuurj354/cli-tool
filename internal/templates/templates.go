@@ -271,42 +271,57 @@ var (
 	learnFrontendFetchIndexTmpl        = loadEmbedded("learn_frontend_fetch_index.tmpl")
 	learnFrontendFetchStyleTmpl        = loadEmbedded("learn_frontend_fetch_style.tmpl")
 	learnFrontendFetchScriptTmpl       = loadEmbedded("learn_frontend_fetch_script.tmpl")
-	microserviceDockerfileTmpl         = loadEmbedded("microservice_dockerfile.tmpl")
-	microserviceHandlerTmpl            = loadEmbedded("microservice_handler.tmpl")
-	microserviceHealthTmpl             = loadEmbedded("microservice_health.tmpl")
-	microserviceLoggingTmpl            = loadEmbedded("microservice_logging.tmpl")
-	microserviceMainTmpl               = loadEmbedded("microservice_main.tmpl")
-	microserviceMakefileTmpl           = loadEmbedded("microservice_makefile.tmpl")
-	miniProjectReadmeTmpl              = loadEmbedded("mini_project_readme.tmpl")
-	monorepoAPITmpl                    = loadEmbedded("monorepo_api.tmpl")
-	monorepoConfigTmpl                 = loadEmbedded("monorepo_config.tmpl")
-	monorepoLoggerTmpl                 = loadEmbedded("monorepo_logger.tmpl")
-	monorepoMakefileTmpl               = loadEmbedded("monorepo_makefile.tmpl")
-	monorepoWorkerTmpl                 = loadEmbedded("monorepo_worker.tmpl")
-	redisCacheTmpl                     = loadEmbedded("redis_cache.tmpl")
-	redisDockerComposeTmpl             = loadEmbedded("redis_docker_compose.tmpl")
-	redisMainTmpl                      = loadEmbedded("redis_main.tmpl")
-	redisPubSubTmpl                    = loadEmbedded("redis_pub_sub.tmpl")
-	readmeTmpl                         = loadEmbedded("readme.tmpl")
-	refactoring01BeforeTmpl            = loadEmbedded("refactoring01_before.tmpl")
-	refactoring01HintsTmpl             = loadEmbedded("refactoring01_hints.tmpl")
-	refactoring02BeforeTmpl            = loadEmbedded("refactoring02_before.tmpl")
-	refactoring02HintsTmpl             = loadEmbedded("refactoring02_hints.tmpl")
-	refactoring03BeforeTmpl            = loadEmbedded("refactoring03_before.tmpl")
-	refactoring03HintsTmpl             = loadEmbedded("refactoring03_hints.tmpl")
-	refactoringReadmeTmpl              = loadEmbedded("refactoring_readme.tmpl")
-	todoCliMainTmpl                    = loadEmbedded("todo_cli_main.tmpl")
-	todoCliReadmeTmpl                  = loadEmbedded("todo_cli_readme.tmpl")
-	todoCliTestTmpl                    = loadEmbedded("todo_cli_test.tmpl")
-	urlShortenerMainTmpl               = loadEmbedded("url_shortener_main.tmpl")
-	urlShortenerReadmeTmpl             = loadEmbedded("url_shortener_readme.tmpl")
-	urlShortenerTestTmpl               = loadEmbedded("url_shortener_test.tmpl")
-	websocketClientTmpl                = loadEmbedded("websocket_client.tmpl")
-	websocketHTMLTmpl                  = loadEmbedded("websocket_html.tmpl")
-	goMicroserviceTestTmpl             = loadEmbedded("go_microservice_test.tmpl")
-	goWebsocketTestTmpl                = loadEmbedded("go_websocket_test.tmpl")
-	websocketHubTmpl                   = loadEmbedded("websocket_hub.tmpl")
-	websocketMainTmpl                  = loadEmbedded("websocket_main.tmpl")
+	// Advanced Learning
+	learnSecurityReadmeTmpl  = loadEmbedded("learn_security_readme.tmpl")
+	learnSecurityHashTmpl    = loadEmbedded("learn_security_hash.tmpl")
+	learnSecurityHeadersTmpl = loadEmbedded("learn_security_headers.tmpl")
+	learnSecuritySQLTmpl     = loadEmbedded("learn_security_sql.tmpl")
+	learnSecurityXSSTmpl     = loadEmbedded("learn_security_xss.tmpl")
+	learnDBReadmeTmpl        = loadEmbedded("learn_db_readme.tmpl")
+	learnDBSQLMainTmpl       = loadEmbedded("learn_db_sql_main.tmpl")
+	learnDBGormMainTmpl      = loadEmbedded("learn_db_gorm_main.tmpl")
+	learnDBSQLCTmpl          = loadEmbedded("learn_db_sqlc.tmpl")
+	learnPerfReadmeTmpl      = loadEmbedded("learn_perf_readme.tmpl")
+	learnPerfBenchTestTmpl   = loadEmbedded("learn_perf_bench_test.tmpl")
+	learnPerfPprofTmpl       = loadEmbedded("learn_perf_pprof.tmpl")
+	learnPerfOptTmpl         = loadEmbedded("learn_perf_opt.tmpl")
+
+	microserviceDockerfileTmpl = loadEmbedded("microservice_dockerfile.tmpl")
+	microserviceHandlerTmpl    = loadEmbedded("microservice_handler.tmpl")
+	microserviceHealthTmpl     = loadEmbedded("microservice_health.tmpl")
+	microserviceLoggingTmpl    = loadEmbedded("microservice_logging.tmpl")
+	microserviceMainTmpl       = loadEmbedded("microservice_main.tmpl")
+	microserviceMakefileTmpl   = loadEmbedded("microservice_makefile.tmpl")
+	miniProjectReadmeTmpl      = loadEmbedded("mini_project_readme.tmpl")
+	monorepoAPITmpl            = loadEmbedded("monorepo_api.tmpl")
+	monorepoConfigTmpl         = loadEmbedded("monorepo_config.tmpl")
+	monorepoLoggerTmpl         = loadEmbedded("monorepo_logger.tmpl")
+	monorepoMakefileTmpl       = loadEmbedded("monorepo_makefile.tmpl")
+	monorepoWorkerTmpl         = loadEmbedded("monorepo_worker.tmpl")
+	redisCacheTmpl             = loadEmbedded("redis_cache.tmpl")
+	redisDockerComposeTmpl     = loadEmbedded("redis_docker_compose.tmpl")
+	redisMainTmpl              = loadEmbedded("redis_main.tmpl")
+	redisPubSubTmpl            = loadEmbedded("redis_pub_sub.tmpl")
+	readmeTmpl                 = loadEmbedded("readme.tmpl")
+	refactoring01BeforeTmpl    = loadEmbedded("refactoring01_before.tmpl")
+	refactoring01HintsTmpl     = loadEmbedded("refactoring01_hints.tmpl")
+	refactoring02BeforeTmpl    = loadEmbedded("refactoring02_before.tmpl")
+	refactoring02HintsTmpl     = loadEmbedded("refactoring02_hints.tmpl")
+	refactoring03BeforeTmpl    = loadEmbedded("refactoring03_before.tmpl")
+	refactoring03HintsTmpl     = loadEmbedded("refactoring03_hints.tmpl")
+	refactoringReadmeTmpl      = loadEmbedded("refactoring_readme.tmpl")
+	todoCliMainTmpl            = loadEmbedded("todo_cli_main.tmpl")
+	todoCliReadmeTmpl          = loadEmbedded("todo_cli_readme.tmpl")
+	todoCliTestTmpl            = loadEmbedded("todo_cli_test.tmpl")
+	urlShortenerMainTmpl       = loadEmbedded("url_shortener_main.tmpl")
+	urlShortenerReadmeTmpl     = loadEmbedded("url_shortener_readme.tmpl")
+	urlShortenerTestTmpl       = loadEmbedded("url_shortener_test.tmpl")
+	websocketClientTmpl        = loadEmbedded("websocket_client.tmpl")
+	websocketHTMLTmpl          = loadEmbedded("websocket_html.tmpl")
+	goMicroserviceTestTmpl     = loadEmbedded("go_microservice_test.tmpl")
+	goWebsocketTestTmpl        = loadEmbedded("go_websocket_test.tmpl")
+	websocketHubTmpl           = loadEmbedded("websocket_hub.tmpl")
+	websocketMainTmpl          = loadEmbedded("websocket_main.tmpl")
 	// Debugging templates
 	debugReadmeTmpl        = loadEmbedded("debug_readme.tmpl")
 	debugPrintMainTmpl     = loadEmbedded("debug_print_main.tmpl")
@@ -806,6 +821,69 @@ func initBuiltInTemplates() {
 				{Path: "behavioral/observer_test.go", Content: learnPatternsObserverTestTmpl},
 				{Path: "behavioral/strategy.go", Content: learnPatternsStrategyTmpl},
 				{Path: "behavioral/strategy_test.go", Content: learnPatternsStrategyTestTmpl},
+				{Path: ".gitignore", Content: gitignoreGoTmpl},
+			},
+		},
+		"learn-security": {
+			Name:        "learn-security",
+			Description: "Learn Go security (SQL injection, XSS, hashing)",
+			Directories: []string{
+				"vulnerabilities/sql_injection",
+				"vulnerabilities/xss",
+				"auth/hashing",
+				"config/secure",
+			},
+			Files: []FileTemplate{
+				{Path: "README.md", Content: learnSecurityReadmeTmpl},
+				{Path: "vulnerabilities/sql_injection/main.go", Content: learnSecuritySQLTmpl},
+				{Path: "vulnerabilities/xss/main.go", Content: learnSecurityXSSTmpl},
+				{Path: "auth/hashing/main.go", Content: learnSecurityHashTmpl},
+				{Path: "config/secure/middleware.go", Content: learnSecurityHeadersTmpl},
+				{Path: "go.mod", Content: `module learn-security
+go 1.22
+require (
+	golang.org/x/crypto v0.17.0
+	github.com/mattn/go-sqlite3 v1.14.19
+)`},
+				{Path: ".gitignore", Content: gitignoreGoTmpl},
+			},
+		},
+		"learn-database": {
+			Name:        "learn-database",
+			Description: "Compare Database approaches (Raw SQL, GORM, sqlc)",
+			Directories: []string{
+				"raw_sql",
+				"gorm",
+				"sqlc",
+			},
+			Files: []FileTemplate{
+				{Path: "README.md", Content: learnDBReadmeTmpl},
+				{Path: "raw_sql/main.go", Content: learnDBSQLMainTmpl},
+				{Path: "gorm/main.go", Content: learnDBGormMainTmpl},
+				{Path: "sqlc/schema.sql", Content: learnDBSQLCTmpl},
+				{Path: "go.mod", Content: `module learn-database
+go 1.22
+require (
+	github.com/mattn/go-sqlite3 v1.14.19
+	gorm.io/gorm v1.25.5
+	gorm.io/driver/sqlite v1.5.0
+)`},
+				{Path: ".gitignore", Content: gitignoreGoTmpl},
+			},
+		},
+		"learn-performance": {
+			Name:        "learn-performance",
+			Description: "Learn Benchmarking, Profiling & Optimization",
+			Directories: []string{
+				"benchmarking",
+				"profiling",
+				"optimization",
+			},
+			Files: []FileTemplate{
+				{Path: "README.md", Content: learnPerfReadmeTmpl},
+				{Path: "benchmarking/concat_test.go", Content: learnPerfBenchTestTmpl},
+				{Path: "profiling/main.go", Content: learnPerfPprofTmpl},
+				{Path: "optimization/slice_test.go", Content: learnPerfOptTmpl},
 				{Path: ".gitignore", Content: gitignoreGoTmpl},
 			},
 		},

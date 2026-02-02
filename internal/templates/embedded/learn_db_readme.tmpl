@@ -1,0 +1,20 @@
+# Learn Go Databases
+
+Compare three popular approaches to database interaction in Go.
+
+## 1. Raw SQL (`raw_sql/`)
+Using the standard library `database/sql`.
+- **Pros**: Full control, no magic, best performance.
+- **Cons**: Boilerplate (Scan), writing strings for queries.
+
+## 2. GORM (`gorm/`)
+A full-featured ORM.
+- **Pros**: Rapid development, handling associations, auto-migration.
+- **Cons**: Reflection overhead, complex queries can be harder to optimize.
+
+## 3. SQLC (`sqlc/`)
+Type-safe code generation from SQL.
+- **Pros**: Catch errors at compile time, type-safe structs, fast.
+- **Cons**: Requires external CLI tool definition.
+
+**Note**: To run the SQLC example, you must install the sqlc CLI tool (`go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest`) and run `sqlc generate`.
