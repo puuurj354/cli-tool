@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
+	"github.com/purnama/scaffold/internal/components"
 	"github.com/purnama/scaffold/internal/config"
 	"github.com/purnama/scaffold/internal/generator"
 	"github.com/purnama/scaffold/internal/templates"
@@ -131,7 +132,32 @@ Examples:
 		RunE:  runConfig,
 	}
 
-	rootCmd.AddCommand(initCmd, listCmd, infoCmd, configCmd)
+	addCmd := &cobra.Command{
+		Use:   "add <component>",
+		Short: "Add component to existing project",
+		Long: `Add reusable components to an existing project.
+
+Available Components:
+  dockerfile       Multi-stage Dockerfile for Go applications
+  makefile         Common Makefile targets (build, test, lint, run)
+  github-actions   GitHub Actions CI workflow (test, lint, build)
+  middleware       HTTP middleware collection (logging, CORS, recovery, rate-limit)
+  config           Environment-based configuration with defaults
+  docker-compose   Docker Compose with PostgreSQL, Redis, and app
+  gitignore        Go-specific .gitignore file
+  readme           Project README template with badges and sections
+
+Examples:
+  scaffold add dockerfile       # Add multi-stage Dockerfile
+  scaffold add middleware       # Add HTTP middleware collection
+  scaffold add github-actions   # Add CI workflow
+  scaffold add dockerfile --force  # Overwrite existing files`,
+		Args: cobra.ExactArgs(1),
+		RunE: runAdd,
+	}
+	addCmd.Flags().BoolVar(&force, "force", false, "Overwrite existing files")
+
+	rootCmd.AddCommand(initCmd, listCmd, infoCmd, configCmd, addCmd)
 
 	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)
@@ -303,4 +329,45 @@ func valueOrDefault(val, def string) string {
 		return def
 	}
 	return val
+}
+
+// runAdd handles the add command for adding components to existing projects
+func runAdd(cmd *cobra.Command, args []string) error {
+	componentName := args[0]
+
+	// Get current working directory
+	cwd, err := os.Getwd()
+	if err != nil {
+		return fmt.Errorf("failed to get current directory: %w", err)
+	}
+
+	// Check if component exists
+	comp, found := components.GetComponent(componentName)
+	if !found {
+		fmt.Printf("Error: Unknown component '%s'\n\n", componentName)
+		fmt.Println("Available components:")
+		for _, c := range components.GetAllComponents() {
+			fmt.Printf("  %-15s  %s\n", c.Name, c.Description)
+		}
+		return fmt.Errorf("component not found")
+	}
+
+	// Add the component
+	fmt.Printf("Adding component: %s\n", titleStyle.Render(comp.Name))
+	fmt.Printf("Description: %s\n\n", comp.Description)
+
+	err = components.AddComponent(cwd, componentName, force)
+	if err != nil {
+		return err
+	}
+
+	// Show created files
+	fmt.Println(categoryStyle.Render("Created files:"))
+	for _, f := range comp.Files {
+		fmt.Printf("  ✓ %s\n", f.Path)
+	}
+	fmt.Println()
+	fmt.Println(dimStyle.Render("Tip: Review TODO comments in generated files for customization"))
+
+	return nil
 }

@@ -1,0 +1,86 @@
+// =============================================================================
+// Rate Limit Middleware
+// =============================================================================
+// Simple in-memory rate limiter using token bucket algorithm
+// TODO: For production, use Redis-based rate limiting for distributed systems
+
+package middleware
+
+import (
+	"net/http"
+	"sync"
+	"time"
+)
+
+// RateLimiter implements a simple token bucket rate limiter
+type RateLimiter struct {
+	mu       sync.Mutex
+	tokens   map[string]int
+	capacity int       // Max tokens per client
+	refill   int       // Tokens added per interval
+	interval time.Duration
+}
+
+// NewRateLimiter creates a new rate limiter
+// capacity: max requests allowed in the interval
+// refill: tokens to add per interval
+func NewRateLimiter(capacity, refill int, interval time.Duration) *RateLimiter {
+	rl := &RateLimiter{
+		tokens:   make(map[string]int),
+		capacity: capacity,
+		refill:   refill,
+		interval: interval,
+	}
+
+	// Start refill goroutine
+	go rl.refillTokens()
+
+	return rl
+}
+
+func (rl *RateLimiter) refillTokens() {
+	ticker := time.NewTicker(rl.interval)
+	for range ticker.C {
+		rl.mu.Lock()
+		for key := range rl.tokens {
+			rl.tokens[key] = min(rl.tokens[key]+rl.refill, rl.capacity)
+		}
+		rl.mu.Unlock()
+	}
+}
+
+// Allow checks if a request is allowed for the given key
+func (rl *RateLimiter) Allow(key string) bool {
+	rl.mu.Lock()
+	defer rl.mu.Unlock()
+
+	// Initialize tokens for new clients
+	if _, exists := rl.tokens[key]; !exists {
+		rl.tokens[key] = rl.capacity
+	}
+
+	// Check if tokens available
+	if rl.tokens[key] > 0 {
+		rl.tokens[key]--
+		return true
+	}
+
+	return false
+}
+
+// RateLimit returns a rate limiting middleware
+func RateLimit(limiter *RateLimiter) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			// Use IP as rate limit key
+			key := r.RemoteAddr
+
+			if !limiter.Allow(key) {
+				http.Error(w, "Too Many Requests", http.StatusTooManyRequests)
+				return
+			}
+
+			next.ServeHTTP(w, r)
+		})
+	}
+}
