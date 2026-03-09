@@ -1,0 +1,128 @@
+package main
+
+import (
+	"bufio"
+	"encoding/json"
+	"fmt"
+	"io"
+	"os"
+	"strings"
+)
+
+// ---- File I/O ----
+
+// writeFile writes content to a temp file, demonstrating defensive error handling.
+func writeFile(name, content string) error {
+	f, err := os.Create(name)
+	if err != nil {
+		return fmt.Errorf("writeFile: cannot create %s: %w", name, err)
+	}
+	defer f.Close()
+
+	if _, err := io.WriteString(f, content); err != nil {
+		return fmt.Errorf("writeFile: write failed: %w", err)
+	}
+	return nil
+}
+
+// readLines reads all lines from a file using a buffered scanner.
+func readLines(name string) ([]string, error) {
+	f, err := os.Open(name)
+	if err != nil {
+		return nil, fmt.Errorf("readLines: open %s: %w", name, err)
+	}
+	defer f.Close()
+
+	var lines []string
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+		lines = append(lines, scanner.Text())
+	}
+	if err := scanner.Err(); err != nil {
+		return nil, fmt.Errorf("readLines: scan: %w", err)
+	}
+	return lines, nil
+}
+
+// ---- JSON encoding ----
+
+type Person struct {
+	Name string `json:"name"`
+	Age  int    `json:"age"`
+}
+
+func encodeJSON(v any) (string, error) {
+	data, err := json.MarshalIndent(v, "", "  ")
+	if err != nil {
+		return "", fmt.Errorf("encodeJSON: %w", err)
+	}
+	return string(data), nil
+}
+
+func decodeJSON(raw string, dest any) error {
+	if err := json.Unmarshal([]byte(raw), dest); err != nil {
+		return fmt.Errorf("decodeJSON: %w", err)
+	}
+	return nil
+}
+
+// ---- strings.Builder (efficient string building) ----
+
+func buildReport(names []string) string {
+	var sb strings.Builder
+	sb.WriteString("Names:\n")
+	for i, name := range names {
+		fmt.Fprintf(&sb, "  %d. %s\n", i+1, name)
+	}
+	return sb.String()
+}
+
+func main() {
+	// --- File I/O ---
+	tmpFile := os.TempDir() + "/go-learn-io.txt"
+	content := "Line 1\nLine 2\nLine 3\n"
+
+	if err := writeFile(tmpFile, content); err != nil {
+		fmt.Fprintln(os.Stderr, "Error:", err)
+		os.Exit(1)
+	}
+
+	lines, err := readLines(tmpFile)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "Error:", err)
+		os.Exit(1)
+	}
+
+	fmt.Println("Lines read:")
+	for _, l := range lines {
+		fmt.Println(" ", l)
+	}
+
+	// Clean up temp file
+	os.Remove(tmpFile)
+
+	// --- JSON ---
+	people := []Person{
+		{Name: "Alice", Age: 30},
+		{Name: "Bob", Age: 25},
+	}
+
+	jsonStr, err := encodeJSON(people)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "JSON encode error:", err)
+		return
+	}
+	fmt.Println("\nEncoded JSON:")
+	fmt.Println(jsonStr)
+
+	var decoded []Person
+	if err := decodeJSON(jsonStr, &decoded); err != nil {
+		fmt.Fprintln(os.Stderr, "JSON decode error:", err)
+		return
+	}
+	fmt.Printf("\nDecoded: %+v\n", decoded)
+
+	// --- String building ---
+	report := buildReport([]string{"Alice", "Bob", "Charlie"})
+	fmt.Println("\n" + report)
+}

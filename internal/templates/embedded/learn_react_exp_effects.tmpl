@@ -1,0 +1,116 @@
+/**
+ * Experiment 03: Effects
+ *
+ * Learn: useEffect hook, cleanup functions, dependency arrays, timers.
+ */
+
+import { useState, useEffect, useRef } from 'react'
+
+export const title = 'Effects (useEffect)'
+export const description = 'Side effects, cleanup, and dependency arrays'
+
+/* ---- Timer with cleanup ---- */
+function Timer() {
+  const [seconds, setSeconds] = useState(0)
+  const [running, setRunning] = useState(false)
+
+  useEffect(() => {
+    if (!running) return
+
+    const id = setInterval(() => {
+      setSeconds((s) => s + 1)
+    }, 1000)
+
+    // Cleanup: stops the interval when running changes or component unmounts
+    return () => clearInterval(id)
+  }, [running])
+
+  return (
+    <div className="demo-section">
+      <h3>⏱ Timer (with cleanup)</h3>
+      <p style={{ fontSize: '2rem', fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>
+        {String(Math.floor(seconds / 60)).padStart(2, '0')}:
+        {String(seconds % 60).padStart(2, '0')}
+      </p>
+      <div className="demo-row" style={{ marginTop: 8 }}>
+        <button className="btn" onClick={() => setRunning((r) => !r)}>
+          {running ? 'Pause' : 'Start'}
+        </button>
+        <button className="btn btn-outline" onClick={() => { setRunning(false); setSeconds(0) }}>
+          Reset
+        </button>
+      </div>
+      <p className="hint">
+        💡 The <code>return () =&gt; clearInterval(id)</code> cleanup prevents memory leaks.
+        Open console to see React StrictMode fires effects twice in dev.
+      </p>
+    </div>
+  )
+}
+
+/* ---- Document title sync ---- */
+function TitleSync() {
+  const [title, setTitle] = useState('React Playground')
+
+  useEffect(() => {
+    const original = document.title
+    document.title = title
+    return () => { document.title = original }
+  }, [title])
+
+  return (
+    <div className="demo-section">
+      <h3>📝 Document Title Sync</h3>
+      <input
+        className="input"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        placeholder="Type to change browser tab title"
+        style={{ width: '100%', maxWidth: 400 }}
+      />
+      <p className="hint">
+        💡 Look at your browser tab — it updates as you type!
+      </p>
+    </div>
+  )
+}
+
+/* ---- Render counter (useRef) ---- */
+function RenderCounter() {
+  const [value, setValue] = useState('')
+  const renderCount = useRef(0)
+
+  useEffect(() => {
+    renderCount.current += 1
+  })
+
+  return (
+    <div className="demo-section">
+      <h3>🔢 Render Counter (useRef)</h3>
+      <input
+        className="input"
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        placeholder="Type to trigger re-renders"
+        style={{ width: '100%', maxWidth: 400 }}
+      />
+      <div className="output">
+        This component has rendered {renderCount.current} time(s)
+      </div>
+      <p className="hint">
+        💡 <code>useRef</code> persists values across renders without causing re-renders.
+        Unlike state, changing <code>.current</code> doesn't trigger a new render.
+      </p>
+    </div>
+  )
+}
+
+export default function EffectsExperiment() {
+  return (
+    <>
+      <Timer />
+      <TitleSync />
+      <RenderCounter />
+    </>
+  )
+}

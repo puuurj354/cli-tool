@@ -1,0 +1,26 @@
+# Learn Go I/O
+
+Learn how Go handles reading, writing, and encoding data.
+
+## Sections
+
+1. **file-io** - Reading and writing files with `os` and `bufio`
+2. **json-encoding** - Marshaling and unmarshaling with `encoding/json`
+3. **string-building** - Efficient string construction with `strings.Builder`
+
+## How to Run
+
+` + "```" + `bash
+cd file-io && go run main.go
+cd json-encoding && go test ./...
+` + "```" + `
+
+## Key Packages
+
+| Package | Purpose |
+|---------|---------|
+| `os` | Open, create, remove files |
+| `bufio` | Buffered reads/writes for performance |
+| `encoding/json` | JSON encode / decode |
+| `io` | Primitives: `Reader`, `Writer`, `WriteString` |
+| `strings` | `strings.Builder` for efficient concatenation |

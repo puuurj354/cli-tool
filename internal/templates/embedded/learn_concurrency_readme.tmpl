@@ -1,17 +1,33 @@
 # Learn Go Concurrency
 
-This project contains examples to learn Go concurrency patterns.
+Learn Go concurrency from basics to production-grade patterns.
 
 ## Sections
 
-1. **01-goroutines** - Basic goroutine usage
-2. **02-channels** - Channel communication
-3. **03-select** - Select statement for multiplexing
-4. **04-sync** - Synchronization primitives (Mutex, WaitGroup)
-5. **05-patterns** - Common concurrency patterns
+1. **01-goroutines** - Basic goroutine usage and scheduling
+2. **02-channels** - Channel communication (buffered, unbuffered, direction)
+3. **03-select** - Select statement for multiplexing channels
+4. **04-sync** - Synchronization primitives (Mutex, WaitGroup, atomic)
+5. **05-patterns** - Common concurrency patterns (pipeline, pub/sub)
+6. **06-worker-pool** - Worker pool to bound concurrency
+7. **07-pipeline** - Multi-stage data processing pipeline
+8. **08-fanout-fanin** - Fan-out and fan-in patterns
+9. **09-semaphore** - Rate-limiting and RWMutex
+10. **10-errgroup** - Propagate errors across goroutines & context cancellation
 
 ## How to Run
 
-```bash" + `
+` + "```" + `bash
 cd 01-goroutines && go run main.go
-```
+cd 06-worker-pool && go run main.go
+` + "```" + `
+
+## Key Concepts
+
+| Pattern | Use When |
+|---------|----------|
+| Worker Pool | Limit concurrent goroutines doing heavy work |
+| Pipeline | Transform data through sequential stages |
+| Fan-out/in | Spread one stream across many workers, merge results |
+| Semaphore | Limit # of goroutines accessing a resource |
+| ErrGroup | First-error-wins with automatic cancellation |

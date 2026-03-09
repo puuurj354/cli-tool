@@ -1,0 +1,73 @@
+# Learn React (TypeScript) Playground
+
+A **zero-config React playground** where you just create `.tsx` files and they auto-render.
+
+## Quick Start
+
+```bash
+npm install
+npm run dev
+```
+
+Open http://localhost:3000 — the app auto-discovers and lists all experiments.
+
+## How It Works
+
+Every `.tsx` file in `src/experiments/` is **auto-discovered** via Vite's `import.meta.glob`.
+You never need to update routes, imports, or config. Just create a file.
+
+### Creating a New Experiment
+
+Create a file in `src/experiments/`:
+
+```tsx
+// src/experiments/11-MyExperiment.tsx
+
+export const title = "My Experiment"
+export const description = "What I'm learning here"
+
+export default function MyExperiment() {
+  return <h2>Hello from my experiment!</h2>
+}
+```
+
+Save → it instantly appears in the sidebar via hot-reload! 🔥
+
+### Convention
+
+| Export | Type | Required | Purpose |
+|--------|------|----------|---------|
+| `default` | `React.ComponentType` | ✅ | The component to render |
+| `title` | `string` | ❌ | Display name in sidebar |
+| `description` | `string` | ❌ | Subtitle in sidebar |
+
+Files are sorted alphabetically — prefix with numbers (`01-`, `02-`) to control order.
+
+## Included Experiments
+
+| # | Topic | What You'll Learn |
+|---|-------|-------------------|
+| 01 | Hello World | JSX, props, conditional rendering |
+| 02 | State | `useState`, counters, objects |
+| 03 | Effects | `useEffect`, cleanup, `useRef` |
+| 04 | Events | Click, keyboard, TypeScript event types |
+| 05 | Lists & Keys | Dynamic lists, add/remove, key prop |
+| 06 | Forms | Controlled inputs, validation |
+| 07 | Custom Hooks | `useLocalStorage`, `useDebounce`, `useToggle` |
+| 08 | Context | `createContext`, Provider, theme toggle |
+| 09 | Debugging | Console strategies, render debugging |
+| 10 | Error Boundary | Catch crashes, fallback UI, recovery |
+
+## Features
+
+- 🔥 **Hot Reload** — edit a file, see changes instantly
+- 🔍 **Auto-Discovery** — new files appear automatically
+- 💥 **Error Boundary** — component crashes don't break the app
+- 🌙 **Dark Theme** — polished UI out of the box
+- 📝 **TypeScript** — type safety with helpful hints
+
+## Tech Stack
+
+- [Vite](https://vitejs.dev/) — fast dev server & build
+- [React 18](https://react.dev/) — UI library
+- [TypeScript](https://www.typescriptlang.org/) — type safety

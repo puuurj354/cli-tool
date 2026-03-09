@@ -1,0 +1,28 @@
+# Learn Go Structs
+
+Learn struct basics, embedding, method sets, and the functional options pattern.
+
+## Sections
+
+1. **basics** - Struct declaration, field access, Stringer interface
+2. **embedding** - Composition via embedded structs and promoted fields
+3. **method-override** - Overriding embedded methods with your own
+4. **tags** - Struct tags (`json`, `yaml`, etc.)
+5. **options** - Functional options pattern for flexible constructors
+6. **anonymous** - Anonymous struct literals for one-off data
+
+## How to Run
+
+` + "```" + `bash
+go run main.go
+go test ./...
+` + "```" + `
+
+## Key Concepts
+
+| Concept | When to Use |
+|---------|-------------|
+| Struct embedding | Prefer composition over inheritance |
+| Pointer receiver | When the method needs to mutate the struct |
+| Functional options | Flexible, extensible config / constructor APIs |
+| Struct tags | Metadata for reflection (JSON, YAML, DB ORM) |

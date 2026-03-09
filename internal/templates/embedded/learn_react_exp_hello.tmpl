@@ -1,0 +1,67 @@
+/**
+ * Experiment 01: Hello World
+ *
+ * Learn: JSX basics, components, props, and TypeScript typing.
+ */
+
+export const title = 'Hello World'
+export const description = 'JSX basics, components, and props'
+
+/* ---- Typed Props ---- */
+interface GreetingProps {
+  name: string
+  emoji?: string
+}
+
+function Greeting({ name, emoji = '👋' }: GreetingProps) {
+  return (
+    <p style={{ fontSize: '1.2rem' }}>
+      {emoji} Hello, <strong>{name}</strong>!
+    </p>
+  )
+}
+
+/* ---- Children Props ---- */
+function Card({ children, title }: { children: React.ReactNode; title: string }) {
+  return (
+    <div className="demo-section">
+      <h3>{title}</h3>
+      {children}
+    </div>
+  )
+}
+
+/* ---- Main Experiment ---- */
+export default function HelloWorld() {
+  const skills = ['React', 'TypeScript', 'Vite']
+
+  return (
+    <>
+      <Card title="Basic Props">
+        <Greeting name="World" />
+        <Greeting name="React Learner" emoji="🚀" />
+      </Card>
+
+      <Card title="JSX Expressions">
+        <p>2 + 2 = <strong>{2 + 2}</strong></p>
+        <p>Current date: <strong>{new Date().toLocaleDateString()}</strong></p>
+        <p>
+          Skills:{' '}
+          {skills.map((s) => (
+            <span key={s} className="tag">{s}</span>
+          ))}
+        </p>
+      </Card>
+
+      <Card title="Conditional Rendering">
+        <p>{skills.length > 0 ? '✅ You have skills!' : '❌ No skills yet'}</p>
+        {skills.includes('React') && <p>🎉 React is in your skillset!</p>}
+      </Card>
+
+      <p className="hint">
+        💡 Try editing this file — add a new Greeting or change the props.
+        The changes appear instantly via hot-reload.
+      </p>
+    </>
+  )
+}

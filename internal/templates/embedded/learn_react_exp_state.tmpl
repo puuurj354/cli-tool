@@ -1,0 +1,108 @@
+/**
+ * Experiment 02: State
+ *
+ * Learn: useState hook, updating state, derived state, state lifting.
+ */
+
+import { useState } from 'react'
+
+export const title = 'State (useState)'
+export const description = 'State management with useState hook'
+
+/* ---- Counter ---- */
+function Counter() {
+  const [count, setCount] = useState(0)
+
+  return (
+    <div className="demo-section">
+      <h3>Counter</h3>
+      <div className="demo-row">
+        <button className="btn" onClick={() => setCount((c) => c - 1)}>−</button>
+        <span style={{ fontSize: '1.5rem', minWidth: 40, textAlign: 'center' }}>{count}</span>
+        <button className="btn" onClick={() => setCount((c) => c + 1)}>+</button>
+        <button className="btn btn-outline" onClick={() => setCount(0)}>Reset</button>
+      </div>
+      <p className="hint">
+        💡 <code>setCount(c =&gt; c + 1)</code> uses functional update — safer than <code>setCount(count + 1)</code>
+      </p>
+    </div>
+  )
+}
+
+/* ---- Toggle ---- */
+function Toggle() {
+  const [isOn, setIsOn] = useState(false)
+
+  return (
+    <div className="demo-section">
+      <h3>Toggle</h3>
+      <button
+        className="btn"
+        style={{
+          background: isOn ? 'var(--success)' : 'var(--text-muted)',
+          minWidth: 80,
+        }}
+        onClick={() => setIsOn((prev) => !prev)}
+      >
+        {isOn ? 'ON' : 'OFF'}
+      </button>
+    </div>
+  )
+}
+
+/* ---- Object State ---- */
+interface UserProfile {
+  name: string
+  age: number
+  darkMode: boolean
+}
+
+function ProfileEditor() {
+  const [profile, setProfile] = useState<UserProfile>({
+    name: 'Alice',
+    age: 25,
+    darkMode: true,
+  })
+
+  const updateField = <K extends keyof UserProfile>(key: K, value: UserProfile[K]) => {
+    setProfile((prev) => ({ ...prev, [key]: value }))
+  }
+
+  return (
+    <div className="demo-section">
+      <h3>Object State</h3>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxWidth: 300 }}>
+        <input
+          className="input"
+          value={profile.name}
+          onChange={(e) => updateField('name', e.target.value)}
+          placeholder="Name"
+        />
+        <input
+          className="input"
+          type="number"
+          value={profile.age}
+          onChange={(e) => updateField('age', Number(e.target.value))}
+          placeholder="Age"
+        />
+      </div>
+      <div className="output">
+        {JSON.stringify(profile, null, 2)}
+      </div>
+      <p className="hint">
+        💡 Always spread previous state: <code>{'{ ...prev, [key]: value }'}</code> — never mutate directly!
+      </p>
+    </div>
+  )
+}
+
+/* ---- Main Experiment ---- */
+export default function StateExperiment() {
+  return (
+    <>
+      <Counter />
+      <Toggle />
+      <ProfileEditor />
+    </>
+  )
+}

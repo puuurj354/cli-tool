@@ -1,0 +1,134 @@
+/**
+ * Experiment 04: Events
+ *
+ * Learn: Event handling, TypeScript event types, keyboard events, drag & drop.
+ */
+
+import { useState, type MouseEvent, type KeyboardEvent, type ChangeEvent } from 'react'
+
+export const title = 'Event Handling'
+export const description = 'Click, keyboard, change, and mouse events with TypeScript'
+
+/* ---- Click Events ---- */
+function ClickDemo() {
+  const [clicks, setClicks] = useState<Array<{ x: number; y: number }>>([])
+
+  const handleClick = (e: MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect()
+    setClicks((prev) => [
+      ...prev.slice(-9), // keep last 10
+      { x: Math.round(e.clientX - rect.left), y: Math.round(e.clientY - rect.top) },
+    ])
+  }
+
+  return (
+    <div className="demo-section">
+      <h3>🖱 Click Tracking</h3>
+      <div
+        onClick={handleClick}
+        style={{
+          background: 'var(--bg-primary)',
+          border: '1px dashed var(--border)',
+          borderRadius: 8,
+          height: 150,
+          position: 'relative',
+          cursor: 'crosshair',
+          overflow: 'hidden',
+        }}
+      >
+        {clicks.map((c, i) => (
+          <span
+            key={i}
+            style={{
+              position: 'absolute',
+              left: c.x - 6,
+              top: c.y - 6,
+              width: 12,
+              height: 12,
+              borderRadius: '50%',
+              background: 'var(--accent)',
+              opacity: (i + 1) / clicks.length,
+            }}
+          />
+        ))}
+        <span style={{ position: 'absolute', bottom: 4, right: 8, color: 'var(--text-muted)', fontSize: '0.75rem' }}>
+          click anywhere • {clicks.length} clicks
+        </span>
+      </div>
+      <p className="hint">
+        💡 Event type is <code>{'MouseEvent<HTMLDivElement>'}</code> — TypeScript infers the target element.
+      </p>
+    </div>
+  )
+}
+
+/* ---- Keyboard Events ---- */
+function KeyboardDemo() {
+  const [keys, setKeys] = useState<string[]>([])
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    setKeys((prev) => [...prev.slice(-7), `${e.key} (code: ${e.code})`])
+  }
+
+  return (
+    <div className="demo-section">
+      <h3>⌨️ Keyboard Events</h3>
+      <input
+        className="input"
+        placeholder="Press any key..."
+        onKeyDown={handleKeyDown}
+        style={{ width: '100%', maxWidth: 400 }}
+      />
+      <div className="output">
+        {keys.length === 0 ? 'No keys pressed yet' : keys.join('\n')}
+      </div>
+    </div>
+  )
+}
+
+/* ---- Event Modifiers ---- */
+function ModifierDemo() {
+  const [log, setLog] = useState<string[]>([])
+
+  const handleChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    setLog((prev) => [...prev.slice(-4), `Selected: ${e.target.value}`])
+  }
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault() // prevent page reload
+    setLog((prev) => [...prev.slice(-4), '✅ Form submitted (default prevented)'])
+  }
+
+  return (
+    <div className="demo-section">
+      <h3>🛡 preventDefault &amp; Modifiers</h3>
+      <form onSubmit={handleSubmit}>
+        <div className="demo-row">
+          <select className="input" onChange={handleChange} defaultValue="">
+            <option value="" disabled>Pick a framework...</option>
+            <option value="react">React</option>
+            <option value="vue">Vue</option>
+            <option value="svelte">Svelte</option>
+          </select>
+          <button type="submit" className="btn">Submit</button>
+        </div>
+      </form>
+      <div className="output">
+        {log.length === 0 ? 'Interact to see event log' : log.join('\n')}
+      </div>
+      <p className="hint">
+        💡 <code>e.preventDefault()</code> stops the browser's default action (form submission, link navigation).
+      </p>
+    </div>
+  )
+}
+
+export default function EventsExperiment() {
+  return (
+    <>
+      <ClickDemo />
+      <KeyboardDemo />
+      <ModifierDemo />
+    </>
+  )
+}

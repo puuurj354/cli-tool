@@ -1,0 +1,84 @@
+package main
+
+import (
+	"fmt"
+	"sync"
+	"time"
+)
+
+// Semaphore limits concurrent access using a buffered channel.
+// Empty slot = permission to proceed; full = block until a slot is freed.
+type Semaphore chan struct{}
+
+// NewSemaphore creates a semaphore with a max concurrency of n.
+func NewSemaphore(n int) Semaphore {
+	return make(chan struct{}, n)
+}
+
+// Acquire blocks until a slot is available.
+func (s Semaphore) Acquire() {
+	s <- struct{}{}
+}
+
+// Release frees a slot.
+func (s Semaphore) Release() {
+	<-s
+}
+
+// fetchURL simulates an HTTP call that takes some time.
+func fetchURL(sem Semaphore, wg *sync.WaitGroup, id int) {
+	defer wg.Done()
+
+	sem.Acquire()
+	defer sem.Release()
+
+	fmt.Printf("Request %d: starting\n", id)
+	time.Sleep(50 * time.Millisecond) // simulate network latency
+	fmt.Printf("Request %d: done\n", id)
+}
+
+func main() {
+	// Only 3 goroutines may run concurrently (rate-limit)
+	sem := NewSemaphore(3)
+
+	var wg sync.WaitGroup
+
+	// Launch 10 "requests" but only 3 run at a time
+	for i := 1; i <= 10; i++ {
+		wg.Add(1)
+		go fetchURL(sem, &wg, i)
+	}
+
+	wg.Wait()
+	fmt.Println("All requests completed!")
+
+	// ---- sync.RWMutex example ----
+	// RWMutex allows multiple concurrent readers OR a single writer
+	var rw sync.RWMutex
+	data := map[string]int{"hits": 0}
+
+	var rwWg sync.WaitGroup
+
+	// 5 readers running concurrently
+	for i := 0; i < 5; i++ {
+		rwWg.Add(1)
+		go func(id int) {
+			defer rwWg.Done()
+			rw.RLock()
+			defer rw.RUnlock()
+			fmt.Printf("Reader %d sees hits=%d\n", id, data["hits"])
+		}(i)
+	}
+
+	// 1 writer — blocks until all readers finish
+	rwWg.Add(1)
+	go func() {
+		defer rwWg.Done()
+		rw.Lock()
+		defer rw.Unlock()
+		data["hits"]++
+		fmt.Println("Writer incremented hits to", data["hits"])
+	}()
+
+	rwWg.Wait()
+}

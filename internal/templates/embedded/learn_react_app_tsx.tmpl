@@ -1,0 +1,153 @@
+import { Component, useState, type ReactNode, type ErrorInfo } from 'react'
+
+/* ------------------------------------------------------------------ */
+/*  Auto-discovery: Vite's import.meta.glob loads every .tsx file      */
+/*  inside src/experiments/ at build time. Users just create a file    */
+/*  and it automatically appears in the sidebar — zero config needed.  */
+/* ------------------------------------------------------------------ */
+
+interface ExperimentModule {
+  default: React.ComponentType
+  title?: string
+  description?: string
+}
+
+const modules = import.meta.glob<ExperimentModule>('./experiments/*.tsx', {
+  eager: true,
+})
+
+interface Experiment {
+  id: string
+  title: string
+  description: string
+  Component: React.ComponentType
+}
+
+/** Parse discovered modules into a sorted experiment list. */
+function loadExperiments(): Experiment[] {
+  return Object.entries(modules)
+    .map(([path, mod]) => {
+      const filename = path.replace('./experiments/', '').replace('.tsx', '')
+      return {
+        id: filename,
+        title: mod.title ?? filename.replace(/^\d+-/, '').replace(/([A-Z])/g, ' $1').trim(),
+        description: mod.description ?? '',
+        Component: mod.default,
+      }
+    })
+    .sort((a, b) => a.id.localeCompare(b.id))
+}
+
+/* ------------------------------------------------------------------ */
+/*  ErrorBoundary: wraps each experiment so a crash in one component   */
+/*  doesn't take down the whole app. Shows the error message instead.  */
+/* ------------------------------------------------------------------ */
+
+interface EBProps { children: ReactNode; onReset: () => void }
+interface EBState { error: Error | null }
+
+class ErrorBoundary extends Component<EBProps, EBState> {
+  state: EBState = { error: null }
+
+  static getDerivedStateFromError(error: Error): EBState {
+    return { error }
+  }
+
+  componentDidCatch(error: Error, info: ErrorInfo) {
+    console.error('[ErrorBoundary]', error, info.componentStack)
+  }
+
+  render() {
+    if (this.state.error) {
+      return (
+        <div className="error-card">
+          <h3>💥 This experiment crashed</h3>
+          <pre>{this.state.error.message}</pre>
+          <button onClick={() => { this.setState({ error: null }); this.props.onReset(); }}>
+            Try Again
+          </button>
+        </div>
+      )
+    }
+    return this.props.children
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/*  App: sidebar + main content area                                   */
+/* ------------------------------------------------------------------ */
+
+export default function App() {
+  const experiments = loadExperiments()
+  const [activeId, setActiveId] = useState<string>(experiments[0]?.id ?? '')
+  const [resetKey, setResetKey] = useState(0)
+
+  const active = experiments.find((e) => e.id === activeId)
+
+  if (experiments.length === 0) {
+    return (
+      <div className="empty-state">
+        <h1>🧪 React Playground</h1>
+        <p>No experiments found!</p>
+        <p>Create a <code>.tsx</code> file in <code>src/experiments/</code> to get started.</p>
+        <pre>{`// src/experiments/MyExperiment.tsx
+export const title = "My Experiment"
+export const description = "Try something new!"
+
+export default function MyExperiment() {
+  return <h2>Hello from my experiment!</h2>
+}`}</pre>
+      </div>
+    )
+  }
+
+  return (
+    <div className="app-layout">
+      {/* ---- Sidebar ---- */}
+      <aside className="sidebar">
+        <div className="sidebar-header">
+          <h1>🧪 React Playground</h1>
+          <span className="badge">{experiments.length} experiments</span>
+        </div>
+        <nav className="experiment-list">
+          {experiments.map((exp) => (
+            <button
+              key={exp.id}
+              className={`experiment-item ${exp.id === activeId ? 'active' : ''}`}
+              onClick={() => { setActiveId(exp.id); setResetKey((k) => k + 1) }}
+            >
+              <span className="experiment-title">{exp.title}</span>
+              {exp.description && (
+                <span className="experiment-desc">{exp.description}</span>
+              )}
+            </button>
+          ))}
+        </nav>
+        <div className="sidebar-footer">
+          <p>Create a <code>.tsx</code> file in<br /><code>src/experiments/</code></p>
+          <p>It will appear here automatically!</p>
+        </div>
+      </aside>
+
+      {/* ---- Main Content ---- */}
+      <main className="main-content">
+        {active ? (
+          <>
+            <header className="experiment-header">
+              <h2>{active.title}</h2>
+              {active.description && <p>{active.description}</p>}
+              <span className="file-badge">src/experiments/{active.id}.tsx</span>
+            </header>
+            <div className="experiment-body">
+              <ErrorBoundary key={resetKey} onReset={() => setResetKey((k) => k + 1)}>
+                <active.Component />
+              </ErrorBoundary>
+            </div>
+          </>
+        ) : (
+          <p>Select an experiment from the sidebar.</p>
+        )}
+      </main>
+    </div>
+  )
+}

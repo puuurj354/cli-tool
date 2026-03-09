@@ -41,6 +41,11 @@ func TestGetTemplate(t *testing.T) {
 		{"get learn-interfaces", "learn-interfaces", false},
 		{"get learn-design-patterns", "learn-design-patterns", false},
 		{"get learn-frontend", "learn-frontend", false},
+		{"get learn-io", "learn-io", false},
+		{"get learn-closures", "learn-closures", false},
+		{"get learn-pointers", "learn-pointers", false},
+		{"get learn-structs", "learn-structs", false},
+		{"get learn-react", "learn-react", false},
 		// Debugging templates
 		{"get learn-debugging", "learn-debugging", false},
 		// TDD templates
@@ -83,8 +88,8 @@ func TestGetTemplate(t *testing.T) {
 func TestGetAllTemplates(t *testing.T) {
 	templates := GetAllTemplates()
 
-	// Should have at least 39 templates (includes new learning and frontier templates)
-	if len(templates) < 39 {
+	// Should have at least 44 templates (includes new learning templates)
+	if len(templates) < 44 {
 		t.Errorf("expected at least 39 templates, got %d", len(templates))
 	}
 
@@ -229,6 +234,7 @@ func TestSpecificTemplatesStructure(t *testing.T) {
 		{"challenge-30days structure", "challenge-30days", 9, 11, []string{"README.md", "week1/day01_hello/main.go"}},
 		{"learn-debugging structure", "learn-debugging", 6, 13, []string{"README.md", "01-print-debugging/main.go"}},
 		{"learn-tdd structure", "learn-tdd", 5, 11, []string{"README.md", "01-red-green-refactor/main.go"}},
+		{"learn-react structure", "learn-react", 2, 18, []string{"README.md", "package.json", "src/App.tsx", "src/experiments/01-HelloWorld.tsx"}},
 	}
 
 	for _, tt := range tests {

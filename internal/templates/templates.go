@@ -202,6 +202,11 @@ var (
 	learnBenchTestTmpl                 = loadEmbedded("learn_bench_test.tmpl")
 	learnChannelsTmpl                  = loadEmbedded("learn_channels.tmpl")
 	learnConcurrencyReadmeTmpl         = loadEmbedded("learn_concurrency_readme.tmpl")
+	learnConcurrentWorkerPoolTmpl      = loadEmbedded("learn_concurrent_worker_pool.tmpl")
+	learnConcurrentPipelineTmpl        = loadEmbedded("learn_concurrent_pipeline.tmpl")
+	learnConcurrentFanoutTmpl          = loadEmbedded("learn_concurrent_fanout.tmpl")
+	learnConcurrentSemaphoreTmpl       = loadEmbedded("learn_concurrent_semaphore.tmpl")
+	learnConcurrentErrgroupTmpl        = loadEmbedded("learn_concurrent_errgroup.tmpl")
 	learnContextCancellationTestTmpl   = loadEmbedded("learn_context_cancellation_test.tmpl")
 	learnContextCancellationTmpl       = loadEmbedded("learn_context_cancellation.tmpl")
 	learnContextReadmeTmpl             = loadEmbedded("learn_context_readme.tmpl")
@@ -271,6 +276,38 @@ var (
 	learnFrontendFetchIndexTmpl        = loadEmbedded("learn_frontend_fetch_index.tmpl")
 	learnFrontendFetchStyleTmpl        = loadEmbedded("learn_frontend_fetch_style.tmpl")
 	learnFrontendFetchScriptTmpl       = loadEmbedded("learn_frontend_fetch_script.tmpl")
+	// I/O, Closures, Pointers, Structs
+	learnIOMainTmpl         = loadEmbedded("learn_io_main.tmpl")
+	learnIOTestTmpl         = loadEmbedded("learn_io_test.tmpl")
+	learnIOReadmeTmpl       = loadEmbedded("learn_io_readme.tmpl")
+	learnClosuresMainTmpl   = loadEmbedded("learn_closures_main.tmpl")
+	learnClosuresTestTmpl   = loadEmbedded("learn_closures_test.tmpl")
+	learnClosuresReadmeTmpl = loadEmbedded("learn_closures_readme.tmpl")
+	learnPointersMainTmpl   = loadEmbedded("learn_pointers_main.tmpl")
+	learnPointersTestTmpl   = loadEmbedded("learn_pointers_test.tmpl")
+	learnPointersReadmeTmpl = loadEmbedded("learn_pointers_readme.tmpl")
+	learnStructsMainTmpl    = loadEmbedded("learn_structs_main.tmpl")
+	learnStructsTestTmpl    = loadEmbedded("learn_structs_test.tmpl")
+	learnStructsReadmeTmpl  = loadEmbedded("learn_structs_readme.tmpl")
+	// React (TypeScript)
+	learnReactPackageJsonTmpl    = loadEmbedded("learn_react_package_json.tmpl")
+	learnReactViteConfigTmpl     = loadEmbedded("learn_react_vite_config.tmpl")
+	learnReactTsconfigTmpl       = loadEmbedded("learn_react_tsconfig.tmpl")
+	learnReactIndexHtmlTmpl      = loadEmbedded("learn_react_index_html.tmpl")
+	learnReactMainTsxTmpl        = loadEmbedded("learn_react_main_tsx.tmpl")
+	learnReactAppTsxTmpl         = loadEmbedded("learn_react_app_tsx.tmpl")
+	learnReactAppCssTmpl         = loadEmbedded("learn_react_app_css.tmpl")
+	learnReactReadmeTmpl         = loadEmbedded("learn_react_readme.tmpl")
+	learnReactExpHelloTmpl       = loadEmbedded("learn_react_exp_hello.tmpl")
+	learnReactExpStateTmpl       = loadEmbedded("learn_react_exp_state.tmpl")
+	learnReactExpEffectsTmpl     = loadEmbedded("learn_react_exp_effects.tmpl")
+	learnReactExpEventsTmpl      = loadEmbedded("learn_react_exp_events.tmpl")
+	learnReactExpListsTmpl       = loadEmbedded("learn_react_exp_lists.tmpl")
+	learnReactExpFormsTmpl       = loadEmbedded("learn_react_exp_forms.tmpl")
+	learnReactExpHooksTmpl       = loadEmbedded("learn_react_exp_hooks.tmpl")
+	learnReactExpContextTmpl     = loadEmbedded("learn_react_exp_context.tmpl")
+	learnReactExpDebugTmpl       = loadEmbedded("learn_react_exp_debug.tmpl")
+	learnReactExpErrorBoundaryTmpl = loadEmbedded("learn_react_exp_error_boundary.tmpl")
 	// Advanced Learning
 	learnSecurityReadmeTmpl  = loadEmbedded("learn_security_readme.tmpl")
 	learnSecurityHashTmpl    = loadEmbedded("learn_security_hash.tmpl")
@@ -462,6 +499,11 @@ func initBuiltInTemplates() {
 				"03-select",
 				"04-sync",
 				"05-patterns",
+				"06-worker-pool",
+				"07-pipeline",
+				"08-fanout-fanin",
+				"09-semaphore",
+				"10-errgroup",
 			},
 			Files: []FileTemplate{
 				{Path: "README.md", Content: learnConcurrencyReadmeTmpl},
@@ -470,6 +512,11 @@ func initBuiltInTemplates() {
 				{Path: "03-select/main.go", Content: learnSelectTmpl},
 				{Path: "04-sync/main.go", Content: learnSyncTmpl},
 				{Path: "05-patterns/main.go", Content: learnPatternsTmpl},
+				{Path: "06-worker-pool/main.go", Content: learnConcurrentWorkerPoolTmpl},
+				{Path: "07-pipeline/main.go", Content: learnConcurrentPipelineTmpl},
+				{Path: "08-fanout-fanin/main.go", Content: learnConcurrentFanoutTmpl},
+				{Path: "09-semaphore/main.go", Content: learnConcurrentSemaphoreTmpl},
+				{Path: "10-errgroup/main.go", Content: learnConcurrentErrgroupTmpl},
 				{Path: ".gitignore", Content: gitignoreGoTmpl},
 			},
 		},
@@ -957,11 +1004,10 @@ require (
 			Name:        "go-web-htmx",
 			Description: "SSR Web App with Go + HTMX + Tailwind",
 			Directories: []string{
-				"cmd/server",
 				"templates",
 			},
 			Files: []FileTemplate{
-				{Path: "cmd/server/main.go", Content: goHtmxMainTmpl},
+				{Path: "main.go", Content: goHtmxMainTmpl},
 				{Path: "templates/index.html", Content: goHtmxIndexTmpl},
 				{Path: "templates/list.html", Content: goHtmxListTmpl},
 				{Path: "README.md", Content: goHtmxReadmeTmpl},
@@ -1268,6 +1314,96 @@ require (
 				{Path: "04-bdd-style/main_test.go", Content: tddBDDTestTmpl},
 				{Path: "05-exercises/README.md", Content: tddExercisesReadmeTmpl},
 				{Path: ".gitignore", Content: gitignoreGoTmpl},
+			},
+		},
+		"learn-io": {
+			Name:        "learn-io",
+			Description: "Learn file I/O, JSON encoding, and string building",
+			Directories: []string{
+				"file-io",
+				"json-encoding",
+				"string-building",
+			},
+			Files: []FileTemplate{
+				{Path: "README.md", Content: learnIOReadmeTmpl},
+				{Path: "file-io/main.go", Content: learnIOMainTmpl},
+				{Path: "file-io/main_test.go", Content: learnIOTestTmpl},
+				{Path: ".gitignore", Content: gitignoreGoTmpl},
+			},
+		},
+		"learn-closures": {
+			Name:        "learn-closures",
+			Description: "Learn closures, function types & functional patterns",
+			Directories: []string{
+				"basics",
+				"decorators",
+				"functional",
+			},
+			Files: []FileTemplate{
+				{Path: "README.md", Content: learnClosuresReadmeTmpl},
+				{Path: "basics/main.go", Content: learnClosuresMainTmpl},
+				{Path: "basics/main_test.go", Content: learnClosuresTestTmpl},
+				{Path: ".gitignore", Content: gitignoreGoTmpl},
+			},
+		},
+		"learn-pointers": {
+			Name:        "learn-pointers",
+			Description: "Learn pointers, receivers & memory layout",
+			Directories: []string{
+				"basics",
+				"structs",
+				"receivers",
+			},
+			Files: []FileTemplate{
+				{Path: "README.md", Content: learnPointersReadmeTmpl},
+				{Path: "basics/main.go", Content: learnPointersMainTmpl},
+				{Path: "basics/main_test.go", Content: learnPointersTestTmpl},
+				{Path: ".gitignore", Content: gitignoreGoTmpl},
+			},
+		},
+		"learn-structs": {
+			Name:        "learn-structs",
+			Description: "Learn structs, embedding & functional options",
+			Directories: []string{
+				"basics",
+				"embedding",
+				"options",
+			},
+			Files: []FileTemplate{
+				{Path: "README.md", Content: learnStructsReadmeTmpl},
+				{Path: "basics/main.go", Content: learnStructsMainTmpl},
+				{Path: "basics/main_test.go", Content: learnStructsTestTmpl},
+				{Path: ".gitignore", Content: gitignoreGoTmpl},
+			},
+		},
+		"learn-react": {
+			Name:        "learn-react",
+			Description: "Learn React (TypeScript) with auto-discovery playground",
+			Directories: []string{
+				"src",
+				"src/experiments",
+			},
+			Files: []FileTemplate{
+				// Scaffold
+				{Path: "package.json", Content: learnReactPackageJsonTmpl},
+				{Path: "vite.config.ts", Content: learnReactViteConfigTmpl},
+				{Path: "tsconfig.json", Content: learnReactTsconfigTmpl},
+				{Path: "index.html", Content: learnReactIndexHtmlTmpl},
+				{Path: "src/main.tsx", Content: learnReactMainTsxTmpl},
+				{Path: "src/App.tsx", Content: learnReactAppTsxTmpl},
+				{Path: "src/App.css", Content: learnReactAppCssTmpl},
+				{Path: "README.md", Content: learnReactReadmeTmpl},
+				// Experiments
+				{Path: "src/experiments/01-HelloWorld.tsx", Content: learnReactExpHelloTmpl},
+				{Path: "src/experiments/02-State.tsx", Content: learnReactExpStateTmpl},
+				{Path: "src/experiments/03-Effects.tsx", Content: learnReactExpEffectsTmpl},
+				{Path: "src/experiments/04-Events.tsx", Content: learnReactExpEventsTmpl},
+				{Path: "src/experiments/05-Lists.tsx", Content: learnReactExpListsTmpl},
+				{Path: "src/experiments/06-Forms.tsx", Content: learnReactExpFormsTmpl},
+				{Path: "src/experiments/07-CustomHooks.tsx", Content: learnReactExpHooksTmpl},
+				{Path: "src/experiments/08-Context.tsx", Content: learnReactExpContextTmpl},
+				{Path: "src/experiments/09-Debugging.tsx", Content: learnReactExpDebugTmpl},
+				{Path: "src/experiments/10-ErrorBoundary.tsx", Content: learnReactExpErrorBoundaryTmpl},
 			},
 		},
 	}

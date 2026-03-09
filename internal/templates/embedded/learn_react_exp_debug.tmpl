@@ -1,0 +1,167 @@
+/**
+ * Experiment 09: Debugging
+ *
+ * Learn: console strategies, DevTools tips, useEffect debugging, performance.
+ */
+
+import { useState, useEffect, useMemo } from 'react'
+
+export const title = 'Debugging Techniques'
+export const description = 'Console logging, DevTools tricks, and render debugging'
+
+/* ---- Console strategies ---- */
+function ConsoleDemo() {
+  const [items, setItems] = useState(['Apple', 'Banana', 'Cherry'])
+  const [newItem, setNewItem] = useState('')
+
+  const addItem = () => {
+    if (!newItem.trim()) return
+
+    // TIP 1: Use console.group for organized logging
+    console.group('🛒 Adding Item')
+    console.log('Previous items:', items)
+    console.log('New item:', newItem)
+    console.log('New length:', items.length + 1)
+    console.groupEnd()
+
+    setItems((prev) => {
+      const updated = [...prev, newItem.trim()]
+      // TIP 2: console.table for arrays/objects
+      console.table(updated.map((item, i) => ({ index: i, item })))
+      return updated
+    })
+    setNewItem('')
+  }
+
+  return (
+    <div className="demo-section">
+      <h3>📋 Console Strategies</h3>
+      <div className="demo-row">
+        <input
+          className="input"
+          value={newItem}
+          onChange={(e) => setNewItem(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && addItem()}
+          placeholder="Add item..."
+        />
+        <button className="btn" onClick={addItem}>Add</button>
+      </div>
+      <div className="output">
+        {items.join(', ')}
+      </div>
+      <p className="hint">
+        💡 Open DevTools Console (F12) — see <code>console.group</code>, <code>console.table</code>,
+        and <code>console.time</code> in action!
+      </p>
+    </div>
+  )
+}
+
+/* ---- Why Did This Render? ---- */
+function RenderDebugger() {
+  const [count, setCount] = useState(0)
+  const [text, setText] = useState('')
+
+  // TIP 3: Track renders with console.count
+  console.count('RenderDebugger rendered')
+
+  // TIP 4: useMemo to avoid re-computation
+  const expensiveValue = useMemo(() => {
+    console.time('expensive-calc')
+    let result = 0
+    for (let i = 0; i < count * 1000; i++) result += i
+    console.timeEnd('expensive-calc')
+    return result
+  }, [count]) // only recalculates when count changes
+
+  return (
+    <div className="demo-section">
+      <h3>🔍 Why Did This Render?</h3>
+      <div className="demo-row">
+        <button className="btn" onClick={() => setCount((c) => c + 1)}>
+          Count: {count}
+        </button>
+        <input
+          className="input"
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder="Type to trigger render..."
+        />
+      </div>
+      <div className="output">
+        {'Expensive calc: ' + expensiveValue.toLocaleString()}{'\n'}
+        {'Open Console → see console.count() and console.time()'}
+      </div>
+      <p className="hint">
+        💡 Typing re-renders the component, but <code>useMemo</code> skips
+        recalculating the expensive value because <code>count</code> hasn't changed.
+      </p>
+    </div>
+  )
+}
+
+/* ---- useEffect Debugging ---- */
+function EffectDebugger() {
+  const [value, setValue] = useState('hello')
+
+  useEffect(() => {
+    console.log('%c[Effect] mounted/updated: value =', 'color: lime', value)
+
+    return () => {
+      // TIP 5: Cleanup logs help spot stale closures and memory leaks
+      console.log('%c[Effect] cleanup for value =', 'color: orange', value)
+    }
+  }, [value])
+
+  return (
+    <div className="demo-section">
+      <h3>🧹 useEffect Lifecycle</h3>
+      <input
+        className="input"
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        style={{ width: '100%', maxWidth: 400 }}
+      />
+      <div className="output">
+        {'Check Console for:'}
+        {'\n  🟢 [Effect] mounted/updated — runs when value changes'}
+        {'\n  🟠 [Effect] cleanup — runs BEFORE re-running the effect'}
+      </div>
+      <p className="hint">
+        💡 In React 18 StrictMode, effects run twice in development.
+        This helps catch missing cleanup functions.
+      </p>
+    </div>
+  )
+}
+
+/* ---- Debug Checklist ---- */
+function DebugChecklist() {
+  return (
+    <div className="demo-section">
+      <h3>🗒 Debug Checklist</h3>
+      <ul style={{ lineHeight: 2, paddingLeft: 20, color: 'var(--text-secondary)' }}>
+        <li><code>console.log(state)</code> — inspect current state</li>
+        <li><code>console.table(array)</code> — visualize arrays/objects</li>
+        <li><code>console.group / groupEnd</code> — organize related logs</li>
+        <li><code>console.time / timeEnd</code> — measure performance</li>
+        <li><code>console.count(label)</code> — count renders</li>
+        <li><code>console.trace()</code> — see the call stack</li>
+        <li><code>debugger;</code> — breakpoint in code</li>
+        <li>React DevTools → Components tab → inspect props/state</li>
+        <li>React DevTools → Profiler tab → record renders</li>
+      </ul>
+    </div>
+  )
+}
+
+export default function DebuggingExperiment() {
+  return (
+    <>
+      <ConsoleDemo />
+      <RenderDebugger />
+      <EffectDebugger />
+      <DebugChecklist />
+    </>
+  )
+}

@@ -1,0 +1,96 @@
+package main
+
+import (
+	"testing"
+)
+
+func TestMakeCounter(t *testing.T) {
+	c := makeCounter(0)
+	if got := c(); got != 1 {
+		t.Errorf("first call: want 1, got %d", got)
+	}
+	if got := c(); got != 2 {
+		t.Errorf("second call: want 2, got %d", got)
+	}
+}
+
+func TestCounterIndependence(t *testing.T) {
+	c1 := makeCounter(0)
+	c2 := makeCounter(100)
+	c1()
+	c1()
+	if got := c2(); got != 101 {
+		t.Errorf("c2 should be independent: want 101, got %d", got)
+	}
+}
+
+func TestWithPrefix(t *testing.T) {
+	echo := Handler(func(s string) string { return s })
+	prefixed := withPrefix("HELLO-", echo)
+	if got := prefixed("world"); got != "HELLO-world" {
+		t.Errorf("want HELLO-world, got %q", got)
+	}
+}
+
+func TestFilter(t *testing.T) {
+	nums := []int{1, 2, 3, 4, 5}
+	evens := filter(nums, func(n int) bool { return n%2 == 0 })
+	if len(evens) != 2 {
+		t.Errorf("expected 2 evens, got %d", len(evens))
+	}
+	for _, n := range evens {
+		if n%2 != 0 {
+			t.Errorf("filter returned odd number: %d", n)
+		}
+	}
+}
+
+func TestMapInts(t *testing.T) {
+	nums := []int{1, 2, 3}
+	got := mapInts(nums, func(n int) int { return n * 2 })
+	want := []int{2, 4, 6}
+	for i, g := range got {
+		if g != want[i] {
+			t.Errorf("mapInts[%d]: want %d, got %d", i, want[i], g)
+		}
+	}
+}
+
+func TestMakeAdders_NoCaptureIssue(t *testing.T) {
+	adders := makeAdders([]int{10, 20, 30})
+	if got := adders[0](5); got != 15 {
+		t.Errorf("adder[0](5): want 15, got %d", got)
+	}
+	if got := adders[1](5); got != 25 {
+		t.Errorf("adder[1](5): want 25, got %d", got)
+	}
+	if got := adders[2](5); got != 35 {
+		t.Errorf("adder[2](5): want 35, got %d", got)
+	}
+}
+
+func TestMemoize(t *testing.T) {
+	callCount := 0
+	expensiveFn := func(n int) int {
+		callCount++
+		return n * n
+	}
+	cached := memoize(expensiveFn)
+
+	_ = cached(5)
+	_ = cached(5) // should hit cache
+	if callCount != 1 {
+		t.Errorf("expected 1 actual call, got %d", callCount)
+	}
+}
+
+func BenchmarkFilter(b *testing.B) {
+	nums := make([]int, 10000)
+	for i := range nums {
+		nums[i] = i
+	}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		filter(nums, func(n int) bool { return n%2 == 0 })
+	}
+}

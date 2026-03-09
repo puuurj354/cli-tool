@@ -1,0 +1,145 @@
+package main
+
+import (
+	"fmt"
+	"sort"
+)
+
+// ---- Basic Closures ----
+
+// makeCounter returns a closure that increments an internal counter.
+// Each call to the returned function remembers its own counter.
+func makeCounter(start int) func() int {
+	count := start
+	return func() int {
+		count++
+		return count
+	}
+}
+
+// ---- Closures as Middleware / Decorator ----
+
+type Handler func(input string) string
+
+// withLogging wraps a Handler and prints before/after.
+func withLogging(h Handler) Handler {
+	return func(input string) string {
+		fmt.Printf("[LOG] processing: %q\n", input)
+		result := h(input)
+		fmt.Printf("[LOG] result:     %q\n", result)
+		return result
+	}
+}
+
+// withPrefix decorates a Handler to prepend a string.
+func withPrefix(prefix string, h Handler) Handler {
+	return func(input string) string {
+		return h(prefix + input)
+	}
+}
+
+// ---- Function types and first-class functions ----
+
+type Predicate func(int) bool
+
+// filter returns a new slice containing only elements that satisfy p.
+func filter(nums []int, p Predicate) []int {
+	result := make([]int, 0, len(nums))
+	for _, n := range nums {
+		if p(n) {
+			result = append(result, n)
+		}
+	}
+	return result
+}
+
+// mapInts applies a transform to every element.
+func mapInts(nums []int, fn func(int) int) []int {
+	result := make([]int, len(nums))
+	for i, n := range nums {
+		result[i] = fn(n)
+	}
+	return result
+}
+
+// ---- Closures capturing loop variables ----
+
+func makeAdders(deltas []int) []func(int) int {
+	adders := make([]func(int) int, len(deltas))
+	for i, d := range deltas {
+		d := d // capture by value — avoids infamous loop-variable bug
+		adders[i] = func(x int) int {
+			return x + d
+		}
+	}
+	return adders
+}
+
+// ---- Memoization using closure ----
+
+func memoize(fn func(int) int) func(int) int {
+	cache := make(map[int]int)
+	return func(n int) int {
+		if v, ok := cache[n]; ok {
+			return v
+		}
+		result := fn(n)
+		cache[n] = result
+		return result
+	}
+}
+
+func main() {
+	// Counter closures — independent state
+	c1 := makeCounter(0)
+	c2 := makeCounter(10)
+	fmt.Println("c1:", c1(), c1(), c1()) // 1 2 3
+	fmt.Println("c2:", c2(), c2())       // 11 12
+
+	// Decorator pattern
+	upper := Handler(func(s string) string {
+		runes := []byte(s)
+		for i, b := range runes {
+			if b >= 'a' && b <= 'z' {
+				runes[i] = b - 32
+			}
+		}
+		return string(runes)
+	})
+
+	logged := withLogging(withPrefix("GO-", upper))
+	logged("hello")
+
+	// Filter and map
+	nums := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+	evens := filter(nums, func(n int) bool { return n%2 == 0 })
+	doubled := mapInts(evens, func(n int) int { return n * 2 })
+	fmt.Println("doubled evens:", doubled)
+
+	// Adders from loop
+	adders := makeAdders([]int{1, 2, 3})
+	for i, add := range adders {
+		fmt.Printf("adder[%d](10) = %d\n", i, add(10))
+	}
+
+	// Sort with closure comparator
+	words := []string{"banana", "apple", "cherry", "date"}
+	sort.Slice(words, func(i, j int) bool {
+		return len(words[i]) < len(words[j])
+	})
+	fmt.Println("sorted by length:", words)
+
+	// Memoized fibonacci
+	var fib func(int) int
+	fib = func(n int) int {
+		if n <= 1 {
+			return n
+		}
+		return fib(n-1) + fib(n-2)
+	}
+	fastFib := memoize(fib)
+	for i := 0; i <= 10; i++ {
+		fmt.Printf("fib(%d)=%d ", i, fastFib(i))
+	}
+	fmt.Println()
+}

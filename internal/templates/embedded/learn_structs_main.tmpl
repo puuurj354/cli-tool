@@ -1,0 +1,163 @@
+package main
+
+import (
+	"fmt"
+	"strings"
+)
+
+// ---- Basic struct ----
+
+type Address struct {
+	Street string
+	City   string
+	Zip    string
+}
+
+// String implements the Stringer interface for readable output.
+func (a Address) String() string {
+	return fmt.Sprintf("%s, %s %s", a.Street, a.City, a.Zip)
+}
+
+// ---- Struct embedding (composition over inheritance) ----
+
+type Person struct {
+	Name    string
+	Age     int
+	Address // embedded — fields promoted to Person
+}
+
+// Greet is a method on Person.
+func (p Person) Greet() string {
+	return fmt.Sprintf("Hi, I'm %s (%d) from %s", p.Name, p.Age, p.City)
+}
+
+// ---- Struct embedding with method override ----
+
+type Employee struct {
+	Person   // embed Person (which embeds Address)
+	Company  string
+	JobTitle string
+}
+
+// Greet overrides Person.Greet to add company info.
+func (e Employee) Greet() string {
+	return fmt.Sprintf("Hi, I'm %s, %s at %s", e.Name, e.JobTitle, e.Company)
+}
+
+// ---- Struct tags (typically used with JSON/YAML) ----
+
+type Product struct {
+	ID    int     `json:"id"`
+	Name  string  `json:"name"`
+	Price float64 `json:"price,omitempty"`
+}
+
+// ---- Functional options pattern (builds on struct knowledge) ----
+
+type ServerConfig struct {
+	Host    string
+	Port    int
+	Timeout int // seconds
+}
+
+type Option func(*ServerConfig)
+
+func WithHost(host string) Option {
+	return func(c *ServerConfig) {
+		if host != "" {
+			c.Host = host
+		}
+	}
+}
+
+func WithPort(port int) Option {
+	return func(c *ServerConfig) {
+		if port > 0 && port <= 65535 {
+			c.Port = port
+		}
+	}
+}
+
+func NewServerConfig(opts ...Option) *ServerConfig {
+	cfg := &ServerConfig{
+		Host:    "localhost",
+		Port:    8080,
+		Timeout: 30,
+	}
+	for _, opt := range opts {
+		opt(cfg)
+	}
+	return cfg
+}
+
+// ---- Anonymous struct ----
+
+func summarizeOrders(orders []struct {
+	Item  string
+	Qty   int
+	Price float64
+}) string {
+	var sb strings.Builder
+	var total float64
+	for _, o := range orders {
+		line := fmt.Sprintf("  %s x%d = $%.2f\n", o.Item, o.Qty, float64(o.Qty)*o.Price)
+		sb.WriteString(line)
+		total += float64(o.Qty) * o.Price
+	}
+	fmt.Fprintf(&sb, "Total: $%.2f\n", total)
+	return sb.String()
+}
+
+func main() {
+	// Basic struct
+	addr := Address{Street: "123 Main St", City: "Jakarta", Zip: "10110"}
+	fmt.Println(addr)
+
+	// Embedding: Person promotes Address fields
+	alice := Person{
+		Name: "Alice",
+		Age:  30,
+		Address: Address{
+			Street: "456 Elm St",
+			City:   "Surabaya",
+			Zip:    "60111",
+		},
+	}
+	fmt.Println(alice.Greet())
+	fmt.Println("City (promoted):", alice.City) // direct field access
+
+	// Employee embeds Person
+	emp := Employee{
+		Person: Person{
+			Name: "Bob",
+			Age:  28,
+			Address: Address{City: "Bandung"},
+		},
+		Company:  "Gopher Inc",
+		JobTitle: "Engineer",
+	}
+	fmt.Println(emp.Greet()) // Employee.Greet overrides Person.Greet
+	fmt.Println(emp.Person.Greet()) // Access Person.Greet explicitly
+
+	// Struct with tags
+	p := Product{ID: 1, Name: "Keyboard", Price: 49.99}
+	fmt.Printf("Product: %+v\n", p)
+
+	// Functional options
+	cfg := NewServerConfig(
+		WithHost("api.example.com"),
+		WithPort(9090),
+	)
+	fmt.Printf("Config: %+v\n", *cfg)
+
+	// Anonymous struct
+	orders := []struct {
+		Item  string
+		Qty   int
+		Price float64
+	}{
+		{"Widget", 2, 9.99},
+		{"Gadget", 1, 24.99},
+	}
+	fmt.Println(summarizeOrders(orders))
+}

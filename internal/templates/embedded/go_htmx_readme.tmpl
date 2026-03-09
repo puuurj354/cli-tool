@@ -1,23 +1,24 @@
-# {{.ProjectName|title}}
+# {{.ProjectName}}
 
-A modern Go web application using **HTMX** for interactivity and standard `html/template` for server-side rendering.
+A modern Go web application using **HTMX** for interactivity and **html/template** for server-side rendering.
 
 ## Features
 
-- **SSR**: Fast, SEO-friendly server-side rendering.
-- **HTMX**: Dynamic interactions without writing JavaScript.
-- **Tailwind CSS**: Utility-first styling (via CDN for simplicity).
-- **Standard Lib**: No heavy frameworks, just pure Go `net/http`.
+- **SSR**: Fast, SEO-friendly server-side rendering
+- **HTMX**: Dynamic interactions without writing JavaScript
+- **Embedded Templates**: Templates compiled into binary via `go:embed`
+- **Tailwind CSS**: Utility-first styling (via CDN)
+- **Thread-Safe**: Mutex-protected state for concurrent access
+- **Structured Logging**: Using `log/slog`
 
-## Structure
+## Project Structure
 
 ```
 .
-├── cmd/server/
-│   └── main.go       # HTTP server and handlers
+├── main.go           # HTTP server, handlers, and business logic
 ├── templates/
-│   ├── index.html    # Main layout
-│   └── list.html     # Partial fragments
+│   ├── index.html    # Main page layout
+│   └── list.html     # Todo list fragment (partial)
 ├── go.mod
 └── README.md
 ```
@@ -25,20 +26,37 @@ A modern Go web application using **HTMX** for interactivity and standard `html/
 ## Running
 
 ```bash
-go run cmd/server/main.go
+go run .
 ```
 
-Visit `http://localhost:8080`.
+Visit [http://localhost:8080](http://localhost:8080)
 
-## How it works
+## HTMX Patterns Used
 
-1.  **Initial Load**: The server renders request to `/` as a full HTML page.
-2.  **Interaction**: When you submit a form or click a button, HTMX sends an AJAX request.
-3.  **Fragment Update**: The server returns *only* the HTML fragment that changed (e.g., the new list of todos).
-4.  **DOM Swap**: HTMX swaps the old list with the new HTML in the DOM.
+| Attribute | Purpose |
+|-----------|---------|
+| `hx-post` | Send POST request (add todo) |
+| `hx-delete` | Send DELETE request (remove todo) |
+| `hx-target` | Specify which element to update |
+| `hx-swap` | Control how HTML is inserted (innerHTML) |
+| `hx-indicator` | Show loading spinner during request |
+| `hx-confirm` | Confirm before destructive actions |
+
+## How It Works
+
+1. **Initial Load**: Server renders full HTML page
+2. **Add Todo**: Form triggers `hx-post="/todos"`, server returns updated list fragment
+3. **Toggle/Delete**: Checkbox/button triggers request, server returns updated list
+4. **Fragment Swap**: HTMX replaces `#todo-list` content with response
 
 ## Customization
 
-- **Templates**: Add new `.html` files in `templates/`.
-- **Styling**: Replace the Tailwind CDN with a build step (e.g., using `tailwindcss` CLI) for production.
-- **Database**: Connect a real database (SQLite, Postgres) in `NewHandler`.
+- **Database**: Replace `[]Todo` slice with SQLite/Postgres
+- **Styling**: Replace Tailwind CDN with build step for production
+- **Auth**: Add session middleware for user authentication
+
+## Resources
+
+- [HTMX Documentation](https://htmx.org/docs/)
+- [HTMX Reference](https://htmx.org/reference/)
+- [Go html/template](https://pkg.go.dev/html/template)

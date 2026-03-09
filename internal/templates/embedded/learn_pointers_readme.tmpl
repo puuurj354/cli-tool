@@ -1,0 +1,29 @@
+# Learn Go Pointers
+
+Understand how pointers work, when to use them, and how to avoid common mistakes.
+
+## Sections
+
+1. **basics** - Declaring, dereferencing, and passing pointers
+2. **structs** - Linked list built with `*Node`
+3. **receivers** - Value receiver vs pointer receiver comparison
+4. **memory** - `unsafe.Sizeof`, `new` vs `make`
+
+## How to Run
+
+` + "```" + `bash
+go run main.go
+go test ./...
+` + "```" + `
+
+## Key Rules
+
+| Concept | Guideline |
+|---------|-----------|
+| `&x` | Take address of variable `x` |
+| `*p` | Dereference pointer `p` to get/set the value |
+| Value receiver | Does NOT modify original; use for small, immutable structs |
+| Pointer receiver | DOES modify original; use when mutation or large struct |
+| nil check | Always guard against nil before dereferencing |
+| `new(T)` | Allocate zeroed `T`, return `*T` |
+| `make(T, ...)` | Initialize slices, maps, channels (not arbitrary types) |

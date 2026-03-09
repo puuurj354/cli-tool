@@ -1,0 +1,108 @@
+package main
+
+import (
+	"fmt"
+	"sync"
+)
+
+// producer generates work items onto a channel
+func producer(items ...int) <-chan int {
+	ch := make(chan int)
+	go func() {
+		defer close(ch)
+		for _, item := range items {
+			ch <- item
+		}
+	}()
+	return ch
+}
+
+// fanOut distributes items from a single source channel to n worker channels.
+// Each worker channel receives items in round-robin order.
+func fanOut(in <-chan int, n int) []<-chan int {
+	channels := make([]chan int, n)
+	for i := range channels {
+		channels[i] = make(chan int)
+	}
+
+	go func() {
+		i := 0
+		for item := range in {
+			channels[i%n] <- item
+			i++
+		}
+		for _, ch := range channels {
+			close(ch)
+		}
+	}()
+
+	result := make([]<-chan int, n)
+	for i, ch := range channels {
+		result[i] = ch
+	}
+	return result
+}
+
+// fanIn merges multiple input channels into a single output channel.
+func fanIn(channels ...<-chan int) <-chan int {
+	merged := make(chan int)
+	var wg sync.WaitGroup
+
+	output := func(ch <-chan int) {
+		defer wg.Done()
+		for val := range ch {
+			merged <- val
+		}
+	}
+
+	wg.Add(len(channels))
+	for _, ch := range channels {
+		go output(ch)
+	}
+
+	// Close merged channel once all inputs are drained
+	go func() {
+		wg.Wait()
+		close(merged)
+	}()
+
+	return merged
+}
+
+// process simulates computation on a value
+func process(workerID int, in <-chan int) <-chan int {
+	out := make(chan int)
+	go func() {
+		defer close(out)
+		for n := range in {
+			result := n * n // square it
+			fmt.Printf("Worker %d: %d -> %d\n", workerID, n, result)
+			out <- result
+		}
+	}()
+	return out
+}
+
+func main() {
+	// Source
+	source := producer(1, 2, 3, 4, 5, 6, 7, 8)
+
+	// Fan-out to 3 workers
+	workerInputs := fanOut(source, 3)
+
+	// Each worker processes its items
+	workerOutputs := make([]<-chan int, len(workerInputs))
+	for i, ch := range workerInputs {
+		workerOutputs[i] = process(i+1, ch)
+	}
+
+	// Fan-in: merge all worker results into one channel
+	results := fanIn(workerOutputs...)
+
+	// Collect final results
+	var total int
+	for r := range results {
+		total += r
+	}
+	fmt.Printf("Total sum of squares: %d\n", total)
+}

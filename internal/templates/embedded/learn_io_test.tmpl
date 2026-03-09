@@ -1,0 +1,106 @@
+package main
+
+import (
+	"bufio"
+	"fmt"
+	"os"
+	"strings"
+	"testing"
+)
+
+func TestWriteReadFile(t *testing.T) {
+	tmpFile := t.TempDir() + "/test.txt"
+
+	// Write
+	if err := writeFile(tmpFile, "hello\nworld\n"); err != nil {
+		t.Fatalf("writeFile: %v", err)
+	}
+
+	// Read back
+	lines, err := readLines(tmpFile)
+	if err != nil {
+		t.Fatalf("readLines: %v", err)
+	}
+
+	if len(lines) != 2 {
+		t.Errorf("expected 2 lines, got %d", len(lines))
+	}
+	if lines[0] != "hello" || lines[1] != "world" {
+		t.Errorf("unexpected lines: %v", lines)
+	}
+}
+
+func TestWriteFile_InvalidPath(t *testing.T) {
+	err := writeFile("/nonexistent/dir/file.txt", "content")
+	if err == nil {
+		t.Error("expected error for invalid path, got nil")
+	}
+}
+
+func TestJSONRoundTrip(t *testing.T) {
+	people := []Person{{Name: "Alice", Age: 30}}
+	encoded, err := encodeJSON(people)
+	if err != nil {
+		t.Fatalf("encode: %v", err)
+	}
+	if !strings.Contains(encoded, "Alice") {
+		t.Errorf("encoded JSON missing 'Alice': %s", encoded)
+	}
+
+	var decoded []Person
+	if err := decodeJSON(encoded, &decoded); err != nil {
+		t.Fatalf("decode: %v", err)
+	}
+	if len(decoded) != 1 || decoded[0].Name != "Alice" {
+		t.Errorf("unexpected decoded value: %+v", decoded)
+	}
+}
+
+func TestDecodeJSON_InvalidInput(t *testing.T) {
+	var p Person
+	if err := decodeJSON("not-json", &p); err == nil {
+		t.Error("expected JSON parse error, got nil")
+	}
+}
+
+func TestBuildReport(t *testing.T) {
+	report := buildReport([]string{"Alice", "Bob"})
+	if !strings.Contains(report, "1. Alice") {
+		t.Errorf("report missing '1. Alice': %s", report)
+	}
+	if !strings.Contains(report, "2. Bob") {
+		t.Errorf("report missing '2. Bob': %s", report)
+	}
+}
+
+// TestBufferedWritePerformance ensures buffered I/O works correctly
+func TestBufferedRead(t *testing.T) {
+	content := "line1\nline2\nline3"
+	r := strings.NewReader(content)
+	scanner := bufio.NewScanner(r)
+
+	var lines []string
+	for scanner.Scan() {
+		lines = append(lines, scanner.Text())
+	}
+	if scanner.Err() != nil {
+		t.Fatalf("scan error: %v", scanner.Err())
+	}
+	if len(lines) != 3 {
+		t.Errorf("expected 3 lines, got %d: %v", len(lines), lines)
+	}
+}
+
+func BenchmarkBuildReport(b *testing.B) {
+	names := make([]string, 100)
+	for i := range names {
+		names[i] = fmt.Sprintf("User%d", i)
+	}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		buildReport(names)
+	}
+}
+
+// Needed so this file compiles as a package (not standalone)
+var _ = os.Stderr

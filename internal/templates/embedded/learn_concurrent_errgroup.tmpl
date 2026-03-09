@@ -1,0 +1,78 @@
+package main
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"time"
+)
+
+// ErrGroup is a minimal errgroup-like implementation for learning purposes.
+// For production use: golang.org/x/sync/errgroup
+type ErrGroup struct {
+	cancel  context.CancelFunc
+	errCh   chan error
+	doneCh  chan struct{}
+	results chan string
+}
+
+// task simulates a unit of work that may fail.
+// It respects context cancellation.
+func task(ctx context.Context, id int, shouldFail bool) (string, error) {
+	select {
+	case <-ctx.Done():
+		return "", fmt.Errorf("task %d cancelled: %w", id, ctx.Err())
+	case <-time.After(20 * time.Millisecond):
+		if shouldFail {
+			return "", fmt.Errorf("task %d: simulated failure", id)
+		}
+		return fmt.Sprintf("task-%d result", id), nil
+	}
+}
+
+func runWithErrGroup(ctx context.Context) error {
+	ctx, cancel := context.WithTimeout(ctx, 200*time.Millisecond)
+	defer cancel()
+
+	type result struct {
+		val string
+		err error
+	}
+
+	resultCh := make(chan result, 5)
+
+	// Launch tasks; task 3 will fail
+	for i := 1; i <= 5; i++ {
+		i := i // capture
+		go func() {
+			val, err := task(ctx, i, i == 3)
+			resultCh <- result{val, err}
+		}()
+	}
+
+	// Collect results
+	for i := 0; i < 5; i++ {
+		r := <-resultCh
+		if r.err != nil {
+			// Cancel remaining tasks on first error (errgroup behaviour)
+			cancel()
+			return r.err
+		}
+		fmt.Println("Received:", r.val)
+	}
+	return nil
+}
+
+func main() {
+	ctx := context.Background()
+
+	if err := runWithErrGroup(ctx); err != nil {
+		if errors.Is(err, context.DeadlineExceeded) {
+			fmt.Println("Timed out:", err)
+		} else {
+			fmt.Println("Error:", err)
+		}
+		return
+	}
+	fmt.Println("All tasks completed successfully!")
+}

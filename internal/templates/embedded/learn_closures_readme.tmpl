@@ -1,0 +1,29 @@
+# Learn Go Closures
+
+Understand how closures capture variables and how to use functions as first-class values.
+
+## Sections
+
+1. **basics** - Counter closures, independent state per closure
+2. **decorators** - Function wrapping / middleware pattern
+3. **functional** - `filter`, `map`, sort with closure comparators
+4. **pitfalls** - Loop variable capture and how to fix it
+5. **memoize** - Caching results using a closure cache map
+
+## How to Run
+
+` + "```" + `bash
+go run main.go
+go test ./...
+go test -bench=. ./...
+` + "```" + `
+
+## Key Ideas
+
+| Concept | Explanation |
+|---------|-----------|
+| Closure | Function that captures variables from its enclosing scope |
+| State isolation | Each closure call returns an *independent* captured variable |
+| Loop capture | `d := d` inside a loop body forces capture-by-value |
+| Decorator | Return a new function that wraps the original with extra behaviour |
+| Memoize | Wrap a pure function, cache results in a closure-held map |

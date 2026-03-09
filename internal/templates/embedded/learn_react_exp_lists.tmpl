@@ -1,0 +1,121 @@
+/**
+ * Experiment 05: Lists & Keys
+ *
+ * Learn: Rendering lists, the key prop, adding/removing/sorting items.
+ */
+
+import { useState } from 'react'
+
+export const title = 'Lists & Keys'
+export const description = 'Rendering dynamic lists with add, remove, and sort'
+
+interface TodoItem {
+  id: number
+  text: string
+  done: boolean
+}
+
+let nextId = 4
+
+export default function ListsExperiment() {
+  const [items, setItems] = useState<TodoItem[]>([
+    { id: 1, text: 'Learn useState', done: true },
+    { id: 2, text: 'Learn useEffect', done: true },
+    { id: 3, text: 'Practice lists & keys', done: false },
+  ])
+  const [newText, setNewText] = useState('')
+
+  const addItem = () => {
+    const trimmed = newText.trim()
+    if (!trimmed) return
+    setItems((prev) => [...prev, { id: nextId++, text: trimmed, done: false }])
+    setNewText('')
+  }
+
+  const toggleItem = (id: number) => {
+    setItems((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, done: !item.done } : item))
+    )
+  }
+
+  const removeItem = (id: number) => {
+    setItems((prev) => prev.filter((item) => item.id !== id))
+  }
+
+  const sortByDone = () => {
+    setItems((prev) => [...prev].sort((a, b) => Number(a.done) - Number(b.done)))
+  }
+
+  const doneCount = items.filter((i) => i.done).length
+
+  return (
+    <>
+      <div className="demo-section">
+        <h3>📝 Todo List</h3>
+        <div className="demo-row" style={{ marginBottom: 16 }}>
+          <input
+            className="input"
+            value={newText}
+            onChange={(e) => setNewText(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && addItem()}
+            placeholder="Add a new item..."
+            style={{ flex: 1 }}
+          />
+          <button className="btn" onClick={addItem}>Add</button>
+          <button className="btn btn-outline" onClick={sortByDone}>Sort</button>
+        </div>
+
+        {items.length === 0 ? (
+          <p style={{ color: 'var(--text-muted)' }}>No items — add one above!</p>
+        ) : (
+          <ul style={{ listStyle: 'none', padding: 0 }}>
+            {items.map((item) => (
+              <li
+                key={item.id}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 10,
+                  padding: '8px 0',
+                  borderBottom: '1px solid var(--border)',
+                  opacity: item.done ? 0.5 : 1,
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={item.done}
+                  onChange={() => toggleItem(item.id)}
+                />
+                <span style={{
+                  flex: 1,
+                  textDecoration: item.done ? 'line-through' : 'none',
+                }}>
+                  {item.text}
+                </span>
+                <span className="tag">id: {item.id}</span>
+                <button className="btn btn-danger" onClick={() => removeItem(item.id)}
+                  style={{ padding: '4px 10px', fontSize: '0.8rem' }}>
+                  ✕
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        <div className="output">
+          {doneCount}/{items.length} completed
+        </div>
+      </div>
+
+      <div className="demo-section">
+        <h3>💡 Why Keys Matter</h3>
+        <p>React uses <code>key</code> to identify which items changed, were added, or removed.</p>
+        <ul style={{ marginTop: 8, paddingLeft: 20, color: 'var(--text-secondary)' }}>
+          <li>✅ Use a <strong>stable unique ID</strong> (database ID, UUID)</li>
+          <li>❌ Avoid using <strong>array index</strong> as key when items can reorder</li>
+          <li>❌ Never use <strong>Math.random()</strong> — causes full re-render every time</li>
+        </ul>
+      </div>
+    </>
+  )
+}

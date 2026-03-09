@@ -1,0 +1,89 @@
+package main
+
+import (
+	"strings"
+	"testing"
+)
+
+func TestAddressString(t *testing.T) {
+	a := Address{Street: "1 Main St", City: "Jakarta", Zip: "10110"}
+	got := a.String()
+	if !strings.Contains(got, "Jakarta") {
+		t.Errorf("Address.String() missing City: %q", got)
+	}
+}
+
+func TestPersonGreet(t *testing.T) {
+	p := Person{Name: "Alice", Age: 30, Address: Address{City: "Bandung"}}
+	greet := p.Greet()
+	if !strings.Contains(greet, "Alice") {
+		t.Errorf("Greet missing name: %q", greet)
+	}
+	if !strings.Contains(greet, "Bandung") {
+		t.Errorf("Greet missing city: %q", greet)
+	}
+}
+
+func TestEmbeddedFieldPromotion(t *testing.T) {
+	p := Person{
+		Name: "Bob",
+		Age:  40,
+		Address: Address{City: "Surabaya"},
+	}
+	// City is promoted from embedded Address
+	if p.City != "Surabaya" {
+		t.Errorf("promoted field: want Surabaya, got %q", p.City)
+	}
+}
+
+func TestEmployeeGreetOverride(t *testing.T) {
+	e := Employee{
+		Person: Person{Name: "Charlie", Age: 25, Address: Address{City: "Medan"}},
+		Company:  "Gopher Inc",
+		JobTitle: "Developer",
+	}
+	greet := e.Greet()
+	if !strings.Contains(greet, "Gopher Inc") {
+		t.Errorf("Employee.Greet should mention company: %q", greet)
+	}
+	// Person.Greet is still accessible directly
+	personGreet := e.Person.Greet()
+	if !strings.Contains(personGreet, "Charlie") {
+		t.Errorf("Person.Greet should mention name: %q", personGreet)
+	}
+}
+
+func TestNewServerConfig_Defaults(t *testing.T) {
+	cfg := NewServerConfig()
+	if cfg.Host != "localhost" {
+		t.Errorf("default host: want localhost, got %q", cfg.Host)
+	}
+	if cfg.Port != 8080 {
+		t.Errorf("default port: want 8080, got %d", cfg.Port)
+	}
+}
+
+func TestNewServerConfig_WithOptions(t *testing.T) {
+	cfg := NewServerConfig(
+		WithHost("api.example.com"),
+		WithPort(9090),
+	)
+	if cfg.Host != "api.example.com" {
+		t.Errorf("want api.example.com, got %q", cfg.Host)
+	}
+	if cfg.Port != 9090 {
+		t.Errorf("want 9090, got %d", cfg.Port)
+	}
+}
+
+func TestWithPort_InvalidIgnored(t *testing.T) {
+	// Port 0 is invalid; defaults should remain
+	cfg := NewServerConfig(WithPort(0))
+	if cfg.Port != 8080 {
+		t.Errorf("invalid port should be ignored: got %d", cfg.Port)
+	}
+	cfg2 := NewServerConfig(WithPort(99999))
+	if cfg2.Port != 8080 {
+		t.Errorf("out-of-range port should be ignored: got %d", cfg2.Port)
+	}
+}

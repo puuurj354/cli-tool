@@ -1,0 +1,185 @@
+/**
+ * Experiment 06: Forms
+ *
+ * Learn: Controlled inputs, form validation, form submission.
+ */
+
+import { useState, type FormEvent } from 'react'
+
+export const title = 'Forms & Validation'
+export const description = 'Controlled inputs, validation, and form submission'
+
+interface FormData {
+  name: string
+  email: string
+  password: string
+  role: string
+  agree: boolean
+}
+
+interface FormErrors {
+  name?: string
+  email?: string
+  password?: string
+  agree?: string
+}
+
+const initialForm: FormData = {
+  name: '',
+  email: '',
+  password: '',
+  role: 'developer',
+  agree: false,
+}
+
+function validate(data: FormData): FormErrors {
+  const errors: FormErrors = {}
+
+  if (!data.name.trim()) {
+    errors.name = 'Name is required'
+  } else if (data.name.trim().length < 2) {
+    errors.name = 'Name must be at least 2 characters'
+  }
+
+  if (!data.email.trim()) {
+    errors.email = 'Email is required'
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+    errors.email = 'Invalid email format'
+  }
+
+  if (!data.password) {
+    errors.password = 'Password is required'
+  } else if (data.password.length < 6) {
+    errors.password = 'Password must be at least 6 characters'
+  }
+
+  if (!data.agree) {
+    errors.agree = 'You must accept the terms'
+  }
+
+  return errors
+}
+
+export default function FormsExperiment() {
+  const [form, setForm] = useState<FormData>(initialForm)
+  const [errors, setErrors] = useState<FormErrors>({})
+  const [submitted, setSubmitted] = useState<FormData | null>(null)
+
+  const updateField = <K extends keyof FormData>(key: K, value: FormData[K]) => {
+    setForm((prev) => ({ ...prev, [key]: value }))
+    // Clear error on edit
+    setErrors((prev) => ({ ...prev, [key]: undefined }))
+  }
+
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault()
+    const errs = validate(form)
+
+    if (Object.keys(errs).length > 0) {
+      setErrors(errs)
+      return
+    }
+
+    setSubmitted(form)
+    setForm(initialForm)
+    setErrors({})
+  }
+
+  const handleReset = () => {
+    setForm(initialForm)
+    setErrors({})
+    setSubmitted(null)
+  }
+
+  return (
+    <>
+      <div className="demo-section">
+        <h3>📋 Registration Form</h3>
+        <form onSubmit={handleSubmit} style={{ maxWidth: 400 }}>
+          {/* Name */}
+          <div style={{ marginBottom: 14 }}>
+            <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: 4, color: 'var(--text-secondary)' }}>
+              Name
+            </label>
+            <input
+              className="input"
+              style={{ width: '100%', borderColor: errors.name ? 'var(--error-border)' : undefined }}
+              value={form.name}
+              onChange={(e) => updateField('name', e.target.value)}
+              placeholder="Your name"
+            />
+            {errors.name && <span style={{ color: 'var(--error-border)', fontSize: '0.8rem' }}>{errors.name}</span>}
+          </div>
+
+          {/* Email */}
+          <div style={{ marginBottom: 14 }}>
+            <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: 4, color: 'var(--text-secondary)' }}>
+              Email
+            </label>
+            <input
+              className="input"
+              type="email"
+              style={{ width: '100%', borderColor: errors.email ? 'var(--error-border)' : undefined }}
+              value={form.email}
+              onChange={(e) => updateField('email', e.target.value)}
+              placeholder="you@example.com"
+            />
+            {errors.email && <span style={{ color: 'var(--error-border)', fontSize: '0.8rem' }}>{errors.email}</span>}
+          </div>
+
+          {/* Password */}
+          <div style={{ marginBottom: 14 }}>
+            <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: 4, color: 'var(--text-secondary)' }}>
+              Password
+            </label>
+            <input
+              className="input"
+              type="password"
+              style={{ width: '100%', borderColor: errors.password ? 'var(--error-border)' : undefined }}
+              value={form.password}
+              onChange={(e) => updateField('password', e.target.value)}
+              placeholder="Min 6 characters"
+            />
+            {errors.password && <span style={{ color: 'var(--error-border)', fontSize: '0.8rem' }}>{errors.password}</span>}
+          </div>
+
+          {/* Role */}
+          <div style={{ marginBottom: 14 }}>
+            <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: 4, color: 'var(--text-secondary)' }}>
+              Role
+            </label>
+            <select className="input" style={{ width: '100%' }} value={form.role} onChange={(e) => updateField('role', e.target.value)}>
+              <option value="developer">Developer</option>
+              <option value="designer">Designer</option>
+              <option value="manager">Manager</option>
+            </select>
+          </div>
+
+          {/* Agree */}
+          <div style={{ marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
+            <input type="checkbox" checked={form.agree} onChange={(e) => updateField('agree', e.target.checked)} />
+            <label style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>I accept the terms</label>
+            {errors.agree && <span style={{ color: 'var(--error-border)', fontSize: '0.8rem' }}>{errors.agree}</span>}
+          </div>
+
+          <div className="demo-row">
+            <button type="submit" className="btn">Submit</button>
+            <button type="button" className="btn btn-outline" onClick={handleReset}>Reset</button>
+          </div>
+        </form>
+      </div>
+
+      {submitted && (
+        <div className="demo-section">
+          <h3>✅ Submitted Data</h3>
+          <div className="output">{JSON.stringify(submitted, null, 2)}</div>
+        </div>
+      )}
+
+      <p className="hint">
+        💡 All inputs are <strong>controlled</strong> — their values come from React state,
+        not from the DOM. This makes validation and debugging predictable.
+      </p>
+    </>
+  )
+}

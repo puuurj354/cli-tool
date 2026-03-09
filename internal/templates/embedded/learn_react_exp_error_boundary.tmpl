@@ -1,0 +1,174 @@
+/**
+ * Experiment 10: Error Boundary
+ *
+ * Learn: Catching render errors, fallback UI, error recovery.
+ */
+
+import { Component, useState, type ReactNode, type ErrorInfo } from 'react'
+
+export const title = 'Error Boundaries'
+export const description = 'Catch render crashes and display fallback UI'
+
+/* ---- Error Boundary ---- */
+
+interface BoundaryProps {
+  children: ReactNode
+  fallback?: ReactNode
+}
+
+interface BoundaryState {
+  error: Error | null
+  errorInfo: ErrorInfo | null
+}
+
+class ExperimentBoundary extends Component<BoundaryProps, BoundaryState> {
+  state: BoundaryState = { error: null, errorInfo: null }
+
+  static getDerivedStateFromError(error: Error): Partial<BoundaryState> {
+    return { error }
+  }
+
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    this.setState({ errorInfo })
+    // In production, you would send this to an error reporting service
+    console.error('[ExperimentBoundary] caught:', error, errorInfo)
+  }
+
+  reset = () => {
+    this.setState({ error: null, errorInfo: null })
+  }
+
+  render() {
+    if (this.state.error) {
+      if (this.props.fallback) return this.props.fallback
+
+      return (
+        <div className="error-card">
+          <h3>💥 Something went wrong</h3>
+          <pre>{this.state.error.message}</pre>
+          {this.state.errorInfo && (
+            <details style={{ marginTop: 12 }}>
+              <summary style={{ cursor: 'pointer', color: 'var(--text-secondary)' }}>
+                Stack trace
+              </summary>
+              <pre style={{ fontSize: '0.75rem', marginTop: 8, whiteSpace: 'pre-wrap' }}>
+                {this.state.errorInfo.componentStack}
+              </pre>
+            </details>
+          )}
+          <button className="btn" onClick={this.reset} style={{ marginTop: 16 }}>
+            Try Again
+          </button>
+        </div>
+      )
+    }
+    return this.props.children
+  }
+}
+
+/* ---- Components that crash intentionally ---- */
+
+function BombComponent({ shouldExplode }: { shouldExplode: boolean }) {
+  if (shouldExplode) {
+    throw new Error('💣 BOOM! This component crashed on purpose!')
+  }
+  return (
+    <div style={{ padding: 16, background: 'var(--bg-primary)', borderRadius: 8 }}>
+      ✅ Component is healthy
+    </div>
+  )
+}
+
+function BadApiCall() {
+  const data: unknown = null
+  // This will throw: Cannot read properties of null
+  return <div>{(data as { name: string }).name}</div>
+}
+
+/* ---- Main Demo ---- */
+export default function ErrorBoundaryExperiment() {
+  const [explode, setExplode] = useState(false)
+  const [showBadApi, setShowBadApi] = useState(false)
+
+  return (
+    <>
+      {/* Controlled crash */}
+      <div className="demo-section">
+        <h3>💣 Controlled Crash</h3>
+        <p style={{ marginBottom: 12, color: 'var(--text-secondary)' }}>
+          Click the button to crash the component. The Error Boundary catches it and shows a fallback.
+        </p>
+        <button
+          className="btn btn-danger"
+          onClick={() => setExplode(true)}
+          style={{ marginBottom: 16 }}
+        >
+          Trigger Crash
+        </button>
+        {!explode && (
+          <button className="btn btn-outline" onClick={() => setExplode(false)} style={{ marginLeft: 8, marginBottom: 16 }}>
+            Reset
+          </button>
+        )}
+
+        <ExperimentBoundary>
+          <BombComponent shouldExplode={explode} />
+        </ExperimentBoundary>
+
+        {explode && (
+          <button
+            className="btn btn-outline"
+            onClick={() => setExplode(false)}
+            style={{ marginTop: 12 }}
+          >
+            Reset Parent State & Recover
+          </button>
+        )}
+      </div>
+
+      {/* Null reference crash */}
+      <div className="demo-section">
+        <h3>🐛 Null Reference Crash</h3>
+        <p style={{ marginBottom: 12, color: 'var(--text-secondary)' }}>
+          Simulates accessing <code>.name</code> on a <code>null</code> value — a common real-world bug.
+        </p>
+        <button
+          className="btn btn-danger"
+          onClick={() => setShowBadApi(true)}
+          style={{ marginBottom: 16 }}
+        >
+          Show Bad Component
+        </button>
+
+        {showBadApi && (
+          <ExperimentBoundary
+            fallback={
+              <div className="error-card">
+                <h3>🛑 Custom Fallback UI</h3>
+                <p>The API returned null. This is a custom fallback message.</p>
+                <button className="btn" onClick={() => setShowBadApi(false)} style={{ marginTop: 12 }}>
+                  Dismiss
+                </button>
+              </div>
+            }
+          >
+            <BadApiCall />
+          </ExperimentBoundary>
+        )}
+      </div>
+
+      {/* Guide */}
+      <div className="demo-section">
+        <h3>📖 Error Boundary Rules</h3>
+        <ul style={{ lineHeight: 2, paddingLeft: 20, color: 'var(--text-secondary)' }}>
+          <li>✅ Catches errors in <strong>rendering</strong>, lifecycle, and constructors</li>
+          <li>❌ Does <strong>NOT</strong> catch errors in event handlers (use try/catch)</li>
+          <li>❌ Does NOT catch async errors (promises, setTimeout)</li>
+          <li>❌ Does NOT catch errors in SSR (server-side rendering)</li>
+          <li>💡 Must be a <strong>class component</strong> — no hook equivalent yet</li>
+          <li>💡 Use <code>componentDidCatch</code> to report errors to services like Sentry</li>
+        </ul>
+      </div>
+    </>
+  )
+}

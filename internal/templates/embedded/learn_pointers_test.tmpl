@@ -1,0 +1,77 @@
+package main
+
+import (
+	"testing"
+)
+
+func TestIncrement(t *testing.T) {
+	x := 10
+	increment(&x)
+	if x != 11 {
+		t.Errorf("want 11, got %d", x)
+	}
+}
+
+func TestIncrement_NilSafe(t *testing.T) {
+	// Should not panic
+	increment(nil)
+}
+
+func TestSwap(t *testing.T) {
+	a, b := 1, 2
+	swap(&a, &b)
+	if a != 2 || b != 1 {
+		t.Errorf("swap failed: a=%d, b=%d", a, b)
+	}
+}
+
+func TestSwap_NilSafe(t *testing.T) {
+	a := 5
+	swap(&a, nil) // should not panic
+	swap(nil, &a)
+}
+
+func TestPushFront(t *testing.T) {
+	var head *Node
+	pushFront(&head, 1)
+	pushFront(&head, 2)
+	pushFront(&head, 3)
+
+	if head.Value != 3 {
+		t.Errorf("head should be 3, got %d", head.Value)
+	}
+	if head.Next.Value != 2 {
+		t.Errorf("next should be 2, got %d", head.Next.Value)
+	}
+	if head.Next.Next.Value != 1 {
+		t.Errorf("tail should be 1, got %d", head.Next.Next.Value)
+	}
+	if head.Next.Next.Next != nil {
+		t.Error("last node.Next should be nil")
+	}
+}
+
+func TestRectangleArea(t *testing.T) {
+	r := Rectangle{Width: 5, Height: 3}
+	if got := r.Area(); got != 15 {
+		t.Errorf("want 15, got %f", got)
+	}
+}
+
+func TestRectangleScale(t *testing.T) {
+	r := Rectangle{Width: 4, Height: 2}
+	r.Scale(3)
+	if r.Width != 12 || r.Height != 6 {
+		t.Errorf("after scale: want {12,6}, got {%.1f,%.1f}", r.Width, r.Height)
+	}
+}
+
+func TestRectangleValueReceiverNoSideEffect(t *testing.T) {
+	r := Rectangle{Width: 4, Height: 2}
+	// Area() uses value receiver, so this copy should NOT affect r
+	copy := r
+	_ = copy.Area()
+	if r.Width != 4 {
+		t.Error("value receiver modified original — unexpected!")
+	}
+}

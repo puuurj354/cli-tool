@@ -1,0 +1,138 @@
+/**
+ * Experiment 07: Custom Hooks
+ *
+ * Learn: Extracting reusable logic into custom hooks.
+ */
+
+import { useState, useEffect, useCallback, useRef } from 'react'
+
+export const title = 'Custom Hooks'
+export const description = 'Extracting reusable logic (useLocalStorage, useDebounce, useToggle)'
+
+/* ---- useToggle ---- */
+function useToggle(initial = false): [boolean, () => void] {
+  const [value, setValue] = useState(initial)
+  const toggle = useCallback(() => setValue((v) => !v), [])
+  return [value, toggle]
+}
+
+/* ---- useLocalStorage ---- */
+function useLocalStorage<T>(key: string, initialValue: T): [T, (v: T) => void] {
+  const [stored, setStored] = useState<T>(() => {
+    try {
+      const item = localStorage.getItem(key)
+      return item ? JSON.parse(item) : initialValue
+    } catch {
+      return initialValue
+    }
+  })
+
+  const setValue = (value: T) => {
+    setStored(value)
+    try {
+      localStorage.setItem(key, JSON.stringify(value))
+    } catch (err) {
+      console.error('useLocalStorage write failed:', err)
+    }
+  }
+
+  return [stored, setValue]
+}
+
+/* ---- useDebounce ---- */
+function useDebounce<T>(value: T, delayMs: number): T {
+  const [debounced, setDebounced] = useState(value)
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebounced(value), delayMs)
+    return () => clearTimeout(timer)
+  }, [value, delayMs])
+
+  return debounced
+}
+
+/* ---- useWindowSize ---- */
+function useWindowSize() {
+  const [size, setSize] = useState({ width: window.innerWidth, height: window.innerHeight })
+
+  useEffect(() => {
+    const handleResize = () => setSize({ width: window.innerWidth, height: window.innerHeight })
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
+  return size
+}
+
+/* ---- usePrevious ---- */
+function usePrevious<T>(value: T): T | undefined {
+  const ref = useRef<T | undefined>(undefined)
+  useEffect(() => { ref.current = value })
+  return ref.current
+}
+
+/* ---- Demo UI ---- */
+export default function CustomHooksExperiment() {
+  const [dark, toggleDark] = useToggle(true)
+  const [name, setName] = useLocalStorage('playground-name', 'React Learner')
+  const [search, setSearch] = useState('')
+  const debouncedSearch = useDebounce(search, 500)
+  const prevSearch = usePrevious(debouncedSearch)
+  const windowSize = useWindowSize()
+
+  return (
+    <>
+      {/* useToggle */}
+      <div className="demo-section">
+        <h3>useToggle</h3>
+        <button className="btn" onClick={toggleDark}>
+          {dark ? '🌙 Dark' : '☀️ Light'}
+        </button>
+        <div className="output">{'const [dark, toggleDark] = useToggle(true)'}</div>
+      </div>
+
+      {/* useLocalStorage */}
+      <div className="demo-section">
+        <h3>useLocalStorage</h3>
+        <input
+          className="input"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          style={{ width: '100%', maxWidth: 300 }}
+        />
+        <p className="hint">
+          💡 Refresh the page — your name persists! Stored in <code>localStorage["playground-name"]</code>
+        </p>
+      </div>
+
+      {/* useDebounce + usePrevious */}
+      <div className="demo-section">
+        <h3>useDebounce + usePrevious</h3>
+        <input
+          className="input"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Type fast..."
+          style={{ width: '100%', maxWidth: 400 }}
+        />
+        <div className="output">
+          {'Typing:    ' + JSON.stringify(search)}{'\n'}
+          {'Debounced: ' + JSON.stringify(debouncedSearch)}{'\n'}
+          {'Previous:  ' + JSON.stringify(prevSearch)}
+        </div>
+        <p className="hint">
+          💡 Debounce waits 500ms after you stop typing. Useful for API search.
+        </p>
+      </div>
+
+      {/* useWindowSize */}
+      <div className="demo-section">
+        <h3>useWindowSize</h3>
+        <div className="output">
+          {`Window: ${windowSize.width} × ${windowSize.height}`}
+        </div>
+        <p className="hint">💡 Resize the browser window to see it update.</p>
+      </div>
+    </>
+  )
+}

@@ -1,0 +1,112 @@
+package main
+
+import (
+	"fmt"
+	"unsafe"
+)
+
+// ---- Pointer Basics ----
+
+// increment modifies the int at the address pointed to by p.
+func increment(p *int) {
+	if p == nil {
+		return // defensive: never dereference a nil pointer
+	}
+	*p++
+}
+
+// swap exchanges two values using pointers.
+func swap(a, b *int) {
+	if a == nil || b == nil {
+		return
+	}
+	*a, *b = *b, *a
+}
+
+// ---- Pointers and Structs ----
+
+type Node struct {
+	Value int
+	Next  *Node // nil = end of list
+}
+
+// pushFront adds a new node to the front of a linked list.
+func pushFront(head **Node, val int) {
+	newNode := &Node{Value: val, Next: *head}
+	*head = newNode
+}
+
+// printList traverses the linked list and prints values.
+func printList(head *Node) {
+	for n := head; n != nil; n = n.Next {
+		fmt.Printf("%d ", n.Value)
+	}
+	fmt.Println()
+}
+
+// ---- Value vs Pointer Receivers ----
+
+type Rectangle struct {
+	Width, Height float64
+}
+
+// Area uses a value receiver — does NOT modify the original.
+func (r Rectangle) Area() float64 {
+	return r.Width * r.Height
+}
+
+// Scale uses a pointer receiver — modifies the original.
+func (r *Rectangle) Scale(factor float64) {
+	if r == nil {
+		return
+	}
+	r.Width *= factor
+	r.Height *= factor
+}
+
+// ---- Memory layout curiosity ----
+
+func sizeOfTypes() {
+	fmt.Println("--- Memory sizes ---")
+	fmt.Printf("bool:    %d bytes\n", unsafe.Sizeof(true))
+	fmt.Printf("int:     %d bytes\n", unsafe.Sizeof(int(0)))
+	fmt.Printf("float64: %d bytes\n", unsafe.Sizeof(float64(0)))
+	fmt.Printf("string:  %d bytes\n", unsafe.Sizeof(""))
+	fmt.Printf("pointer: %d bytes\n", unsafe.Sizeof((*int)(nil)))
+}
+
+func main() {
+	// Basic pointer usage
+	x := 42
+	increment(&x)
+	fmt.Println("x after increment:", x) // 43
+
+	a, b := 10, 20
+	swap(&a, &b)
+	fmt.Printf("after swap: a=%d, b=%d\n", a, b)
+
+	// Linked list with pointer-to-pointer
+	var head *Node
+	for _, v := range []int{3, 2, 1} {
+		pushFront(&head, v)
+	}
+	fmt.Print("list: ")
+	printList(head)
+
+	// Value vs pointer receivers
+	rect := Rectangle{Width: 5, Height: 3}
+	fmt.Printf("area: %.1f\n", rect.Area())
+	rect.Scale(2)
+	fmt.Printf("after scale: %+v, area: %.1f\n", rect, rect.Area())
+
+	// Memory sizes
+	sizeOfTypes()
+
+	// new vs make
+	p := new(int) // allocates zero-value int, returns *int
+	*p = 99
+	fmt.Println("new(int):", *p)
+
+	s := make([]int, 3, 5) // len=3, cap=5
+	fmt.Printf("make slice: len=%d cap=%d\n", len(s), cap(s))
+}
